@@ -46,6 +46,13 @@ function mbreports_civicrm_uninstall() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_enable
  */
 function mbreports_civicrm_enable() {
+  $mbreportsConfig = CRM_Mbreports_Config::singleton();
+  if (_check_custom_group($mbreportsConfig->ovCustomGroupId == 0)) {
+    _create_custom_group($mbreportsConfig->ovCustomGroupName);
+  }
+  if (_check_custom_group($mbreportsConfig->wfCustomGroupId == 0)) {
+    _create_custom_group($mbreportsConfig->wfCustomGroupName);
+  }
   return _mbreports_civix_civicrm_enable();
 }
 
