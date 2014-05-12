@@ -10,21 +10,30 @@ class CRM_Mbreports_Config {
    * singleton pattern
    */
   static private $_singleton = NULL;
+  
+  public $caseTypeOptionGroupId = NULL;
+  public $actTypeOptionGroupId = NULL;
   /*
    * custom group for case type Woonfraude
    */
   public $wfMelderCustomGroupName = NULL;
   public $wfMelderCustomGroupId = NULL;
   public $wfMelderCustomTableName = NULL;
+  
   public $wfUitkomstCustomGroupName = NULL;
   public $wfUitkomstCustomGroupId = NULL;
   public $wfUitkomstCustomTableName = NULL;
+  
   public $wfTypeCustomFieldName = NULL;
   public $wfMelderCustomFieldName = NULL;
   public $wfUitkomstCustomFieldName = NULL;
+  
   public $wfTypeColumnName = NULL;
   public $wfMelderColumnName = NULL;
   public $wfUitkomstColumnName = NULL;
+  public $woonfraudeCaseTypeId = NULL;
+  
+  public $changeCaseStatusActTypeId = NULL;
   /*
    * custom group for case type Overlast
    */
@@ -33,10 +42,14 @@ class CRM_Mbreports_Config {
   public $ovCustomTableName = NULL;
   public $ovTypeCustomFieldName = NULL;
   public $ovTypeColumnName = NULL;
+  public $overlastCaseTypeId = NULL;
   /**
    * Constructor function
    */
   function __construct() {
+    $this->setCaseTypeId('woonfraude');
+    $this->setCaseTypeId('overlast');
+    $this->setActTypeId('change Case Status');
     $this->setWfUitkomstCustomGroupName('wf_uitkomst');
     $this->setWfMelderCustomGroupName('wf_melder');
     $this->setWfMelderCustomFieldName('wf_melder');
@@ -47,73 +60,126 @@ class CRM_Mbreports_Config {
     $this->setOvCustomGroupName('ov_type');
     $this->setOvTypeCustomFieldName('ov_type');
     $this->setOverlast();
+    $this->setCaseTypeId('Woonfraude');
+    $this->setCaseTypeId('Overlast');
+    $this->setActTypeId('Change Case Status');
   }
   
-  private function setWfMelderCustomGroupName($wfMelderCustomGroupName) {
+  private function setCaseTypeId($caseTypeName) {
+    $propertyName = strtolower(trim($caseTypeName)).'CaseTypeId';
+    try {
+      $optionGroupId = civicrm_api3('OptionGroup', 'Getvalue', array('name' => 'case_type', 'return' => 'id'));
+    } catch (CiviCRM_API3_Exception $ex) {
+      throw new Exception('Could not find option group for case_type, error from API OptionGroup Getvalue : '
+        .$ex->getMessage());
+    }
+    $optionValueParams = array(
+      'option_group_id' => $optionGroupId,
+      'name'            => ucfirst($caseTypeName),
+      'return'          => 'value');
+    try {
+      $this->$propertyName = civicrm_api3('OptionValue', 'Getvalue', $optionValueParams);
+    } catch (CiviCRM_API3_Exception $ex) {
+      throw new Exception('Could not find a valid case type '.ucfirst($caseTypeName.
+        ', error from API OptionValue Getvalue : '.$ex->getMessage()));
+    }
+  }
+  
+  private function setActTypeId($actTypeName) {
+    $gluedActTypeName = $this->glueStringParts($actTypeName);
+    $propertyName = strtolower($gluedActTypeName).'ActTypeId';
+    try {
+      $optionGroupId = civicrm_api3('OptionGroup', 'Getvalue', array('name' => 'activity_type', 'return' => 'id'));
+    } catch (CiviCRM_API3_Exception $ex) {
+      throw new Exception('Could not find option group for activity_type, error from API OptionGroup Getvalue : '
+        .$ex->getMessage());
+    }
+    $optionValueParams = array(
+      'option_group_id' => $optionGroupId,
+      'name'            => ucwords($actTypeName),
+      'return'          => 'value');
+    try {
+      $this->$propertyName = civicrm_api3('OptionValue', 'Getvalue', $optionValueParams);
+    } catch (CiviCRM_API3_Exception $ex) {
+      throw new Exception('Could not find a valid activity type '.ucwords($actTypeName.
+        ', error from API OptionValue Getvalue : '.$ex->getMessage()));
+    }    
+  }
+
+  private function glueStringParts($string) {
+    $result = $string;
+    $parts = explode(' ', $string);
+    if (count($parts) > 1) {
+      $result = implode($parts);
+    }
+    return $result;
+  }
+  
+  public function setWfMelderCustomGroupName($wfMelderCustomGroupName) {
     $this->wfMelderCustomGroupName = $wfMelderCustomGroupName;
   }
   
-  private function setWfUitkomstCustomGroupName($wfUitkomstCustomGroupName) {
+  public function setWfUitkomstCustomGroupName($wfUitkomstCustomGroupName) {
     $this->wfUitkomstCustomGroupName = $wfUitkomstCustomGroupName;
   }
   
-  private function setWfMelderCustomGroupId($wfMelderCustomGroupId) {
+  public function setWfMelderCustomGroupId($wfMelderCustomGroupId) {
     $this->wfMelderCustomGroupId = $wfMelderCustomGroupId;
   }
   
-  private function setWfUitkomstCustomGroupId($wfUitkomstCustomGroupId) {
+  public function setWfUitkomstCustomGroupId($wfUitkomstCustomGroupId) {
     $this->wfUitkomstCustomGroupId = $wfUitkomstCustomGroupId;
   }
   
-  private function setWfUitkomstCustomTableName($wfUitkomstCustomTableName) {
+  public function setWfUitkomstCustomTableName($wfUitkomstCustomTableName) {
     $this->wfUitkomstCustomTableName = $wfUitkomstCustomTableName;
   }
   
-  private function setWfMelderCustomTableName($wfMelderCustomTableName) {
+  public function setWfMelderCustomTableName($wfMelderCustomTableName) {
     $this->wfMelderCustomTableName = $wfMelderCustomTableName;
   }
   
-  private function setWfTypeCustomFieldName($wfTypeCustomFieldName) {
+  public function setWfTypeCustomFieldName($wfTypeCustomFieldName) {
     $this->wfTypeCustomFieldName = $wfTypeCustomFieldName;
   }
   
-  private function setWfTypeColumnName($wfTypeColumnName) {
+  public function setWfTypeColumnName($wfTypeColumnName) {
     $this->wfTypeColumnName = $wfTypeColumnName;
   }
   
-  private function setWfMelderCustomFieldName($wfMelderCustomFieldName) {
+  public function setWfMelderCustomFieldName($wfMelderCustomFieldName) {
     $this->wfMelderCustomFieldName = $wfMelderCustomFieldName;
   }
   
-  private function setWfMelderColumnName($wfMelderColumnName) {
+  public function setWfMelderColumnName($wfMelderColumnName) {
     $this->wfMelderColumnName = $wfMelderColumnName;
   }
   
-  private function setWfUitkomstCustomFieldName($wfUitkomstCustomFieldName) {
+  public function setWfUitkomstCustomFieldName($wfUitkomstCustomFieldName) {
     $this->wfUitkomstCustomFieldName = $wfUitkomstCustomFieldName;
   }
   
-  private function setWfUitkomstColumnName($wfUitkomstColumnName) {
+  public function setWfUitkomstColumnName($wfUitkomstColumnName) {
     $this->wfUitkomstColumnName = $wfUitkomstColumnName;
   }
   
-  private function setOvCustomGroupName($ovCustomGroupName) {
+  public function setOvCustomGroupName($ovCustomGroupName) {
     $this->ovCustomGroupName = $ovCustomGroupName;
   }
   
-  private function setOvCustomGroupId($ovCustomGroupId) {
+  public function setOvCustomGroupId($ovCustomGroupId) {
     $this->ovCustomGroupId = $ovCustomGroupId;
   }
   
-  private function setOvCustomTableName($ovCustomTableName) {
+  public function setOvCustomTableName($ovCustomTableName) {
     $this->ovCustomTableName = $ovCustomTableName;
   }
   
-  private function setOvTypeCustomFieldName($ovTypeCustomFieldName) {
+  public function setOvTypeCustomFieldName($ovTypeCustomFieldName) {
     $this->ovTypeCustomFieldName = $ovTypeCustomFieldName;
   }
   
-  private function setOvTypeColumnName($ovTypeColumnName) {
+  public function setOvTypeColumnName($ovTypeColumnName) {
     $this->ovTypeColumnName = $ovTypeColumnName;
   }
   
