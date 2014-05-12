@@ -40,8 +40,12 @@ class CRM_Mbreports_Config {
     $this->setWfUitkomstCustomGroupName('wf_uitkomst');
     $this->setWfMelderCustomGroupName('wf_melder');
     $this->setWfMelderCustomFieldName('wf_melder');
+    $this->setWfTypeCustomFieldName('wf_type');
+    $this->setWfUitkomstCustomFieldName('wf_uitkomst');
     $this->setWoonfraude();
-    $this->setOvCustomGroupName('Overlastdata');
+    
+    $this->setOvCustomGroupName('ov_type');
+    $this->setOvTypeCustomFieldName('ov_type');
     $this->setOverlast();
   }
   
