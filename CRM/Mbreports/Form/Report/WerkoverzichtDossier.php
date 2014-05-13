@@ -113,7 +113,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       }
     }
     
-    // city_region
+    // block
     $query = "SELECT block FROM civicrm_property GROUP BY block ORDER BY block ASC";
     $dao = CRM_Core_DAO::executeQuery($query);  
 
@@ -123,6 +123,16 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       if(!empty($dao->block)){
         $blocks[$dao->block] = $dao->block;
       }
+    }
+    
+    // vge_type_id
+    $query = "SELECT id, label FROM civicrm_property_type ORDER BY label ASC";
+    $dao = CRM_Core_DAO::executeQuery($query);  
+
+    $vge_type_ids = array();
+    $vge_type_ids[''] = ts('- elke - ');
+    while($dao->fetch()){
+      $vge_type_ids[$dao->id] = $dao->label;
     }
     
     // activity_ontruiming_status_id
@@ -234,8 +244,41 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             'options' => $activity_statuss,
           ),
         ),
+        'order_bys' =>
+        array(
+          'id' =>
+          array(
+            'name' => 'id',
+            'title' => ts('Dossier ID'),
+            'alias' => 'id',
+          ),
+          'typeringen' => 
+          array(
+            'name' => 'typeringen',
+            'title' => ts('Typeringen'),
+            'alias' => 'typeringen',
+          ),
+          'status_id' => 
+          array(
+            'name' => 'status_id',
+            'title' => ts('Dossier status'),
+            'alias' => 'status_id',
+          ),
+          'start_date' => 
+          array(
+            'name' => 'start_date',
+            'title' => ts('Dossier begindatum'),
+            'alias' => 'start_date',
+          ),
+          'dossiermanager' => 
+          array(
+            'name' => 'dossiermanager',
+            'title' => ts('Dossiermanager'),
+            'alias' => 'dossiermanager',
+          ),
+        ),
       ),
-            
+          
       // property
       'civicrm_property' => array(
         'dao' => 'CRM_Core_DAO_CustomField',
@@ -244,7 +287,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             'title' => ts('VGE nummer'),
           ),
           'complex_id' => array(
-            'title' => ts('Complex nummer'),
+            'title' => ts('Complex'),
           ),
           'block' => array(
             'title' => ts('Wijk'),
@@ -271,6 +314,38 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             'title' => ts('Buurt'),
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'options' => $city_regions,
+          ),
+          'vge_type_id' => array(
+            'title' => ts('VGE type'),
+            'operatorType' => CRM_Report_Form::OP_SELECT,
+            'options' => $vge_type_ids,
+          ),
+        ),
+        'order_bys' =>
+        array(
+          'complex_id' =>
+          array(
+            'name' => 'complex_id',
+            'title' => ts('Complex'),
+            'alias' => 'complex_id',
+          ),
+          'block' => 
+          array(
+            'name' => 'block',
+            'title' => ts('Wijk'),
+            'alias' => 'block',
+          ),
+          'city_region' => 
+          array(
+            'name' => 'city_region',
+            'title' => ts('Buurt'),
+            'alias' => 'city_region',
+          ),
+          'vge_type_id' => 
+          array(
+            'name' => 'vge_type_id',
+            'title' => ts('VGE type'),
+            'alias' => 'vge_type_id',
           ),
         ),
       ),
