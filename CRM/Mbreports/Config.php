@@ -45,6 +45,11 @@ class CRM_Mbreports_Config {
   public $ovTypeCustomFieldName = NULL;
   public $ovTypeColumnName = NULL;
   public $overlastCaseTypeId = NULL;
+  
+  /*
+   * array with case types that are available for M&B reporting
+   */
+  public $validCaseTypes = array();
   /**
    * Constructor function
    */
@@ -65,6 +70,7 @@ class CRM_Mbreports_Config {
     $this->setCaseTypeId('Woonfraude');
     $this->setCaseTypeId('Overlast');
     $this->setActTypeId('Change Case Status');
+    $this->setValidCaseTypes();
   }
   
   private function setCaseTypeId($caseTypeName) {
@@ -270,6 +276,7 @@ class CRM_Mbreports_Config {
         .' in custom group '.$this->ovCustomGroupName.', error from API CustomField Getvalue :'.$ex->getMessage());
     }
   }
+  
   private function setDossierManagerRelationshipTypeId() {
     $params = array(
       'name_a_b'  =>  'Dossiermanager',
@@ -280,6 +287,12 @@ class CRM_Mbreports_Config {
       $this->dossierManagerRelationshipTypeId = 0;
     }
   }
+  
+  private function setValidCaseTypes() {
+    $this->validCaseTypes = asort(array('ActienaVonnis', 'Buitenkanstraject', 'Overlast', 
+      'Huurbemiddeling', 'Stadsbank', 'Volgcontact', 'Woonfraude', 'Laatstekans', 
+      'Regeling'));
+  }
   /**
    * Function to return singleton object
    * 
@@ -289,7 +302,7 @@ class CRM_Mbreports_Config {
    */
   public static function &singleton() {
     if (self::$_singleton === NULL) {
-      self::$_singleton = new CRM_Threepeas_Config();
+      self::$_singleton = new CRM_Mbreports_Config();
     }
     return self::$_singleton;
   }
