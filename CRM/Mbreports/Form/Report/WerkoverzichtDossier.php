@@ -21,6 +21,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $result = civicrm_api('OptionValue', 'get', $params);
     
     $case_types = array();
+    $case_types[''] = ts('- elke - ');
     foreach($result['values'] as $key => $case_type){
       $case_types[$case_type['id']] = $case_type['label'];
     }
@@ -41,6 +42,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $result = civicrm_api('OptionValue', 'get', $params);
     
     $case_statuses = array();
+    $case_statuses[''] = ts('- elke - ');
     foreach($result['values'] as $key => $case_status){
       $case_statuses[$case_status['id']] = $case_status['label'];
     }
@@ -92,6 +94,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $dao = CRM_Core_DAO::executeQuery($query);  
 
     $complex_ids = array();
+    $complex_ids[''] = ts('- elke - ');
     while($dao->fetch()){
       if(!empty($dao->complex_id)){
         $complex_ids[$dao->complex_id] = $dao->complex_id;
@@ -103,6 +106,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $dao = CRM_Core_DAO::executeQuery($query);  
 
     $city_regions = array();
+    $city_regions[''] = ts('- elke - ');
     while($dao->fetch()){
       if(!empty($dao->city_region)){
         $city_regions[$dao->city_region] = $dao->city_region;
@@ -114,6 +118,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $dao = CRM_Core_DAO::executeQuery($query);  
 
     $blocks = array();
+    $blocks[''] = ts('- elke - ');
     while($dao->fetch()){
       if(!empty($dao->block)){
         $blocks[$dao->block] = $dao->block;
@@ -136,6 +141,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $result = civicrm_api('OptionValue', 'get', $params);
     
     $activity_statuss = array();
+    $activity_statuss[''] = ts('- elke - ');
     foreach($result['values'] as $key => $activity_status){
       $activity_statuss[$activity_status['id']] = $activity_status['label'];
     }
@@ -220,7 +226,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           'activity_ontruiming_41' => array(
             'title' => ts('Ontruiming'),
             'operatorType' => CRM_Report_Form::OP_SELECT,
-            'options' => array('J' => ts('Ja'), 'N' => ts('Nee')),
+            'options' => array('' => ts('- elke - '), 'J' => ts('Ja'), 'N' => ts('Nee')),
           ),
           'activity_ontruiming_status_id' => array(
             'title' => ts('Ontruiming status '),
