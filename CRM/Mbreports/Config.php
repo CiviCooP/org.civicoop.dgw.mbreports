@@ -58,13 +58,13 @@ class CRM_Mbreports_Config {
     $this->setCaseTypeId('overlast');
     $this->setActTypeId('change Case Status');
     $this->setWfUitkomstCustomGroupName('wf_uitkomst');
-    $this->setWfMelderCustomGroupName('wf_melder');
+    $this->setWfMelderCustomGroupName('wf_data');
     $this->setWfMelderCustomFieldName('wf_melder');
     $this->setWfTypeCustomFieldName('wf_type');
     $this->setWfUitkomstCustomFieldName('wf_uitkomst');
     $this->setWoonfraude();
     
-    $this->setOvCustomGroupName('ov_type');
+    $this->setOvCustomGroupName('ov_data');
     $this->setOvTypeCustomFieldName('ov_type');
     $this->setOverlast();
     $this->setCaseTypeId('Woonfraude');
