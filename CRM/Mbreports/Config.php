@@ -13,6 +13,8 @@ class CRM_Mbreports_Config {
   
   public $caseTypeOptionGroupId = NULL;
   public $actTypeOptionGroupId = NULL;
+  
+  public $dossierManagerRelationshipTypeId = NULL;
   /*
    * custom group for case type Woonfraude
    */
@@ -266,6 +268,16 @@ class CRM_Mbreports_Config {
       $this->setOvTypeColumnName('');
       throw new Exception('Could not find custom field with name '.$this->ovTypeCustomFieldName
         .' in custom group '.$this->ovCustomGroupName.', error from API CustomField Getvalue :'.$ex->getMessage());
+    }
+  }
+  private function setDossierManagerRelationshipTypeId() {
+    $params = array(
+      'name_a_b'  =>  'Dossiermanager',
+      'return'    =>  'id');
+    try {
+      $this->dossierManagerRelationshipTypeId = civicrm_api3('RelationshipType', 'Getvalue', $params);
+    } catch (CiviCRM_API3_Exception $ex) {
+      $this->dossierManagerRelationshipTypeId = 0;
     }
   }
   /**
