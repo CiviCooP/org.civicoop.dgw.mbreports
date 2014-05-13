@@ -13,6 +13,8 @@ class CRM_Mbreports_Config {
   
   public $caseTypeOptionGroupId = NULL;
   public $actTypeOptionGroupId = NULL;
+  
+  public $dossierManagerRelationshipTypeId = NULL;
   /*
    * custom group for case type Woonfraude
    */
@@ -43,6 +45,11 @@ class CRM_Mbreports_Config {
   public $ovTypeCustomFieldName = NULL;
   public $ovTypeColumnName = NULL;
   public $overlastCaseTypeId = NULL;
+  
+  /*
+   * array with case types that are available for M&B reporting
+   */
+  public $validCaseTypes = array();
   /**
    * Constructor function
    */
@@ -51,18 +58,19 @@ class CRM_Mbreports_Config {
     $this->setCaseTypeId('overlast');
     $this->setActTypeId('change Case Status');
     $this->setWfUitkomstCustomGroupName('wf_uitkomst');
-    $this->setWfMelderCustomGroupName('wf_melder');
+    $this->setWfMelderCustomGroupName('wf_data');
     $this->setWfMelderCustomFieldName('wf_melder');
     $this->setWfTypeCustomFieldName('wf_type');
     $this->setWfUitkomstCustomFieldName('wf_uitkomst');
     $this->setWoonfraude();
     
-    $this->setOvCustomGroupName('ov_type');
+    $this->setOvCustomGroupName('ov_data');
     $this->setOvTypeCustomFieldName('ov_type');
     $this->setOverlast();
     $this->setCaseTypeId('Woonfraude');
     $this->setCaseTypeId('Overlast');
     $this->setActTypeId('Change Case Status');
+    $this->setValidCaseTypes();
   }
   
   private function setCaseTypeId($caseTypeName) {
@@ -267,6 +275,23 @@ class CRM_Mbreports_Config {
       throw new Exception('Could not find custom field with name '.$this->ovTypeCustomFieldName
         .' in custom group '.$this->ovCustomGroupName.', error from API CustomField Getvalue :'.$ex->getMessage());
     }
+  }
+  
+  private function setDossierManagerRelationshipTypeId() {
+    $params = array(
+      'name_a_b'  =>  'Dossiermanager',
+      'return'    =>  'id');
+    try {
+      $this->dossierManagerRelationshipTypeId = civicrm_api3('RelationshipType', 'Getvalue', $params);
+    } catch (CiviCRM_API3_Exception $ex) {
+      $this->dossierManagerRelationshipTypeId = 0;
+    }
+  }
+  
+  private function setValidCaseTypes() {
+    $this->validCaseTypes = asort(array('ActienaVonnis', 'Buitenkanstraject', 'Overlast', 
+      'Huurbemiddeling', 'Stadsbank', 'Volgcontact', 'Woonfraude', 'Laatstekans', 
+      'Regeling'));
   }
   /**
    * Function to return singleton object
