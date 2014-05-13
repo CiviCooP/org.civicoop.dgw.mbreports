@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <extension key="org.civicoop.dgw.mbreports" type="module">
   <file>mbreports</file>
-  <name>FIXME</name>
-  <description>FIXME</description>
+  <name>Mens en Buurt Rapporten De Goede Woning</name>
+  <description>Extensie voor rapportage Mens en Buurt Dossiers</description>
   <license>AGPL-3.0</license>
   <maintainer>
-    <author>Erik Hommel</author>
-    <email>hommel@ee-atwork.nl</email>
+    <author>Erik Hommel (CiviCooP)</author>
+    <email>helpdesk@civicoop.org</email>
   </maintainer>
   <releaseDate>2014-05-12</releaseDate>
   <version>1.0</version>
@@ -14,7 +14,7 @@
   <compatibility>
     <ver>4.2</ver>
   </compatibility>
-  <comments>This is a new, undeveloped module</comments>
+  <comments>Extension being developed</comments>
   <civix>
     <namespace>CRM/Mbreports</namespace>
   </civix>
