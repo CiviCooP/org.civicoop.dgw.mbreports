@@ -12,9 +12,11 @@ class CRM_Mbreports_Config {
   static private $_singleton = NULL;
   
   public $caseTypeOptionGroupId = NULL;
+  public $caseTypes = array();
   public $actTypeOptionGroupId = NULL;
   
   public $dossierManagerRelationshipTypeId = NULL;
+  public $dossierManagerList = array();
   /*
    * custom group for case type Woonfraude
    */
@@ -31,6 +33,7 @@ class CRM_Mbreports_Config {
   public $wfUitkomstCustomFieldName = NULL;
   
   public $wfTypeColumnName = NULL;
+  public $wfTypeList = array();
   public $wfMelderColumnName = NULL;
   public $wfUitkomstColumnName = NULL;
   public $woonfraudeCaseTypeId = NULL;
@@ -44,6 +47,7 @@ class CRM_Mbreports_Config {
   public $ovCustomTableName = NULL;
   public $ovTypeCustomFieldName = NULL;
   public $ovTypeColumnName = NULL;
+  public $ovTypeList = array();
   public $overlastCaseTypeId = NULL;
   
   /*
@@ -54,6 +58,9 @@ class CRM_Mbreports_Config {
    * Constructor function
    */
   function __construct() {
+    $this->setCaseTypeOptionGroupId();
+    $this->setActTypeOptionGroupId();
+
     $this->setCaseTypeId('woonfraude');
     $this->setCaseTypeId('overlast');
     $this->setActTypeId('change Case Status');
@@ -63,26 +70,24 @@ class CRM_Mbreports_Config {
     $this->setWfTypeCustomFieldName('wf_type');
     $this->setWfUitkomstCustomFieldName('wf_uitkomst');
     $this->setWoonfraude();
+    $this->setWfTypeList();
     
     $this->setOvCustomGroupName('ov_data');
     $this->setOvTypeCustomFieldName('ov_type');
     $this->setOverlast();
-    $this->setCaseTypeId('Woonfraude');
-    $this->setCaseTypeId('Overlast');
+    $this->setOvTypeList();
     $this->setActTypeId('Change Case Status');
     $this->setValidCaseTypes();
+    
+    $this->setDossierManagerRelationshipTypeId();
+    $this->setDossierManagerList();
+    $this->setCaseTypes();
   }
   
   private function setCaseTypeId($caseTypeName) {
     $propertyName = strtolower(trim($caseTypeName)).'CaseTypeId';
-    try {
-      $optionGroupId = civicrm_api3('OptionGroup', 'Getvalue', array('name' => 'case_type', 'return' => 'id'));
-    } catch (CiviCRM_API3_Exception $ex) {
-      throw new Exception('Could not find option group for case_type, error from API OptionGroup Getvalue : '
-        .$ex->getMessage());
-    }
     $optionValueParams = array(
-      'option_group_id' => $optionGroupId,
+      'option_group_id' => $this->caseTypeOptionGroupId,
       'name'            => ucfirst($caseTypeName),
       'return'          => 'value');
     try {
@@ -96,14 +101,8 @@ class CRM_Mbreports_Config {
   private function setActTypeId($actTypeName) {
     $gluedActTypeName = $this->glueStringParts($actTypeName);
     $propertyName = strtolower($gluedActTypeName).'ActTypeId';
-    try {
-      $optionGroupId = civicrm_api3('OptionGroup', 'Getvalue', array('name' => 'activity_type', 'return' => 'id'));
-    } catch (CiviCRM_API3_Exception $ex) {
-      throw new Exception('Could not find option group for activity_type, error from API OptionGroup Getvalue : '
-        .$ex->getMessage());
-    }
     $optionValueParams = array(
-      'option_group_id' => $optionGroupId,
+      'option_group_id' => $this->actTypeOptionGroupId,
       'name'            => ucwords($actTypeName),
       'return'          => 'value');
     try {
@@ -289,10 +288,84 @@ class CRM_Mbreports_Config {
   }
   
   private function setValidCaseTypes() {
-    $this->validCaseTypes = asort(array('ActienaVonnis', 'Buitenkanstraject', 'Overlast', 
-      'Huurbemiddeling', 'Stadsbank', 'Volgcontact', 'Woonfraude', 'Laatstekans', 
-      'Regeling'));
+    $this->validCaseTypes = array('ActienaVonnis', 'Buitenkanstraject', 'Overlast', 
+      'Volgcontact', 'Woonfraude', 'Laatstekans', 'Regeling');
+    asort($this->validCaseTypes);
   }
+  
+  private function setCaseTypeOptionGroupId() {
+    $params = array('name' => 'case_type', 'return' => 'id');
+    try {
+      $this->caseTypeOptionGroupId = civicrm_api3('OptionGroup', 'Getvalue', $params);
+    } catch (CiviCRM_API3_Exception $ex) {
+      $this->caseTypeOptionGroupId = 0;
+    }
+  }
+
+  private function setActTypeOptionGroupId() {
+    $params = array('name' => 'activity_type', 'return' => 'id');
+    try {
+      $this->actTypeOptionGroupId = civicrm_api3('OptionGroup', 'Getvalue', $params);
+    } catch (CiviCRM_API3_Exception $ex) {
+      $this->actTypeOptionGroupId = 0;
+    }
+  }
+  
+  private function setCaseTypes() {
+    $params = array('option_group_id' => $this->caseTypeOptionGroupId);
+    try {
+      $apiCaseTypes = civicrm_api3('OptionValue', 'Get', $params);
+      foreach ($apiCaseTypes['values'] as $apiCaseType) {
+        if (in_array($apiCaseType['label'], $this->validCaseTypes)) {
+          $this->caseTypes[$apiCaseType['id']] = $apiCaseType['label'];
+        }
+      }
+    } catch (CiviCRM_API3_Exception $ex) {
+      $this->caseTypes = array();
+    }
+    asort($this->caseTypes);
+  }
+  
+  private function setDossierManagerList() {
+    /*
+     * retrieve all relationships dossiermanager
+     */
+    $query = 'SELECT DISTINCT(contact_id_b) as manager_id, display_name FROM civicrm_relationship '
+      . 'JOIN civicrm_contact cc ON contact_id_b = cc.id WHERE relationship_type_id = %1 AND case_id IS NOT NULL';
+    $params = array(1 => array($this->dossierManagerRelationshipTypeId, 'Integer'));
+    $dao = CRM_Core_DAO::executeQuery($query, $params);
+    while($dao->fetch()) {
+      $this->dossierManagerList[$dao->manager_id] = $dao->display_name;
+    }
+    asort($this->dossierManagerList);
+  }
+  
+  private function setOvTypeList() {
+    $params = array(
+      'name'            =>  $this->ovTypeCustomFieldName,
+      'custom_group_id' =>  $this->ovCustomGroupId,
+      'return'          =>  'option_group_id');
+    $ovOptionGroup = civicrm_api3('CustomField', 'Getvalue', $params);
+    $optionValues = civicrm_api3('OptionValue', 'Get', array('option_group_id' => $ovOptionGroup));
+    foreach ($optionValues['values'] as $optionId => $optionValue) {
+      $this->ovTypeList[$optionId] = $optionValue['label'];
+    }
+    asort($this->ovTypeList);
+  }
+
+  private function setWfTypeList() {
+    $params = array(
+      'name'            =>  $this->wfTypeCustomFieldName,
+      'custom_group_id' =>  $this->wfUitkomstCustomGroupId,
+      'return'          =>  'option_group_id');
+    $wfOptionGroup = civicrm_api3('CustomField', 'Getvalue', $params);
+    $optionValues = civicrm_api3('OptionValue', 'Get', array('option_group_id' => $wfOptionGroup));
+    foreach ($optionValues['values'] as $optionId => $optionValue) {
+      $this->wfTypeList[$optionId] = $optionValue['label'];
+    }
+    asort($this->wfTypeList);
+  }
+  
   /**
    * Function to return singleton object
    * 
