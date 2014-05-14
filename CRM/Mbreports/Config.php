@@ -17,10 +17,16 @@ class CRM_Mbreports_Config {
   
   public $caseTypeOptionGroupId = NULL;
   public $caseTypes = array();
+  public $caseStatusOptionGroupId= NULL;
+  public $caseStatus = array();
   public $actTypeOptionGroupId = NULL;
   
+  public $hoofdhuurderRelationshipTypeId = NULL;
   public $dossierManagerRelationshipTypeId = NULL;
   public $dossierManagerList = array();
+  public $complexList = array();
+  public $buurtList = array();
+  public $wijkList = array();
   /*
    * custom group for case type Woonfraude
    */
@@ -64,6 +70,7 @@ class CRM_Mbreports_Config {
   function __construct() {
     $this->setCaseTypeOptionGroupId();
     $this->setActTypeOptionGroupId();
+    $this->setCaseStatusOptionGroupId();
 
     $this->setCaseTypeId('woonfraude');
     $this->setCaseTypeId('overlast');
@@ -83,9 +90,14 @@ class CRM_Mbreports_Config {
     $this->setActTypeId('Change Case Status');
     $this->setValidCaseTypes();
     
+    $this->setHoofdhuurderRelationshipTypeId();
     $this->setDossierManagerRelationshipTypeId();
     $this->setDossierManagerList();
     $this->setCaseTypes();
+    $this->setBuurtList();
+    $this->setComplexList();
+    $this->setWijkList();
+    $this->setCaseStatus();
   }
   
   private function setCaseTypeId($caseTypeName) {
@@ -291,6 +303,17 @@ class CRM_Mbreports_Config {
     }
   }
   
+  private function setHoofdhuurderRelationshiptypeId() {
+    $params = array(
+      'name_a_b'  =>  'Hoofdhuurder',
+      'return'    =>  'id');
+    try {
+      $this->hoofdhuurderRelationshipTypeId = civicrm_api3('RelationshipType', 'Getvalue', $params);
+    } catch (CiviCRM_API3_Exception $ex) {
+      $this->hoofdhuurderRelationshipTypeId = 0;
+    }
+  }
+  
   private function setValidCaseTypes() {
     $this->validCaseTypes = array('ActienaVonnis', 'Buitenkanstraject', 'Overlast', 
       'Volgcontact', 'Woonfraude', 'Laatstekans', 'Regeling');
@@ -303,6 +326,15 @@ class CRM_Mbreports_Config {
       $this->caseTypeOptionGroupId = civicrm_api3('OptionGroup', 'Getvalue', $params);
     } catch (CiviCRM_API3_Exception $ex) {
       $this->caseTypeOptionGroupId = 0;
+    }
+  }
+
+  private function setCaseStatusOptionGroupId() {
+    $params = array('name' => 'case_status', 'return' => 'id');
+    try {
+      $this->caseStatusOptionGroupId = civicrm_api3('OptionGroup', 'Getvalue', $params);
+    } catch (CiviCRM_API3_Exception $ex) {
+      $this->caseStatusOptionGroupId = 0;
     }
   }
 
@@ -321,13 +353,26 @@ class CRM_Mbreports_Config {
       $apiCaseTypes = civicrm_api3('OptionValue', 'Get', $params);
       foreach ($apiCaseTypes['values'] as $apiCaseType) {
         if (in_array($apiCaseType['label'], $this->validCaseTypes)) {
-          $this->caseTypes[$apiCaseType['id']] = $apiCaseType['label'];
+          $this->caseTypes[$apiCaseType['value']] = $apiCaseType['label'];
         }
       }
     } catch (CiviCRM_API3_Exception $ex) {
       $this->caseTypes = array();
     }
     asort($this->caseTypes);
+  }
+  
+  private function setCaseStatus() {
+    $params = array('option_group_id' => $this->caseStatusOptionGroupId);
+    try {
+      $apiCaseStatus = civicrm_api3('OptionValue', 'Get', $params);
+      foreach ($apiCaseStatus['values'] as $caseStatus) {
+        $this->caseStatus[$caseStatus['value']] = $caseStatus['label'];
+      }
+    } catch (CiviCRM_API3_Exception $ex) {
+      $this->caseStatus = array();
+    }
+    asort($this->caseStatus);
   }
   
   private function setDossierManagerList() {
@@ -368,6 +413,38 @@ class CRM_Mbreports_Config {
       $this->wfTypeList[$optionId] = $optionValue['label'];
     }
     asort($this->wfTypeList);
+  }
+  private function setComplexList() {
+    $dao = CRM_Core_DAO::executeQuery('SELECT DISTINCT(complex_id) FROM civicrm_property');
+    while ($dao->fetch()) {
+      if (!empty($dao->complex_id)) {
+      $this->complexList[] = $dao->complex_id;
+      }
+    }
+    $this->complexList[] = 'Onbekend';
+    asort($this->complexList);
+  }
+
+  private function setBuurtList() {
+    $dao = CRM_Core_DAO::executeQuery('SELECT DISTINCT(city_region) FROM civicrm_property');
+    while ($dao->fetch()) {
+      if (!empty($dao->city_region)) {
+      $this->buurtList[] = $dao->city_region;
+      }
+    }
+    $this->buurtList[] = 'Onbekend';
+    asort($this->buurtList);
+  }
+  
+  private function setWijkList() {
+    $dao = CRM_Core_DAO::executeQuery('SELECT DISTINCT(block) FROM civicrm_property');
+    while ($dao->fetch()) {
+      if (!empty($dao->block)) {
+      $this->wijkList[] = $dao->block;
+      }
+    }
+    $this->wijkList[] = 'Onbekend';
+    asort($this->wijkList);
   }
   
   /**
