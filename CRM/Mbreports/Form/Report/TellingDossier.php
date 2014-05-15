@@ -55,7 +55,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     }
     //$this->_where = 'WHERE a.is_deleted = 0 AND f.label IN("'
     //  .implode('", "', $inArray).'")';
-    $this->_where = 'WHERE a.is_deleted = 0 AND f.label = "ActienaVonnis" AND b.contact_id_b = 27';
+    $this->_where = 'WHERE a.is_deleted = 0 AND b.contact_id_b = 40873';
   }
 
   function orderBy() {
@@ -198,7 +198,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
    */
   private function addTempTable($dao) {    
     $insert = 'INSERT INTO data_rows (case_id, case_manager, case_type, status_id, start_date,
-      end_date, wf_melder, ov_type, complex, wijk, buurt, wf_type, wf_uitkomst, ov_uitkomst)';
+      end_date, wf_melder, ov_type, wijk, buurt, complex, wf_type, wf_uitkomst, ov_uitkomst)';
     $elementIndex = 1;
     $insValues = array();
     $insParams = array();
@@ -215,9 +215,9 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
      * retrieve data for VGE and for wf_uitkomst
      */
     $vgeData = $this->getCaseVgeData($dao->case_id);
-    $this->setValueLine($vgeData['complex_id'], 'String', $elementIndex, $insParams, $insValues);
     $this->setValueLine($vgeData['block'], 'String', $elementIndex, $insParams, $insValues);
     $this->setValueLine($vgeData['city_region'], 'String', $elementIndex, $insParams, $insValues);
+    $this->setValueLine($vgeData['complex_id'], 'String', $elementIndex, $insParams, $insValues);
 
     $wfUitkomstData = $this->getWfUitkomstData($dao->case_id);
     $this->setValueLine($wfUitkomstData['wf_type'], 'String', $elementIndex, $insParams, $insValues);
@@ -266,11 +266,12 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     $previousComplex = NULL;
     while ($dao->fetch()) {
       $row = array();
-      $row['complex'] = $dao->complex;
+      $row['complex'] = '<strong>'.$dao->complex.'</strong>';
       if ($dao->complex == $previousComplex) {
         $row['complex'] = '';
       } else {
-        $row['complex'] = $dao->complex;
+        $rows[] = array();
+        $row['complex'] = '<strong>'.$dao->complex.'</strong>';
         $previousComplex = $dao->complex;
       }
       $row['case_type'] = $dao->case_type;
