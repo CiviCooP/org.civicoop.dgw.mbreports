@@ -68,7 +68,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $result = civicrm_api('RelationshipType', 'getsingle', $params);
         
     $query = "SELECT civicrm_contact.id, civicrm_contact.sort_name FROM civicrm_contact ";
-    $query .= "LEFT JOIN civicrm_relationship ON civicrm_contact.id = civicrm_relationship.contact_id_a ";
+    $query .= "LEFT JOIN civicrm_relationship ON civicrm_contact.id = civicrm_relationship.contact_id_b ";
     $query .= "WHERE civicrm_relationship.case_id != 'NULL' ";
     $query .= "AND civicrm_relationship.relationship_type_id = '" . $result['id'] . "' ";
     $query .= "GROUP BY civicrm_contact.id ORDER BY civicrm_contact.sort_name ASC";
@@ -79,7 +79,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $dossiermanagers[$dao->id] = $dao->sort_name;
     }
     
-    // relationship_contact_id_a_deurwaarder
+    // deurwaarder
     // name_a_b = Deurwaarder
     $params = array(
       'version' => 3,
@@ -89,7 +89,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $result = civicrm_api('RelationshipType', 'getsingle', $params);
     
     $query = "SELECT civicrm_contact.id, civicrm_contact.sort_name FROM civicrm_contact ";
-    $query .= "LEFT JOIN civicrm_relationship ON civicrm_contact.id = civicrm_relationship.contact_id_a ";
+    $query .= "LEFT JOIN civicrm_relationship ON civicrm_contact.id = civicrm_relationship.contact_id_b ";
     $query .= "WHERE civicrm_relationship.case_id != 'NULL' ";
     $query .= "AND civicrm_relationship.relationship_type_id = '" . $result['id'] . "' ";
     $query .= "GROUP BY civicrm_contact.id ORDER BY civicrm_contact.sort_name ASC";
@@ -100,7 +100,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $deurwaarders[$dao->id] = $dao->sort_name;
     }
     
-    // complex
+    // property.complex
     $query = "SELECT complex_id FROM civicrm_property GROUP BY complex_id ORDER BY complex_id ASC";
     $dao = CRM_Core_DAO::executeQuery($query);  
 
@@ -112,7 +112,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       }
     }
     
-    // city_region
+    // property.city_region
     $query = "SELECT city_region FROM civicrm_property GROUP BY city_region ORDER BY city_region ASC";
     $dao = CRM_Core_DAO::executeQuery($query);  
 
@@ -124,7 +124,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       }
     }
     
-    // block
+    // property.block
     $query = "SELECT block FROM civicrm_property GROUP BY block ORDER BY block ASC";
     $dao = CRM_Core_DAO::executeQuery($query);  
 
@@ -136,7 +136,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       }
     }
     
-    // vge_type_id
+    // property.vge_type_id
     $query = "SELECT id, label FROM civicrm_property_type ORDER BY label ASC";
     $dao = CRM_Core_DAO::executeQuery($query);  
 
@@ -146,7 +146,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $vge_type_ids[$dao->id] = $dao->label;
     }
     
-    // activity_ontruiming_status_id
+    // ontruiming.status_id
     $params = array(
       'version' => 3,
       'sequential' => 1,
@@ -172,84 +172,84 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       array(
         'dao' => 'CRM_Case_DAO_Case',
         'fields' => array(
-          'id' =>
+          'CA.id' =>
           array('title' => ts('Dossier ID'),
             'required' => TRUE,
           ),
-          'subject' =>
+          'CA.subject' =>
           array('title' => ts('Dossier onderwerp'),
             'required' => TRUE,
           ),
-          'case_type_id' =>
+          'CA.case_type_id' =>
           array('title' => ts('Dossier type'),
             'required' => TRUE,
           ),
-          'status_id' =>
+          'CA.status_id' =>
           array('title' => ts('Dossier status'),
             'required' => TRUE,
           ),
-          'start_date' =>
+          'CA.start_date' =>
           array('title' => ts('Dossier begindatum'),
             //'required' => TRUE,
           ),
-          'typeringen' =>
+          'TYPE.typeringen' =>
           array('title' => ts('Typeringen')
           ),
-          'relationship_contact_id_a_dossiermanager' => 
+          'dossiermanager' => 
           array('title' => ts('Dossiermanager')
           ),
-          'relationship_contact_id_a_deurwaarder' => 
+          'deurwaarder' => 
           array('title' => ts('Deurwaarder')
           ),
           // J / N (Ja of Nee) ontruimt, ontruim id is 41
-          'activity_ontruiming_41' =>
+          'ontruiming' =>
           array('title' => ts('Ontruiming')
           ),
-          'activity_ontruiming_status_id' =>
+          'ontruiming_status_id' =>
           array('title' => ts('Ontruiming status')
           ),
-          'activity_ontruiming_date_time' => 
+          'ontruiming_activity_date_time' => 
           array('title' => ts('Ontruiming datum')
           ),
           // J / N (Ja of Nee) vonnis, vonnis id = 40
-          'activity_vonnis_40' =>
+          'vonnis' =>
           array('title' => ts('Vonnis')
           ),
-          'activity_vonnis_date_time' => 
+          'vonnis_activity_date_time' => 
           array('title' => ts('Vonnis datum')
           ),
         ),
         'filters' => array(
-          'case_type_id' => array(
+          'CA.case_type_id' => array(
             'title' => ts('Dossier type'),
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'options' => $case_types,
           ),
-          'status_id' => array(
+          'CA.status_id' => array(
             'title' => ts('Dossier status'),
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'options' => $case_statuses,
           ),
-          'start_date' => array(
+          'CA.start_date' => array(
             'title' => ts('Dossier begindatum'),
             'operatorType' => CRM_Report_Form::OP_DATE,
           ),
-          'relationship_contact_id_a_dossiermanager' => array(
+          'dossiermanager' => array(
             'title' => ts('Dossiermanager'),
             'operatorType' => CRM_Report_Form::OP_MULTISELECT,
             'options' => $dossiermanagers,
           ),
-          'relationship_contact_id_a_deurwaarder' => array(
+          'deurwaarder' => array(
             'title' => ts('Deurwaarder'),
             'operatorType' => CRM_Report_Form::OP_MULTISELECT,
             'options' => $deurwaarders,
           ),
-          'activity_ontruiming_41' => array(
+          'ontruiming' => array(
             'title' => ts('Ontruiming'),
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'options' => array('' => ts('- elke - '), 'J' => ts('Ja'), 'N' => ts('Nee')),
           ),
-          'activity_ontruiming_status_id' => array(
+          'ontruiming_status_id' => array(
             'title' => ts('Ontruiming status '),
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'options' => $activity_statuss,
@@ -257,25 +257,25 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         ),
         'order_bys' =>
         array(
-          'id' =>
+          'CA.id' =>
           array(
             'name' => 'id',
             'title' => ts('Dossier ID'),
             'alias' => 'id',
           ),
-          'typeringen' => 
+          'TYPE.typeringen' => 
           array(
             'name' => 'typeringen',
             'title' => ts('Typeringen'),
             'alias' => 'typeringen',
           ),
-          'status_id' => 
+          'CA.status_id' => 
           array(
             'name' => 'status_id',
             'title' => ts('Dossier status'),
             'alias' => 'status_id',
           ),
-          'start_date' => 
+          'CA.start_date' => 
           array(
             'name' => 'start_date',
             'title' => ts('Dossier begindatum'),
@@ -294,39 +294,39 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       'civicrm_property' => array(
         'dao' => 'CRM_Core_DAO_CustomField',
         'fields' => array(
-          'vge_id' => array(
+          'PROP.vge_id' => array(
             'title' => ts('VGE nummer'),
           ),
-          'complex_id' => array(
+          'PROP.complex_id' => array(
             'title' => ts('Complex'),
           ),
-          'block' => array(
+          'PROP.block' => array(
             'title' => ts('Wijk'),
           ),
-          'city_region' => array(
+          'PROP.city_region' => array(
             'title' => ts('Buurt'),
           ),
-          'vge_type_id' => array(
+          'PROP.vge_type_id' => array(
             'title' => ts('VGE type'),
           ),
         ),
         'filters' => array(
-          'complex_id' => array(
+          'PROP.complex_id' => array(
             'title' => ts('Complex'),
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'options' => $complex_ids,
           ),
-          'block' => array(
+          'PROP.block' => array(
             'title' => ts('Wijk'),
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'options' => $blocks,
           ),
-          'city_region' => array(
+          'PROP.city_region' => array(
             'title' => ts('Buurt'),
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'options' => $city_regions,
           ),
-          'vge_type_id' => array(
+          'PROP.vge_type_id' => array(
             'title' => ts('VGE type'),
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'options' => $vge_type_ids,
@@ -334,25 +334,25 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         ),
         'order_bys' =>
         array(
-          'complex_id' =>
+          'PROP.complex_id' =>
           array(
             'name' => 'complex_id',
             'title' => ts('Complex'),
             'alias' => 'complex_id',
           ),
-          'block' => 
+          'PROP.block' => 
           array(
             'name' => 'block',
             'title' => ts('Wijk'),
             'alias' => 'block',
           ),
-          'city_region' => 
+          'PROP.city_region' => 
           array(
             'name' => 'city_region',
             'title' => ts('Buurt'),
             'alias' => 'city_region',
           ),
-          'vge_type_id' => 
+          'PROP.vge_type_id' => 
           array(
             'name' => 'vge_type_id',
             'title' => ts('VGE type'),
@@ -362,37 +362,37 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       ),
       
       // hoofdhuurder
-      '11_b_a' => array(
+      'hoofdhuurder' => array(
         'dao' => 'CRM_Contact_DAO_Contact',
         'fields' => array(
-          '11_b_a_sort_name' => array(
+          'hoofdhuurder' => array(
             'title' => ts('Hoofdhuurder naam'),
               'required' => TRUE,
           ),
-          '11_b_a_street_address' => array(
+          'hoofdhuurder_street_address' => array(
             'title' => ts('Hoofdhuurder adres'),
               'required' => TRUE,
           ),
-          '11_b_a_email' => array(
+          'hoofdhuurder_email' => array(
             'title' => ts('Hoofdhuurder e-mail'),
           ),
-          '11_b_a_phone' => array(
+          'hoofdhuurder_phone' => array(
             'title' => ts('Hoofdhuurder telefoon'),
           ),
         ),
       ),
             
       // medehuurder
-      '13_b_a' => array(
+      'medehuurder' => array(
         'dao' => 'CRM_Contact_DAO_Contact',
         'fields' => array(
-          '13_b_a_sort_name' => array(
+          'medehuurder' => array(
             'title' => ts('Medehuurder naam'),
           ),
-          '13_b_a_email' => array(
+          'medehuurder_email' => array(
             'title' => ts('Medehuurder e-mail'),
           ),
-          '13_b_a_phone' => array(
+          'medehuurder_phone' => array(
             'title' => ts('Medehuurder telefoon'),
           ),
         ),
@@ -403,126 +403,168 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
 
   function preProcess() {
-    $this->assign('reportTitle', ts('Membership Detail Report'));
+    $this->assign('reportTitle', ts('Werkoverzicht dossier'));
     parent::preProcess();
   }
-
-  function select() {
-    $select = $this->_columnHeaders = array();
-
-    foreach ($this->_columns as $tableName => $table) {
-      if (array_key_exists('fields', $table)) {
-        foreach ($table['fields'] as $fieldName => $field) {
-          if (CRM_Utils_Array::value('required', $field) ||
-            CRM_Utils_Array::value($fieldName, $this->_params['fields'])
-          ) {
-            if ($tableName == 'civicrm_address') {
-              $this->_addressField = TRUE;
-            }
-            elseif ($tableName == 'civicrm_email') {
-              $this->_emailField = TRUE;
-            }
-            $select[] = "{$field['dbAlias']} as {$tableName}_{$fieldName}";
-            $this->_columnHeaders["{$tableName}_{$fieldName}"]['title'] = $field['title'];
-            $this->_columnHeaders["{$tableName}_{$fieldName}"]['type'] = CRM_Utils_Array::value('type', $field);
-          }
-        }
-      }
-    }
-
-    $this->_select = "SELECT " . implode(', ', $select) . " ";
-  }
-
-  function from() {
-    $this->_from = NULL;
-
-    $this->_from = "
-         FROM  civicrm_contact {$this->_aliases['civicrm_contact']} {$this->_aclFrom}
-               INNER JOIN civicrm_membership {$this->_aliases['civicrm_membership']}
-                          ON {$this->_aliases['civicrm_contact']}.id =
-                             {$this->_aliases['civicrm_membership']}.contact_id AND {$this->_aliases['civicrm_membership']}.is_test = 0
-               LEFT  JOIN civicrm_membership_status {$this->_aliases['civicrm_membership_status']}
-                          ON {$this->_aliases['civicrm_membership_status']}.id =
-                             {$this->_aliases['civicrm_membership']}.status_id ";
-
-
-    //used when address field is selected
-    if ($this->_addressField) {
-      $this->_from .= "
-             LEFT JOIN civicrm_address {$this->_aliases['civicrm_address']}
-                       ON {$this->_aliases['civicrm_contact']}.id =
-                          {$this->_aliases['civicrm_address']}.contact_id AND
-                          {$this->_aliases['civicrm_address']}.is_primary = 1\n";
-    }
-    //used when email field is selected
-    if ($this->_emailField) {
-      $this->_from .= "
-              LEFT JOIN civicrm_email {$this->_aliases['civicrm_email']}
-                        ON {$this->_aliases['civicrm_contact']}.id =
-                           {$this->_aliases['civicrm_email']}.contact_id AND
-                           {$this->_aliases['civicrm_email']}.is_primary = 1\n";
-    }
-  }
-
-  function where() {
-    $clauses = array();
-    foreach ($this->_columns as $tableName => $table) {
-      if (array_key_exists('filters', $table)) {
-        foreach ($table['filters'] as $fieldName => $field) {
-          $clause = NULL;
-          if (CRM_Utils_Array::value('operatorType', $field) & CRM_Utils_Type::T_DATE) {
-            $relative = CRM_Utils_Array::value("{$fieldName}_relative", $this->_params);
-            $from     = CRM_Utils_Array::value("{$fieldName}_from", $this->_params);
-            $to       = CRM_Utils_Array::value("{$fieldName}_to", $this->_params);
-
-            $clause = $this->dateClause($field['name'], $relative, $from, $to, $field['type']);
-          }
-          else {
-            $op = CRM_Utils_Array::value("{$fieldName}_op", $this->_params);
-            if ($op) {
-              $clause = $this->whereClause($field,
-                $op,
-                CRM_Utils_Array::value("{$fieldName}_value", $this->_params),
-                CRM_Utils_Array::value("{$fieldName}_min", $this->_params),
-                CRM_Utils_Array::value("{$fieldName}_max", $this->_params)
-              );
-            }
-          }
-
-          if (!empty($clause)) {
-            $clauses[] = $clause;
-          }
-        }
-      }
-    }
-
-    if (empty($clauses)) {
-      $this->_where = "WHERE ( 1 ) ";
-    }
-    else {
-      $this->_where = "WHERE " . implode(' AND ', $clauses);
-    }
-
-    if ($this->_aclWhere) {
-      $this->_where .= " AND {$this->_aclWhere} ";
-    }
-  }
-
-  function groupBy() {
-    $this->_groupBy = " GROUP BY {$this->_aliases['civicrm_contact']}.id, {$this->_aliases['civicrm_membership']}.membership_type_id";
-  }
-
-  function orderBy() {
-    $this->_orderBy = " ORDER BY {$this->_aliases['civicrm_contact']}.sort_name, {$this->_aliases['civicrm_contact']}.id, {$this->_aliases['civicrm_membership']}.membership_type_id";
-  }
-
+  
   function postProcess() {
 
     $this->beginPostProcess();
 
+    echo('<pre>');
+    print_r($this->_submitValues);
+    echo('</pre>');
+    
+    // select
+    $sql = "SELECT";
+        
+    // fields
+    foreach($this->_submitValues['fields'] as $field => $true){
+      switch($field){
+        case 'dossiermanager':
+          $sql .= " (SELECT DOSMCON.sort_name FROM civicrm_contact AS DOSMCON";
+          $sql .= " LEFT JOIN civicrm_relationship AS DOSMRE ON DOSMCON.id = DOSMRE.contact_id_b ";
+          $sql .= " LEFT JOIN civicrm_relationship_type AS DOSMRETY ON DOSMRE.relationship_type_id = DOSMRETY.id ";
+          $sql .= " WHERE DOSMRETY.name_a_b = 'Dossiermanager'";
+          $sql .= " AND DOSMRE.case_id = CA.id";
+          $sql .= " ) AS dossiermanager,";
+          break;
+        
+        case 'deurwaarder':
+          $sql .= " (SELECT DEURCON.sort_name FROM civicrm_contact AS DEURCON";
+          $sql .= " LEFT JOIN civicrm_relationship AS DEURRE ON DEURCON.id = DEURRE.contact_id_b ";
+          $sql .= " LEFT JOIN civicrm_relationship_type AS DEURRETY ON DEURRE.relationship_type_id = DEURRETY.id ";
+          $sql .= " WHERE DEURRETY.name_a_b = 'Deurwaarder'";
+          $sql .= " AND DEURRE.case_id = CA.id";
+          $sql .= " ) AS deurwaarder,";
+          break;
+        
+        // option group activity_type id = 2
+        // option_value Ontruiming id = 620, value = 41, option_value status gepland value = 3
+        /*case 'ontruiming':
+          $sql .= " (CASE WHEN 3 = (SELECT ONT.status_id FROM civicrm_activity AS ONT";
+          $sql .= " LEFT JOIN civicrm_case_activity AS ONTCAACT ON ONT.id = ONTCAACT.activity_id";
+          $sql .= " WHERE ONT.activity_type_id = '41'";
+          $sql .= " AND ONTCAACT.case_id = CA.id";
+          $sql .= " ORDER BY ONT.activity_date_time DESC LIMIT 1";
+          $sql .= " ) THEN 'J' ELSE 'N' END) AS ontruiming,";
+          break;
+        
+        
+        SELECT ONT.status_id, ONT.activity_date_time FROM civicrm_activity AS ONT
+        LEFT JOIN civicrm_case_activity AS ONTCAACT ON ONT.id = ONTCAACT.activity_id
+        WHERE ONT.activity_type_id = '41'
+        AND ONTCAACT.case_id = '282'
+        ORDER BY ONT.activity_date_time DESC
+        
+        
+        // option_group activity_status = 25
+        case 'ontruiming_status_id':
+          $sql .= " (SELECT ONTSTOPVA.name FROM civicrm_activity AS ONTST";
+          $sql .= " LEFT JOIN civicrm_case_activity AS ONTSTCAACT ON ONTST.id = ONTSTCAACT.activity_id";
+          $sql .= " LEFT JOIN civicrm_option_value AS ONTSTOPVA ON ONTST.status_id = ONTSTOPVA.value";
+          $sql .= " WHERE ONTST.activity_type_id = '41'";
+          $sql .= " AND ONTSTCAACT.case_id = CA.id";
+          $sql .= " AND ONTSTOPVA.option_group_id = '25'";
+          $sql .= " ORDER BY ONTST.activity_date_time DESC LIMIT 1";
+          $sql .= " ) AS ontruiming_status,";
+          break;
+        
+SELECT ONTST.status_id, ONTSTOPVA.name, ONTST.activity_date_time FROM civicrm_activity AS ONTST
+LEFT JOIN civicrm_case_activity AS ONTSTCAACT ON ONTST.id = ONTSTCAACT.activity_id
+LEFT JOIN civicrm_option_value AS ONTSTOPVA ON ONTST.status_id = ONTSTOPVA.value
+WHERE ONTST.activity_type_id = '41'
+AND ONTSTCAACT.case_id = '282'
+AND ONTSTOPVA.option_group_id = '25'
+ORDER BY ONTST.activity_date_time DESC LIMIT 1
+        
+        case 'ontruiming_activity_date_time':
+          $sql .= " (SELECT ONTDATE.activity_date_time FROM civicrm_activity AS ONTDATE";
+          $sql .= " LEFT JOIN civicrm_case_activity AS ONTDATECAACT ON ONTDATE.id = ONTDATECAACT.activity_id";
+          $sql .= " WHERE ONTDATE.activity_type_id = '41'";
+          $sql .= " AND ONTDATECAACT.case_id = CA.id";
+          $sql .= " ORDER BY ONTDATE.activity_date_time DESC LIMIT 1";
+          $sql .= " ) AS ontruiming_activity_date_time,";
+          break;
+        
+        // option_value Vonnis id = 619, value = 40  
+        case 'vonnis':
+          $sql .= " (CASE WHEN EXISTS (SELECT VON.id FROM civicrm_activity AS VON";
+          $sql .= " LEFT JOIN civicrm_case_activity AS VONCAACT ON ONT.id = VONCAACT.activity_id";
+          $sql .= " WHERE VON.activity_type_id = '40'";
+          $sql .= " AND VONCAACT.case_id = CA.id";
+          $sql .= " ORDER BY VON.activity_date_time DESC LIMIT 1";
+          $sql .= " ) THEN 'J' ELSE 'N' END) AS vonnis,";
+          break;
+        
+        case 'vonnis_activity_date_time':
+          $sql .= " (SELECT VONDATE.activity_date_time FROM civicrm_activity AS VONDATE";
+          $sql .= " LEFT JOIN civicrm_case_activity AS VONDATECAACT ON ONT.id = VONDATECAACT.activity_id";
+          $sql .= " WHERE VONDATE.activity_type_id = '41'";
+          $sql .= " AND VONDATECAACT.case_id = CA.id";
+          $sql .= " ORDER BY VONDATE.activity_date_time DESC LIMIT 1";
+          $sql .= " ) AS vonnis_activity_date_time,";
+          break;*/
+        
+        // Hoofdhuurder civicrm_relationship_type id = 11
+        
+        // hoofdhuurder contact.id -> relationship.contact_id_b,
+        // relationship.contact_id_b -> relationship.contact_id_a, 
+        // relationship.contact_id_a -> case_contact.contact_id,
+        // case_contact.contact_id -> case_contact.case_id
+        case 'hoofdhuurder':
+          $sql .= " (SELECT HOOFD.sort_name FROM civicrm_contact AS HOOFD";
+          $sql .= " LEFT JOIN civicrm_relationship AS HOOFDRE ON HOOFD.id = HOOFDRE.contact_id_b";
+          
+          $sql .= " LEFT JOIN civicrm_case_contact AS HOOFDCACON ON HOOFDRE.contact_id_a = HOOFDCACON.case_id";
+          
+          $sql .= " WHERE HOOFDRE.relationship_type_id = '11'";
+          $sql .= " AND HOOFDCACON.case_id = CA.id";
+          $sql .= " ) AS hoofdhuurder,";
+          break;
+        
+        /*case 'hoofdhuurder_street_address':
+          $sql .= " (SELECT HOOFDSTRE.street_address FROM civicrm_address AS HOOFDSTRE";
+          $sql .= " LEFT JOIN civicrm_relationship AS HOOFDSTRERE ON HOOFDSTRE.contact_id = HOOFDSTRERE.contact_id_b ";
+          $sql .= " LEFT JOIN civicrm_relationship_type AS HOOFDSTRERETY ON HOOFDSTRERE.relationship_type_id = HOOFDSTRERETY.id ";
+          $sql .= " WHERE HOOFDSTRERETY.name_a_b = 'Hoofdhuurder'";
+          $sql .= " AND HOOFDSTRERE.case_id = CA.id";
+          $sql .= " ) AS hoofdhuurder_street_address,";
+          break;*/
+        
+        case 'CA.id':
+          $sql .= " " . $field . ",";
+          break;
+        
+        default:
+          
+      }
+    }
+    
+    $sql = substr($sql, 0, -1);
+    
+    // from
+    $sql .= " FROM civicrm_case as CA";
+    
+    // join
+    /*if(isset($this->_submitValues['fields']['typeringen.typeringen'])){
+      $sql .= " LEFT JOIN civicrm_value_typeringen_7"
+    }*/
+    
+    /*if(isset($this->_submitValues['fields']['dossiermanager.sort_name'])){
+      $sql .= " LEFT JOIN civicrm_contact AS dossiermanager ON "
+    }
+    
+    if(isset($this->_submitValues['fields']['dossiermanager.sort_name'])){
+      $sql .= " LEFT JOIN civicrm_contact AS dossiermanager ON "
+    }*/
+    
+    echo('$sql: ' . $sql);
+    exit();
+    
     // get the acl clauses built before we assemble the query
-    $this->buildACLClause($this->_aliases['civicrm_contact']);
-    $sql = $this->buildQuery(TRUE);
+    //$this->buildACLClause($this->_aliases['civicrm_contact']);
+    //$sql = $this->buildQuery(TRUE);
 
     $rows = array();
     $this->buildRows($sql, $rows);
