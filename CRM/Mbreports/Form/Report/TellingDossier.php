@@ -55,7 +55,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     }
     //$this->_where = 'WHERE a.is_deleted = 0 AND f.label IN("'
     //  .implode('", "', $inArray).'")';
-    $this->_where = 'WHERE a.is_deleted = 0 AND f.label = "ActienaVonnis" AND b.contact_id_b = 77589';
+    $this->_where = 'WHERE a.is_deleted = 0 AND f.label = "ActienaVonnis" AND b.contact_id_b = 27';
   }
 
   function orderBy() {
