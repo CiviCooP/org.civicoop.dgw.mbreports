@@ -14,7 +14,7 @@ return array (
       'label' => 'WerkoverzichtDossier',
       'description' => 'WerkoverzichtDossier (org.civicoop.dgw.mbreports)',
       'class_name' => 'CRM_Mbreports_Form_Report_WerkoverzichtDossier',
-      'report_url' => 'org.civicoop.dgw.mbreports/werkoverzichtdossier',
+      'report_url' => 'civicrm/werkoverzichtdossier',
       'component' => 'CiviCase',
     ),
   ),

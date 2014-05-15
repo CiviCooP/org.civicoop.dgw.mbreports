@@ -426,10 +426,10 @@ class CRM_Mbreports_Config {
   }
 
   private function setBuurtList() {
-    $dao = CRM_Core_DAO::executeQuery('SELECT DISTINCT(city_region) FROM civicrm_property');
+    $dao = CRM_Core_DAO::executeQuery('SELECT DISTINCT(block) FROM civicrm_property');
     while ($dao->fetch()) {
-      if (!empty($dao->city_region)) {
-      $this->buurtList[] = $dao->city_region;
+      if (!empty($dao->block)) {
+      $this->buurtList[] = $dao->block;
       }
     }
     $this->buurtList[] = 'Onbekend';
@@ -437,10 +437,10 @@ class CRM_Mbreports_Config {
   }
   
   private function setWijkList() {
-    $dao = CRM_Core_DAO::executeQuery('SELECT DISTINCT(block) FROM civicrm_property');
+    $dao = CRM_Core_DAO::executeQuery('SELECT DISTINCT(city_region) FROM civicrm_property');
     while ($dao->fetch()) {
-      if (!empty($dao->block)) {
-      $this->wijkList[] = $dao->block;
+      if (!empty($dao->city_region)) {
+      $this->wijkList[] = $dao->city_region;
       }
     }
     $this->wijkList[] = 'Onbekend';

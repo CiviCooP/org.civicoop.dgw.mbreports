@@ -18,10 +18,6 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   protected $_customGroupFilters = FALSE;
   protected $_add2groupSupported = FALSE;
   protected $_summary = NULL;
-  protected $_complexList = array();
-  protected $_buurtList = array();
-  protected $_wijkList = array();
-  protected $_dossierManagerList = array();
 
   function __construct() {
     $this->setColumns();    
@@ -57,8 +53,9 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     foreach ($mbreportsConfig->caseTypes as $caseType) {
       $inArray[] = $caseType;
     }
-    $this->_where = 'WHERE a.is_deleted = 0 AND f.label IN("'
-      .implode('", "', $inArray).'")';
+    //$this->_where = 'WHERE a.is_deleted = 0 AND f.label IN("'
+    //  .implode('", "', $inArray).'")';
+    $this->_where = 'WHERE a.is_deleted = 0 AND f.label = "ActienaVonnis" AND b.contact_id_b = 40873';
   }
 
   function orderBy() {
@@ -149,16 +146,13 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
       'complex'       => array('title' => 'Complex'),
       //'wijk'          => array('title' => 'Wijk'),
       //'buurt'         => array('title' => 'Buurt'),
-      //'case_manager'  => array('title' => 'Dossiermanager'),
       'case_type'     => array('title' => 'Dossiertype'),
+      'case_manager'  => array('title' => 'Dossiermanager'),
+      'status'        => array('title' => 'Status'),
       //'typering'      => array('title' => 'Typering'),
       //'melder'        => array('title' => 'Melder'),
       //'uitkomst'      => array('title' => 'Uitkomst'),
-      'total_count'   => array('title' => 'Totaal'),
-      'urgent_count'  => array('title' => 'Urgent'),
-      'open_count'    => array('title' => 'Open'),
-      'wait_count'    => array('title' => 'Wacht'),
-      'closed_count'  => array('title' => 'Gesloten'));
+      'count'         => array('title' => 'Totaal'));
     
     $daoTemp = CRM_Core_DAO::executeQuery($sql);
     if (!is_array($rows)) {
@@ -181,6 +175,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
    */
   private function createTempTable() {
     $query = 'CREATE TABLE IF NOT EXISTS data_rows (
+      case_id INT(11),
       complex VARCHAR(25),
       wijk VARCHAR(128),
       buurt VARCHAR(128),
@@ -190,121 +185,46 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
       wf_type VARCHAR(255),
       wf_melder VARCHAR(255),
       wf_uitkomst VARCHAR(255),
+      ov_uitkomst VARCHAR(255),
       status_id INT(11), 
       start_date VARCHAR(25), 
       end_date VARCHAR(25))';
     CRM_Core_DAO::executeQuery($query);
+    //temp
+    CRM_Core_DAO::executeQuery('TRUNCATE TABLE data_rows');
   }
   /**
    * Function to add  a record to temp table
    */
-  private function addTempTable($dao) {
-    $mbreportsConfig = CRM_Mbreports_Config::singleton();
-    $insert = 'INSERT INTO data_rows (case_manager, case_type, status_id, start_date,
-      end_date, wf_melder, ov_type, complex, wijk, buurt, wf_type, wf_uitkomst)';
-    $insValues = array();
+  private function addTempTable($dao) {    
+    $insert = 'INSERT INTO data_rows (case_id, case_manager, case_type, status_id, start_date,
+      end_date, wf_melder, ov_type, complex, wijk, buurt, wf_type, wf_uitkomst, ov_uitkomst)';
     $elementIndex = 1;
-    if (!empty($dao->manager_name)) {
-      $insParams[$elementIndex] = array($dao->manager_name, 'String');
-      $insValues[] = '%'.$elementIndex;
-      $elementIndex++;
-    } else {
-      $insValues[] = 'NULL';
-    }
-      
-    if (!empty($dao->case_type)) {
-      $insParams[$elementIndex] = array($dao->case_type, 'String');
-      $insValues[] = '%'.$elementIndex;
-      $elementIndex++;
-    } else {
-      $insValues[] = 'NULL';
-    }
-      
-    if (!empty($dao->status_id)) {
-      $insParams[$elementIndex] = array($dao->status_id, 'Integer');
-      $insValues[] = '%'.$elementIndex;
-      $elementIndex++;
-    } else {
-      $insValues[] = 'NULL';
-    }
-      
-    if (!empty($dao->start_date)) {
-      $insParams[$elementIndex] = array($dao->start_date, 'String');
-      $insValues[] = '%'.$elementIndex;
-      $elementIndex++;
-    } else {
-      $insValues[] = 'NULL';
-    }
-      
-    if (!empty($dao->end_date)) {
-      $insParams[$elementIndex] = array($dao->end_date, 'String');
-      $insValues[] = '%'.$elementIndex;
-      $elementIndex++;
-    } else {
-      $insValues[] = 'NULL';
-    }
-      
-    if (!empty($dao->wf_melder)) {
-      $insParams[$elementIndex] = array($dao->wf_melder, 'String');
-      $insValues[] = '%'.$elementIndex;
-      $elementIndex++;
-    } else {
-      $insValues[] = 'NULL';
-    }
+    $insValues = array();
+    $insParams = array();
     
-    if (!empty($dao->ov_type)) {
-      $ovType = CRM_Utils_Array::value($dao->ov_type, $mbreportsConfig->ovTypeList);
-      $insParams[$elementIndex] = array($ovType, 'String');
-      $insValues[] = '%'.$elementIndex;
-      $elementIndex++;
-    } else {
-      $insValues[] = 'NULL';
-    }
+    $this->setValueLine($dao->case_id, 'String',  $elementIndex, $insParams, $insValues);
+    $this->setValueLine($dao->manager_name, 'String',  $elementIndex, $insParams, $insValues);
+    $this->setValueLine($dao->case_type, 'String',  $elementIndex, $insParams, $insValues);
+    $this->setValueLine($dao->status_id, 'Integer',  $elementIndex, $insParams, $insValues);
+    $this->setValueLine($dao->start_date, 'String',  $elementIndex, $insParams, $insValues);
+    $this->setValueLine($dao->end_date, 'String',  $elementIndex, $insParams, $insValues);
+    $this->setValueLine($dao->wf_melder, 'String',  $elementIndex, $insParams, $insValues);
+    $this->setValueLine($dao->ov_type, 'String',  $elementIndex, $insParams, $insValues);
     /*
      * retrieve data for VGE and for wf_uitkomst
      */
     $vgeData = $this->getCaseVgeData($dao->case_id);
-    if (isset($vgeData['complex_id'])) {
-      $insParams[$elementIndex] = array($vgeData['complex_id'], 'String');
-      $insValues[] = '%'.$elementIndex;
-      $elementIndex++;
-    } else {
-      $insValues[] = 'NULL';
-    }
-    
-    if (isset($vgeData['city_region'])) {
-      $insParams[$elementIndex] = array($vgeData['city_region'], 'String');
-      $insValues[] = '%'.$elementIndex;
-      $elementIndex++;
-    } else {
-      $insValues[] = 'NULL';
-    }
-    
-    if (isset($vgeData['block'])) {
-      $insParams[$elementIndex] = array($vgeData['block'], 'String');
-      $insValues[] = '%'.$elementIndex;
-      $elementIndex++;
-    } else {
-      $insValues[] = 'NULL';
-    }
+    $this->setValueLine($vgeData['complex_id'], 'String', $elementIndex, $insParams, $insValues);
+    $this->setValueLine($vgeData['block'], 'String', $elementIndex, $insParams, $insValues);
+    $this->setValueLine($vgeData['city_region'], 'String', $elementIndex, $insParams, $insValues);
 
     $wfUitkomstData = $this->getWfUitkomstData($dao->case_id);
-    if (isset($wfUitkomstData['wf_type'])) {
-      $insParams[$elementIndex] = array($wfUitkomstData['wf_type'], 'String');
-      $insValues[] = '%'.$elementIndex;
-      $elementIndex++;
-    } else {
-      $insValues[] = 'NULL';
-    }
-    
-    if (isset($wfUitkomstData['wf_uitkomst'])) {
-      $insParams[$elementIndex] = array($wfUitkomstData['wf_uitkomst'], 'String');
-      $insValues[] = '%'.$elementIndex;
-      $elementIndex++;
-    } else {
-      $insValues[] = 'NULL';
-    }
-    $insert = $insert.' VALUES('.implode(', ', $insValues).')'; 
+    $this->setValueLine($wfUitkomstData['wf_type'], 'String', $elementIndex, $insParams, $insValues);
+    $this->setValueLine($wfUitkomstData['wf_uitkomst'], 'String', $elementIndex, $insParams, $insValues);
+    $this->setValueLine($wfUitkomstData['ov_uitkomst'], 'String', $elementIndex, $insParams, $insValues);
+
+    $insert = $insert.' VALUES('.implode(', ', $insValues).')';
     CRM_Core_DAO::executeQuery($insert, $insParams);
   }
   /**
@@ -319,6 +239,15 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     } else {
       $vgeData = array();
     }
+    if (empty($vgeData['complex_id'])) {
+      $vgeData['complex_id'] = 'Onbekend';
+    }
+    if (empty($vgeData['block'])) {
+      $vgeData['block'] = 'Onbekend';
+    }
+    if (empty($vgeData['city_region'])) {
+      $vgeData['city_region'] = 'Onbekend';
+    }
     return $vgeData;
   }
   /**
@@ -330,62 +259,29 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   
   private function buildDisplayRows() {
     $mbreportsConfig = CRM_Mbreports_Config::singleton();
-    $result = array();
-    $row = array();
-    foreach ($mbreportsConfig->complexList as $complex) {
-      $row['complex'] = '<strong>'.$complex. '</strong>';
-      foreach ($mbreportsConfig->caseTypes as $caseType) {
-        $row['case_type'] = $caseType;
-        foreach ($mbreportsConfig->caseStatus as $statusId => $statusLabel) {
-          $query = 'SELECT count(*) AS countCases FROM data_rows WHERE 
-            complex = %1 AND case_type = %2 and status_id = %3';
-          $params = array(
-            1 => array($complex, 'String'),
-            2 => array($caseType, 'String'),
-            3 => array($statusId, 'Integer'));
-          $daoCount = CRM_Core_DAO::executeQuery($query, $params);
-          if ($daoCount->fetch()) {
-            $totalCount = $totalCount + $daoCount->countCases;           
-            switch($statusLabel) {
-              case 'Gesloten':
-                if ($row['closed_count'] != 0) {
-                  $row['closed_count'] = $daoCount->countCases;
-                } else {
-                  $row['closed_count'] = '-';
-                }
-                break;
-              case 'Open':
-                if ($row['open_count'] != 0) {
-                  $row['open_count'] = $daoCount->countCases;
-                } else {
-                  $row['open_count'] = '-';
-                }
-                break;
-              case 'Urgent':
-                if ($row['urgent_count'] != 0) {
-                  $row['urgent_count'] = $daoCount->countCases;
-                } else {
-                  $row['urgent_count'] = '-';
-                }
-                break;
-              case 'Wacht':
-                if ($row['wait_count'] != 0) {
-                  $row['wait_count'] = $daoCount->countCases;
-                } else {
-                  $row['wait_count'] = '-';
-                }
-                break;
-            }
-          }
-        }
-        if ($totalCount != 0) {
-          $row['total_count'] = $totalCount;
-          $rows[] = $row;
-        }
-        $totalCount = 0;
-        $row = array();
-      }
+    $rows = array();
+    $query = 'SELECT COUNT(*) AS countCases, case_manager, complex, case_type, status_id 
+      FROM data_rows GROUP BY case_manager, complex, case_type, status_id';
+    $dao = CRM_Core_DAO::executeQuery($query);
+    while ($dao->fetch()) {
+      $row = array();
+      $row['complex'] = $dao->complex;
+      $row['case_type'] = $dao->case_type;
+      $row['case_manager'] = $dao->case_manager;
+      $row['status'] = CRM_Utils_Array::value($dao->status_id, $mbreportsConfig->caseStatus);
+      $row['count'] = $dao->countCases;
+      $rows[] = $row;
     }
     return $rows;
+  }
+  
+  private function setValueLine($field, $type, &$elementIndex, &$insParams, &$insValues) {
+    if (!empty($field)) {
+      $insParams[$elementIndex] = array($field, $type);
+      $insValues[] = '%'.$elementIndex;
+      $elementIndex++;
+    } else {
+      $insValues[] = 'NULL';
+    }
   }
 }
