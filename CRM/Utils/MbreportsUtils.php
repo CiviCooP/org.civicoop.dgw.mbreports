@@ -72,10 +72,13 @@ class CRM_Utils_MbreportsUtils {
    */
   public static function getHuishouden($contactId) {
     $huishoudenId = NULL;
-    if (CRM_Utils_DgwUtils::checkContactHoofdhuurder($contactId) == FALSE) {
+    if (CRM_Utils_DgwUtils::checkContactHoofdhuurder($contactId) == TRUE) {
+      $huishoudenId = self::getHuishoudenId($contactId, 'hoofdhuurder');
       return $huishoudenId;
-    } else {
-      $huishoudenId = self::getHuishoudenId($contactId);
+    }
+    if (CRM_Utils_DgwUtils::checkContactMedehuurder($contactId) == TRUE) {
+      $huishoudenId = self::getHuishoudenId($contactId, 'medehuurder');
+      return $huishoudenId;
     }
     return $huishoudenId;
   }
@@ -103,13 +106,21 @@ class CRM_Utils_MbreportsUtils {
     }
   }
   
-  private function getHuishoudenId($contactId) {
+  private function getHuishoudenId($contactId, $type) {
     $mbreportsConfig = CRM_Mbreports_Config::singleton();
     $query = 'SELECT contact_id_b FROM civicrm_relationship WHERE relationship_type_id = %1 AND contact_id_a = %2 ORDER BY end_date DESC';
+    if ($type == 'hoofdhuurder') {
     $params = array(
       1 => array($mbreportsConfig->hoofdhuurderRelationshipTypeId, 'Integer'),
       2 => array($contactId, 'Integer')
       );
+    }
+    if ($type == 'medehuurder') {
+    $params = array(
+      1 => array($mbreportsConfig->medehuurderRelationshipTypeId, 'Integer'),
+      2 => array($contactId, 'Integer')
+      );
+    }
     $dao = CRM_Core_DAO::executeQuery($query, $params);
     if ($dao->fetch()) {
       return $dao->contact_id_b;

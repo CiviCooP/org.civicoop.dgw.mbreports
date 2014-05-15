@@ -22,6 +22,7 @@ class CRM_Mbreports_Config {
   public $actTypeOptionGroupId = NULL;
   
   public $hoofdhuurderRelationshipTypeId = NULL;
+  public $medehuurderRelationshipTypeId = NULL;
   public $dossierManagerRelationshipTypeId = NULL;
   public $dossierManagerList = array();
   public $complexList = array();
@@ -91,6 +92,7 @@ class CRM_Mbreports_Config {
     $this->setValidCaseTypes();
     
     $this->setHoofdhuurderRelationshipTypeId();
+    $this->setMedehuurderRelationshipTypeId();
     $this->setDossierManagerRelationshipTypeId();
     $this->setDossierManagerList();
     $this->setCaseTypes();
@@ -311,6 +313,17 @@ class CRM_Mbreports_Config {
       $this->hoofdhuurderRelationshipTypeId = civicrm_api3('RelationshipType', 'Getvalue', $params);
     } catch (CiviCRM_API3_Exception $ex) {
       $this->hoofdhuurderRelationshipTypeId = 0;
+    }
+  }
+  
+  private function setMedehuurderRelationshiptypeId() {
+    $params = array(
+      'name_a_b'  =>  'Medehuurder',
+      'return'    =>  'id');
+    try {
+      $this->medehuurderRelationshipTypeId = civicrm_api3('RelationshipType', 'Getvalue', $params);
+    } catch (CiviCRM_API3_Exception $ex) {
+      $this->medehuurderRelationshipTypeId = 0;
     }
   }
   
