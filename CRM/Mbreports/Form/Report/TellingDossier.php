@@ -55,7 +55,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     }
     //$this->_where = 'WHERE a.is_deleted = 0 AND f.label IN("'
     //  .implode('", "', $inArray).'")';
-    $this->_where = 'WHERE a.is_deleted = 0 AND f.label = "ActienaVonnis" AND b.contact_id_b = 40873';
+    $this->_where = 'WHERE a.is_deleted = 0 AND f.label = "ActienaVonnis" AND b.contact_id_b = 77589';
   }
 
   function orderBy() {
@@ -263,9 +263,16 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     $query = 'SELECT COUNT(*) AS countCases, case_manager, complex, case_type, status_id 
       FROM data_rows GROUP BY case_manager, complex, case_type, status_id';
     $dao = CRM_Core_DAO::executeQuery($query);
+    $previousComplex = NULL;
     while ($dao->fetch()) {
       $row = array();
       $row['complex'] = $dao->complex;
+      if ($dao->complex == $previousComplex) {
+        $row['complex'] = '';
+      } else {
+        $row['complex'] = $dao->complex;
+        $previousComplex = $dao->complex;
+      }
       $row['case_type'] = $dao->case_type;
       $row['case_manager'] = $dao->case_manager;
       $row['status'] = CRM_Utils_Array::value($dao->status_id, $mbreportsConfig->caseStatus);
