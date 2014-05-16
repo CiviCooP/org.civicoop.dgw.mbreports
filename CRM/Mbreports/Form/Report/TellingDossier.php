@@ -264,7 +264,8 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     
     $groupFields = $this->getGroupFields();
     $query = 'SELECT COUNT(*) AS countCases, '.implode(', ', $groupFields)
-        .' FROM data_rows GROUP BY '.implode(', ', $groupFields);
+      .' FROM data_rows GROUP BY '.implode(', ', $groupFields)
+      .' ORDER BY '.implode(', ', $groupFields);
     $dao = CRM_Core_DAO::executeQuery($query);
     $previousComplex = NULL;
     while ($dao->fetch()) {
@@ -299,11 +300,11 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   }
   
   private function setGroupBys() {        
-    $this->add('checkBox', 'wijkGroupBy', ts('Wijk'));
-    $this->add('checkBox', 'buurtGroupBy', ts('Buurt'));
-    $this->add('checkBox', 'complexGroupBy', ts('Complex'));
-    $this->add('checkBox', 'caseTypeGroupBy', ts('Case Type'));
-    $this->add('CheckBox', 'caseManagerGroupBy', ts('Case Manager'));
+    $this->addElement('checkbox', 'wijkGroupBy', ts('Wijk'));
+    $this->addElement('checkbox', 'buurtGroupBy', ts('Buurt'));
+    $this->addElement('checkbox', 'complexGroupBy', ts('Complex'), NULL, array('checked'));
+    $this->addElement('checkbox', 'caseTypeGroupBy', ts('Case Type'), NULL, array('checked'));
+    $this->addElement('checkbox', 'caseManagerGroupBy', ts('Case Manager'), NULL, array('checked'));
   }
   
   private function getGroupFields() {
