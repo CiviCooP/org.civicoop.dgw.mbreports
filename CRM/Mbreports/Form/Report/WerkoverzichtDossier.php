@@ -14,7 +14,7 @@
 class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   function __construct() {
-    //$config = CRM_Mbreports_Config::singleton();
+    $config = CRM_Mbreports_Config::singleton();
     
     // case types
     $params = array(
@@ -195,27 +195,27 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           'TYPE.typeringen' =>
           array('title' => ts('Typeringen')
           ),
-          'dossiermanager' => 
+          'DOSS.dossiermanager' => 
           array('title' => ts('Dossiermanager')
           ),
-          'deurwaarder' => 
+          'DEUR.deurwaarder' => 
           array('title' => ts('Deurwaarder')
           ),
           // J / N (Ja of Nee) ontruimt, ontruim id is 41
-          'ontruiming' =>
+          'ONT.ontruiming' =>
           array('title' => ts('Ontruiming')
           ),
-          'ontruiming_status_id' =>
+          'ONT.status' =>
           array('title' => ts('Ontruiming status')
           ),
-          'ontruiming_activity_date_time' => 
+          'ONT.activity_date_time' => 
           array('title' => ts('Ontruiming datum')
           ),
           // J / N (Ja of Nee) vonnis, vonnis id = 40
-          'vonnis' =>
+          'VONN.vonnis' =>
           array('title' => ts('Vonnis')
           ),
-          'vonnis_activity_date_time' => 
+          'VONN.activity_date_time' => 
           array('title' => ts('Vonnis datum')
           ),
         ),
@@ -365,34 +365,34 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       'hoofdhuurder' => array(
         'dao' => 'CRM_Contact_DAO_Contact',
         'fields' => array(
-          'hoofdhuurder' => array(
+          'HOOFD.hoofdhuurder' => array(
             'title' => ts('Hoofdhuurder naam'),
               'required' => TRUE,
           ),
-          'hoofdhuurder_street_address' => array(
+          'HOOFDADD.street_address' => array(
             'title' => ts('Hoofdhuurder adres'),
               'required' => TRUE,
           ),
-          'hoofdhuurder_email' => array(
+          'HOOFDEM.email' => array(
             'title' => ts('Hoofdhuurder e-mail'),
           ),
-          'hoofdhuurder_phone' => array(
+          'HOOFDPHO.phone' => array(
             'title' => ts('Hoofdhuurder telefoon'),
           ),
         ),
       ),
-            
+      
       // medehuurder
       'medehuurder' => array(
         'dao' => 'CRM_Contact_DAO_Contact',
         'fields' => array(
-          'medehuurder' => array(
+          'MEDE.medehuurder' => array(
             'title' => ts('Medehuurder naam'),
           ),
-          'medehuurder_email' => array(
+          'MEDEEM.email' => array(
             'title' => ts('Medehuurder e-mail'),
           ),
-          'medehuurder_phone' => array(
+          'MEDEPHO.phone' => array(
             'title' => ts('Medehuurder telefoon'),
           ),
         ),
@@ -408,134 +408,82 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   function postProcess() {
-
+    
     $this->beginPostProcess();
 
-    echo('<pre>');
+    $config = CRM_Mbreports_Config::singleton();
+    
+    /*echo('<pre>');
     print_r($this->_submitValues);
-    echo('</pre>');
+    echo('</pre>');*/
     
     // select
     $sql = "SELECT";
         
     // fields
     foreach($this->_submitValues['fields'] as $field => $true){
-      switch($field){
-        case 'dossiermanager':
-          $sql .= " (SELECT DOSMCON.sort_name FROM civicrm_contact AS DOSMCON";
-          $sql .= " LEFT JOIN civicrm_relationship AS DOSMRE ON DOSMCON.id = DOSMRE.contact_id_b ";
-          $sql .= " LEFT JOIN civicrm_relationship_type AS DOSMRETY ON DOSMRE.relationship_type_id = DOSMRETY.id ";
-          $sql .= " WHERE DOSMRETY.name_a_b = 'Dossiermanager'";
-          $sql .= " AND DOSMRE.case_id = CA.id";
-          $sql .= " ) AS dossiermanager,";
-          break;
-        
-        case 'deurwaarder':
-          $sql .= " (SELECT DEURCON.sort_name FROM civicrm_contact AS DEURCON";
-          $sql .= " LEFT JOIN civicrm_relationship AS DEURRE ON DEURCON.id = DEURRE.contact_id_b ";
-          $sql .= " LEFT JOIN civicrm_relationship_type AS DEURRETY ON DEURRE.relationship_type_id = DEURRETY.id ";
-          $sql .= " WHERE DEURRETY.name_a_b = 'Deurwaarder'";
-          $sql .= " AND DEURRE.case_id = CA.id";
-          $sql .= " ) AS deurwaarder,";
-          break;
-        
-        // option group activity_type id = 2
-        // option_value Ontruiming id = 620, value = 41, option_value status gepland value = 3
-        /*case 'ontruiming':
-          $sql .= " (CASE WHEN 3 = (SELECT ONT.status_id FROM civicrm_activity AS ONT";
-          $sql .= " LEFT JOIN civicrm_case_activity AS ONTCAACT ON ONT.id = ONTCAACT.activity_id";
-          $sql .= " WHERE ONT.activity_type_id = '41'";
-          $sql .= " AND ONTCAACT.case_id = CA.id";
-          $sql .= " ORDER BY ONT.activity_date_time DESC LIMIT 1";
-          $sql .= " ) THEN 'J' ELSE 'N' END) AS ontruiming,";
-          break;
-        
-        
-        SELECT ONT.status_id, ONT.activity_date_time FROM civicrm_activity AS ONT
-        LEFT JOIN civicrm_case_activity AS ONTCAACT ON ONT.id = ONTCAACT.activity_id
-        WHERE ONT.activity_type_id = '41'
-        AND ONTCAACT.case_id = '282'
-        ORDER BY ONT.activity_date_time DESC
-        
-        
-        // option_group activity_status = 25
-        case 'ontruiming_status_id':
-          $sql .= " (SELECT ONTSTOPVA.name FROM civicrm_activity AS ONTST";
-          $sql .= " LEFT JOIN civicrm_case_activity AS ONTSTCAACT ON ONTST.id = ONTSTCAACT.activity_id";
-          $sql .= " LEFT JOIN civicrm_option_value AS ONTSTOPVA ON ONTST.status_id = ONTSTOPVA.value";
-          $sql .= " WHERE ONTST.activity_type_id = '41'";
-          $sql .= " AND ONTSTCAACT.case_id = CA.id";
-          $sql .= " AND ONTSTOPVA.option_group_id = '25'";
-          $sql .= " ORDER BY ONTST.activity_date_time DESC LIMIT 1";
-          $sql .= " ) AS ontruiming_status,";
-          break;
-        
-SELECT ONTST.status_id, ONTSTOPVA.name, ONTST.activity_date_time FROM civicrm_activity AS ONTST
-LEFT JOIN civicrm_case_activity AS ONTSTCAACT ON ONTST.id = ONTSTCAACT.activity_id
-LEFT JOIN civicrm_option_value AS ONTSTOPVA ON ONTST.status_id = ONTSTOPVA.value
-WHERE ONTST.activity_type_id = '41'
-AND ONTSTCAACT.case_id = '282'
-AND ONTSTOPVA.option_group_id = '25'
-ORDER BY ONTST.activity_date_time DESC LIMIT 1
-        
-        case 'ontruiming_activity_date_time':
-          $sql .= " (SELECT ONTDATE.activity_date_time FROM civicrm_activity AS ONTDATE";
-          $sql .= " LEFT JOIN civicrm_case_activity AS ONTDATECAACT ON ONTDATE.id = ONTDATECAACT.activity_id";
-          $sql .= " WHERE ONTDATE.activity_type_id = '41'";
-          $sql .= " AND ONTDATECAACT.case_id = CA.id";
-          $sql .= " ORDER BY ONTDATE.activity_date_time DESC LIMIT 1";
-          $sql .= " ) AS ontruiming_activity_date_time,";
-          break;
-        
-        // option_value Vonnis id = 619, value = 40  
-        case 'vonnis':
-          $sql .= " (CASE WHEN EXISTS (SELECT VON.id FROM civicrm_activity AS VON";
-          $sql .= " LEFT JOIN civicrm_case_activity AS VONCAACT ON ONT.id = VONCAACT.activity_id";
-          $sql .= " WHERE VON.activity_type_id = '40'";
-          $sql .= " AND VONCAACT.case_id = CA.id";
-          $sql .= " ORDER BY VON.activity_date_time DESC LIMIT 1";
-          $sql .= " ) THEN 'J' ELSE 'N' END) AS vonnis,";
-          break;
-        
-        case 'vonnis_activity_date_time':
-          $sql .= " (SELECT VONDATE.activity_date_time FROM civicrm_activity AS VONDATE";
-          $sql .= " LEFT JOIN civicrm_case_activity AS VONDATECAACT ON ONT.id = VONDATECAACT.activity_id";
-          $sql .= " WHERE VONDATE.activity_type_id = '41'";
-          $sql .= " AND VONDATECAACT.case_id = CA.id";
-          $sql .= " ORDER BY VONDATE.activity_date_time DESC LIMIT 1";
-          $sql .= " ) AS vonnis_activity_date_time,";
-          break;*/
-        
-        // Hoofdhuurder civicrm_relationship_type id = 11
-        
-        // hoofdhuurder contact.id -> relationship.contact_id_b,
-        // relationship.contact_id_b -> relationship.contact_id_a, 
-        // relationship.contact_id_a -> case_contact.contact_id,
-        // case_contact.contact_id -> case_contact.case_id
-        case 'hoofdhuurder':
-          $sql .= " (SELECT HOOFD.sort_name FROM civicrm_contact AS HOOFD";
-          $sql .= " LEFT JOIN civicrm_relationship AS HOOFDRE ON HOOFD.id = HOOFDRE.contact_id_b";
-          
-          $sql .= " LEFT JOIN civicrm_case_contact AS HOOFDCACON ON HOOFDRE.contact_id_a = HOOFDCACON.case_id";
-          
-          $sql .= " WHERE HOOFDRE.relationship_type_id = '11'";
-          $sql .= " AND HOOFDCACON.case_id = CA.id";
-          $sql .= " ) AS hoofdhuurder,";
-          break;
-        
-        /*case 'hoofdhuurder_street_address':
-          $sql .= " (SELECT HOOFDSTRE.street_address FROM civicrm_address AS HOOFDSTRE";
-          $sql .= " LEFT JOIN civicrm_relationship AS HOOFDSTRERE ON HOOFDSTRE.contact_id = HOOFDSTRERE.contact_id_b ";
-          $sql .= " LEFT JOIN civicrm_relationship_type AS HOOFDSTRERETY ON HOOFDSTRERE.relationship_type_id = HOOFDSTRERETY.id ";
-          $sql .= " WHERE HOOFDSTRERETY.name_a_b = 'Hoofdhuurder'";
-          $sql .= " AND HOOFDSTRERE.case_id = CA.id";
-          $sql .= " ) AS hoofdhuurder_street_address,";
-          break;*/
-        
+      switch($field){        
         case 'CA.id':
           $sql .= " " . $field . ",";
           break;
         
+        case 'TYPE.typeringen':
+          $sql .= " " . $field . ",";
+          break;
+        
+        case 'DOSS.dossiermanager':
+          $sql .= " " . $field . ",";
+          break;
+        
+        case 'DEUR.deurwaarder':
+          $sql .= " " . $field . ",";
+          break;
+        
+        case 'ONT.ontruiming':
+          $sql .= " " . $field . ",";
+          $sql .= " ONT.status,";
+          $sql .= " ONT.activity_date_time,";
+          break;
+        
+        case 'VONN.vonnis':
+          $sql .= " " . $field . ",";
+          $sql .= " VONN.activity_date_time,";
+          break;
+        
+        /*case 'PROP.vge_id':
+          $sql .= " " . $field . ",";
+          $sql .= " PROP.complex_id,";
+          $sql .= " PROP.block,";
+          $sql .= " PROP.city_region,";
+          $sql .= " PROP.vge_type_id,";
+          break;*/
+        
+        case 'HOOFD.hoofdhuurder':
+          $sql .= " " . $field . ",";
+          break;
+        case 'HOOFDADD.street_address':
+          $sql .= " " . $field . ",";
+          break;
+        case 'HOOFDEM.email':
+          $sql .= " " . $field . ",";
+          break;
+        case 'HOOFDPHO.phone':
+          $sql .= " " . $field . ",";
+          break;
+        
+        case 'MEDE.medehuurder':
+          $sql .= " " . $field . ",";
+          break;
+        case 'MEDEEM.email':
+          $sql .= " " . $field . ",";
+          break;
+        case 'MEDEPHO.phone':
+          $sql .= " " . $field . ",";
+          break;
+          
+          break;
+        
+
         default:
           
       }
@@ -544,22 +492,235 @@ ORDER BY ONTST.activity_date_time DESC LIMIT 1
     $sql = substr($sql, 0, -1);
     
     // from
-    $sql .= " FROM civicrm_case as CA";
+    $sql .= " FROM civicrm_case as CA" . PHP_EOL;
     
-    // join
-    /*if(isset($this->_submitValues['fields']['typeringen.typeringen'])){
-      $sql .= " LEFT JOIN civicrm_value_typeringen_7"
-    }*/
-    
-    /*if(isset($this->_submitValues['fields']['dossiermanager.sort_name'])){
-      $sql .= " LEFT JOIN civicrm_contact AS dossiermanager ON "
+    foreach($this->_submitValues['fields'] as $field => $true){
+      switch($field){
+        
+        case 'TYPE.typeringen':
+          $sql .= " LEFT JOIN ( SELECT TYPEPROTY.label as typeringen, TYPEOVD.entity_id FROM civicrm_value_ov_data AS TYPEOVD " . PHP_EOL;
+          // civicrm_property_type
+          $sql .= " LEFT JOIN civicrm_property_type AS TYPEPROTY ON TYPEPROTY.id = TYPEOVD.ov_type " . PHP_EOL;
+          $sql .= " ) AS TYPE ON CA.id = TYPE.entity_id " . PHP_EOL;
+          break;
+        
+        case 'DOSS.dossiermanager':
+          $sql .= " LEFT JOIN ( SELECT sort_name AS dossiermanager, DOSSREL.case_id FROM civicrm_contact AS DOSSCON " . PHP_EOL;
+          // civicrm_relationship
+          $sql .= " LEFT JOIN civicrm_relationship AS DOSSREL ON DOSSREL.contact_id_b = DOSSCON.id " . PHP_EOL;
+          $sql .= " WHERE DOSSREL.relationship_type_id = '42' " . PHP_EOL;
+          $sql .= " ) AS DOSS ON CA.id = DOSS.case_id " . PHP_EOL;
+          $sql .= PHP_EOL . PHP_EOL;
+          break;
+        
+        case 'DEUR.deurwaarder':
+          $sql .= " LEFT JOIN ( SELECT sort_name AS deurwaarder, DEURREL.case_id FROM civicrm_contact AS DEURCON " . PHP_EOL;
+          // civicrm_relationship
+          $sql .= " LEFT JOIN civicrm_relationship AS DEURREL ON DEURREL.contact_id_b = DEURCON.id " . PHP_EOL;
+          $sql .= " WHERE DEURREL.relationship_type_id = '15' " . PHP_EOL;
+          $sql .= " ) AS DEUR ON CA.id = DEUR.case_id " . PHP_EOL;
+          $sql .= PHP_EOL . PHP_EOL;
+          break;
+        
+        case 'ONT.ontruiming':
+          $sql .= " LEFT JOIN ( SELECT status_id, activity_date_time, ONTOPTVA.label AS status, ONTCAACT.case_id, " . PHP_EOL;
+          
+          // J or N 
+          $sql .= " (CASE WHEN 3 = status_id THEN 'J' ELSE 'N' END) AS ontruiming " . PHP_EOL;
+
+          $sql .= " FROM civicrm_activity AS ONTACT " . PHP_EOL;
+          
+          // civicrm_case_activity
+          $sql .= " LEFT JOIN civicrm_case_activity AS ONTCAACT ON ONTCAACT.activity_id = ONTACT.id " . PHP_EOL;
+          // option_value, status_id
+          $sql .= " LEFT JOIN civicrm_option_value AS ONTOPTVA ON ONTOPTVA.value = ONTACT.status_id " . PHP_EOL;
+          
+          $sql .= " WHERE ONTACT.activity_type_id = '41' " . PHP_EOL;
+          $sql .= " AND ONTOPTVA.option_group_id = '25' " . PHP_EOL;
+          
+          $sql .= " ORDER BY ONTACT.activity_date_time" . PHP_EOL;
+          
+          $sql .= " ) AS ONT ON CA.id = ONT.case_id " . PHP_EOL;
+          $sql .= PHP_EOL . PHP_EOL;
+          break;
+        
+        case 'VONN.vonnis':
+          $sql .= " LEFT JOIN ( SELECT status_id, activity_date_time, VONNCAACT.case_id, " . PHP_EOL;
+          
+          // J or N 
+          $sql .= " (CASE WHEN (status_id IS NULL) THEN 'N' ELSE 'J' END) AS vonnis " . PHP_EOL;
+
+          $sql .= " FROM civicrm_activity AS VONNACT " . PHP_EOL;
+          
+          // civicrm_case_activity
+          $sql .= " LEFT JOIN civicrm_case_activity AS VONNCAACT ON VONNCAACT.activity_id = VONNACT.id " . PHP_EOL;
+
+          $sql .= " WHERE VONNACT.activity_type_id = '40' " . PHP_EOL;
+          
+          $sql .= " ORDER BY VONNACT.activity_date_time" . PHP_EOL;
+          
+          $sql .= " ) AS VONN ON CA.id = VONN.case_id " . PHP_EOL;
+          $sql .= PHP_EOL . PHP_EOL;
+          break;
+        
+        /*case 'PROP.vge_id':
+          $sql .= " LEFT JOIN ( SELECT ";
+          break;*/
+        
+        case 'HOOFD.hoofdhuurder':
+          $sql .= " LEFT JOIN ( SELECT HOOFDCON.sort_name AS hoofdhuurder, HOOFDCACON.case_id AS case_id FROM civicrm_contact AS HOOFDCON " . PHP_EOL;
+          
+          // civicrm_relationship
+          $sql .= " LEFT JOIN civicrm_relationship AS HOODFREL ON HOODFREL.contact_id_b = HOOFDCON.id " . PHP_EOL;
+          
+          // civicrm_contact
+          $sql .= " LEFT JOIN civicrm_contact AS HOOFDCONA ON HOOFDCONA.id = HOODFREL.contact_id_a " . PHP_EOL;
+          
+          // civicrm_case_contact
+          $sql .= " LEFT JOIN civicrm_case_contact as HOOFDCACON ON HOOFDCACON.contact_id = HOOFDCONA.id " . PHP_EOL;
+                    
+          $sql .= " WHERE HOODFREL.relationship_type_id = '11' AND HOODFREL.is_active = '1' " . PHP_EOL;
+          
+          $sql .= " ORDER BY HOODFREL.start_date DESC";
+          
+          $sql .= " ) AS HOOFD ON CA.id = HOOFD.case_id " . PHP_EOL;
+          $sql .= PHP_EOL . PHP_EOL;
+          break;
+                
+        case 'HOOFDADD.street_address':
+          $sql .= " LEFT JOIN ( SELECT HOOFDADDADD.street_address AS street_address, HOOFDADDCACON.case_id AS case_id FROM civicrm_contact AS HOOFDADDCON " . PHP_EOL;
+          // civicrm_relationship
+          $sql .= " LEFT JOIN civicrm_relationship AS HOODFREL ON HOODFREL.contact_id_b = HOOFDADDCON.id " . PHP_EOL;
+          
+          // civicrm_contact
+          $sql .= " LEFT JOIN civicrm_contact AS HOOFDADDCONA ON HOOFDADDCONA.id = HOODFREL.contact_id_a " . PHP_EOL;
+          
+          // civicrm_case_contact
+          $sql .= " LEFT JOIN civicrm_case_contact as HOOFDADDCACON ON HOOFDADDCACON.contact_id = HOOFDADDCONA.id " . PHP_EOL;
+          
+          // civicrm_address
+          $sql .= " LEFT JOIN civicrm_address as HOOFDADDADD ON HOOFDADDADD.contact_id = HOOFDADDCON.id " . PHP_EOL;
+          
+          $sql .= " WHERE HOODFREL.relationship_type_id = '11' AND HOOFDADDADD.is_primary = '1' AND HOODFREL.is_active = '1' " . PHP_EOL;
+          
+          $sql .= " ORDER BY HOODFREL.start_date DESC ";
+          
+          $sql .= " ) AS HOOFDADD ON CA.id = HOOFDADD.case_id " . PHP_EOL;
+          $sql .= PHP_EOL . PHP_EOL;
+          break;
+        
+        case 'HOOFDEM.email':
+          $sql .= " LEFT JOIN ( SELECT HOOFDEMEM.email, HOOFDEMCACON.case_id AS case_id FROM civicrm_contact AS HOOFDEMCON " . PHP_EOL;
+          // civicrm_relationship
+          $sql .= " LEFT JOIN civicrm_relationship AS HOODFREL ON HOODFREL.contact_id_b = HOOFDEMCON.id " . PHP_EOL;
+          
+          // civicrm_contact
+          $sql .= " LEFT JOIN civicrm_contact AS HOOFDEMCONA ON HOOFDEMCONA.id = HOODFREL.contact_id_a " . PHP_EOL;
+          
+          // civicrm_case_contact
+          $sql .= " LEFT JOIN civicrm_case_contact as HOOFDEMCACON ON HOOFDEMCACON.contact_id = HOOFDEMCONA.id " . PHP_EOL;
+          
+          // civicrm_email
+          $sql .= " LEFT JOIN civicrm_email as HOOFDEMEM ON HOOFDEMEM.contact_id = HOOFDEMCON.id " . PHP_EOL;
+          
+          $sql .= " WHERE HOODFREL.relationship_type_id = '11' AND HOOFDEMEM.is_primary = '1' AND HOODFREL.is_active = '1' " . PHP_EOL;
+          
+          $sql .= " ORDER BY HOODFREL.start_date DESC ";
+          
+          $sql .= " ) AS HOOFDEM ON CA.id = HOOFDEM.case_id " . PHP_EOL;
+          $sql .= PHP_EOL . PHP_EOL;
+          break;
+        
+        case 'HOOFDPHO.phone':
+          $sql .= " LEFT JOIN ( SELECT HOOFDPHOPHO.phone AS phone, HOOFDPHOCACON.case_id AS case_id FROM civicrm_contact AS HOOFDPHOCON " . PHP_EOL;
+          // civicrm_relationship
+          $sql .= " LEFT JOIN civicrm_relationship AS HOODFREL ON HOODFREL.contact_id_b = HOOFDPHOCON.id " . PHP_EOL;
+          
+          // civicrm_contact
+          $sql .= " LEFT JOIN civicrm_contact AS HOOFDPHOCONA ON HOOFDPHOCONA.id = HOODFREL.contact_id_a " . PHP_EOL;
+          
+          // civicrm_case_contact
+          $sql .= " LEFT JOIN civicrm_case_contact as HOOFDPHOCACON ON HOOFDPHOCACON.contact_id = HOOFDPHOCONA.id " . PHP_EOL;
+                   
+          // civicrm_phone
+          $sql .= " LEFT JOIN civicrm_phone as HOOFDPHOPHO ON HOOFDPHOPHO.contact_id = HOOFDPHOCON.id " . PHP_EOL;
+          
+          $sql .= " WHERE HOODFREL.relationship_type_id = '11' AND HOOFDPHOPHO.is_primary = '1' AND HOODFREL.is_active = '1' " . PHP_EOL;
+          
+          $sql .= " ORDER BY HOODFREL.start_date DESC ";
+          
+          $sql .= " ) AS HOOFDPHO ON CA.id = HOOFDPHO.case_id " . PHP_EOL;
+          $sql .= PHP_EOL . PHP_EOL;
+          break;
+        
+        case 'MEDE.medehuurder':
+          $sql .= " LEFT JOIN ( SELECT MEDECON.sort_name AS medehuurder, MEDECACON.case_id AS case_id FROM civicrm_contact AS MEDECON " . PHP_EOL;
+          // civicrm_relationship
+          $sql .= " LEFT JOIN civicrm_relationship AS MEDEREL ON MEDEREL.contact_id_b = MEDECON.id " . PHP_EOL;
+          
+          // civicrm_contact
+          $sql .= " LEFT JOIN civicrm_contact AS MEDECONA ON MEDECONA.id = MEDEREL.contact_id_a " . PHP_EOL;
+          
+          // civicrm_case_contact
+          $sql .= " LEFT JOIN civicrm_case_contact as MEDECACON ON MEDECACON.contact_id = MEDECONA.id " . PHP_EOL;
+                    
+          $sql .= " WHERE MEDEREL.relationship_type_id = '13' AND MEDEREL.is_active = '1' " . PHP_EOL;
+          
+          $sql .= " ORDER BY MEDEREL.start_date DESC ";
+          
+          $sql .= " ) AS MEDE ON CA.id = MEDE.case_id " . PHP_EOL;
+          $sql .= PHP_EOL . PHP_EOL;
+          break;
+        
+        case 'MEDEEM.email':
+          $sql .= " LEFT JOIN ( SELECT MEDEEMEM.email AS email, MEDEEMCACON.case_id AS case_id FROM civicrm_contact AS MEDEEMCON " . PHP_EOL;
+          // civicrm_relationship
+          $sql .= " LEFT JOIN civicrm_relationship AS MEDEEMREL ON MEDEEMREL.contact_id_b = MEDEEMCON.id " . PHP_EOL;
+          
+          // civicrm_contact
+          $sql .= " LEFT JOIN civicrm_contact AS MEDEEMCONA ON MEDEEMCONA.id = MEDEEMREL.contact_id_a " . PHP_EOL;
+          
+          // civicrm_case_contact
+          $sql .= " LEFT JOIN civicrm_case_contact as MEDEEMCACON ON MEDEEMCACON.contact_id = MEDEEMCONA.id " . PHP_EOL;
+                    
+          // civicrm_email
+          $sql .= " LEFT JOIN civicrm_email as MEDEEMEM ON MEDEEMEM.contact_id = MEDEEMCON.id " . PHP_EOL;
+          
+          $sql .= " WHERE MEDEEMREL.relationship_type_id = '13' AND MEDEEMEM.is_primary = '1' AND MEDEEMREL.is_active = '1' " . PHP_EOL;
+          
+          $sql .= " ORDER BY MEDEEMREL.start_date DESC ";
+          
+          $sql .= " ) AS MEDEEM ON CA.id = MEDEEM.case_id " . PHP_EOL;
+          $sql .= PHP_EOL . PHP_EOL;
+          break;
+        
+        case 'MEDEPHO.phone':
+          $sql .= " LEFT JOIN ( SELECT MEDEPHOPHO.phone AS phone, MEDEPHOCACON.case_id AS case_id FROM civicrm_contact AS MEDEPHOCON " . PHP_EOL;
+          // civicrm_relationship
+          $sql .= " LEFT JOIN civicrm_relationship AS MEDEPHOREL ON MEDEPHOREL.contact_id_b = MEDEPHOCON.id " . PHP_EOL;
+          
+          // civicrm_contact
+          $sql .= " LEFT JOIN civicrm_contact AS MEDEPHOCONA ON MEDEPHOCONA.id = MEDEPHOREL.contact_id_a " . PHP_EOL;
+          
+          // civicrm_case_contact
+          $sql .= " LEFT JOIN civicrm_case_contact as MEDEPHOCACON ON MEDEPHOCACON.contact_id = MEDEPHOCONA.id " . PHP_EOL;
+          
+          // civicrm_phone
+          $sql .= " LEFT JOIN civicrm_phone as MEDEPHOPHO ON MEDEPHOPHO.contact_id = MEDEPHOCON.id " . PHP_EOL;
+          
+          $sql .= " WHERE MEDEPHOREL.relationship_type_id = '13' AND MEDEPHOPHO.is_primary = '1' AND MEDEPHOREL.is_active = '1' " . PHP_EOL;
+          
+          $sql .= " ORDER BY MEDEPHOREL.start_date DESC ";
+          
+          $sql .= " ) AS MEDEPHO ON CA.id = MEDEPHO.case_id " . PHP_EOL;
+          $sql .= PHP_EOL . PHP_EOL;
+          break;
+      }
     }
     
-    if(isset($this->_submitValues['fields']['dossiermanager.sort_name'])){
-      $sql .= " LEFT JOIN civicrm_contact AS dossiermanager ON "
-    }*/
-    
-    echo('$sql: ' . $sql);
+    $sql .= " GROUP BY CA.id " . PHP_EOL;
+        
+    echo($sql);
     exit();
     
     // get the acl clauses built before we assemble the query
@@ -572,9 +733,11 @@ ORDER BY ONTST.activity_date_time DESC LIMIT 1
     $this->formatDisplay($rows);
     $this->doTemplateAssignment($rows);
     $this->endPostProcess($rows);
+    
+   
   }
 
-  function alterDisplay(&$rows) {
+  /*function alterDisplay(&$rows) {
     // custom code to alter rows
     $entryFound = FALSE;
     $checkList = array();
@@ -636,5 +799,5 @@ ORDER BY ONTST.activity_date_time DESC LIMIT 1
         break;
       }
     }
-  }
+  }*/
 }
