@@ -18,9 +18,11 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   protected $_customGroupFilters = FALSE;
   protected $_add2groupSupported = FALSE;
   protected $_summary = NULL;
+  protected $_formValues = array();
 
   function __construct() {
-    $this->setColumns();    
+    $this->setColumns();
+    $this->setGroupBys();
     parent::__construct();
   }
 
@@ -69,8 +71,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     $this->where();
     $sql = $this->_select.' '.$this->_from.' '.$this->_where;
     
-    //$values = $this->exportValues();
-    
+    $this->_formValues = $this->exportValues();
     $rows = array();
     $this->buildRows($sql, $rows);
 
@@ -133,7 +134,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
           'title'        => 'Periode',
           'default'      => 'this.month',
           'operatorType' => CRM_Report_Form::OP_DATE,
-    ))));
+    ))));        
   }
   
   public function buildRows($sql, &$rows) {
@@ -260,8 +261,10 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   private function buildDisplayRows() {
     $mbreportsConfig = CRM_Mbreports_Config::singleton();
     $rows = array();
-    $query = 'SELECT COUNT(*) AS countCases, case_manager, complex, case_type, status_id 
-      FROM data_rows GROUP BY case_manager, complex, case_type, status_id';
+    
+    $groupFields = $this->getGroupFields();
+    $query = 'SELECT COUNT(*) AS countCases, '.implode(', ', $groupFields)
+        .' FROM data_rows GROUP BY '.implode(', ', $groupFields);
     $dao = CRM_Core_DAO::executeQuery($query);
     $previousComplex = NULL;
     while ($dao->fetch()) {
@@ -269,10 +272,12 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
       $row['complex'] = '<strong>'.$dao->complex.'</strong>';
       if ($dao->complex == $previousComplex) {
         $row['complex'] = '';
+        $row['level_break'] = 0;
       } else {
         $rows[] = array();
         $row['complex'] = '<strong>'.$dao->complex.'</strong>';
         $previousComplex = $dao->complex;
+        $row['level_break'] = 1;
       }
       $row['case_type'] = $dao->case_type;
       $row['case_manager'] = $dao->case_manager;
@@ -291,5 +296,34 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     } else {
       $insValues[] = 'NULL';
     }
+  }
+  
+  private function setGroupBys() {        
+    $this->add('checkBox', 'wijkGroupBy', ts('Wijk'));
+    $this->add('checkBox', 'buurtGroupBy', ts('Buurt'));
+    $this->add('checkBox', 'complexGroupBy', ts('Complex'));
+    $this->add('checkBox', 'caseTypeGroupBy', ts('Case Type'));
+    $this->add('CheckBox', 'caseManagerGroupBy', ts('Case Manager'));
+  }
+  
+  private function getGroupFields() {
+    $groupFields = array();
+    if ($this->_formValues['wijkGroupBy'] == TRUE) {
+      $groupFields[] = 'wijk';
+    }
+    if ($this->_formValues['buurtGroupBy'] == TRUE) {
+      $groupFields[] = 'buurt';
+    }
+    if ($this->_formValues['complexGroupBy'] == TRUE) {
+      $groupFields[] = 'complex';
+    }
+    if ($this->_formValues['caseTypeGroupBy'] == TRUE) {
+      $groupFields[] = 'case_type';
+    }
+    if ($this->_formValues['caseManagerGroupBy']== TRUE) {
+      $groupByFields = 'case_manager';
+    }
+    $groupFields[] = 'status_id';
+    return $groupFields;
   }
 }
