@@ -96,7 +96,13 @@
         {foreach from=$rows item=row key=rowid}
           {eval var=$sectionHeaderTemplate}
           {if $row.level_break eq 1}
-            <tr><td colspan="42"><hr /></td></tr>
+            {if $row.total_count > 0}
+              <tr  class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}">
+                <td colspan="{$row.col_span}"><strong>Totaal {$row.previous}</strong></td>
+                <td><strong>{$row.total_count}</strong></td>
+              </tr>
+            {/if}  
+            <tr  class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}"><td colspan="42"><hr /></td></tr>
           {/if}
           <tr  class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}">
             {foreach from=$columnHeaders item=header key=field}
