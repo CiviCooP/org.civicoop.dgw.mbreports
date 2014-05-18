@@ -23,6 +23,7 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
+  
 {if (!$chartEnabled || !$chartSupported )&& $rows}
     {if $pager and $pager->_response and $pager->_response.numPages > 1}
         <div class="report-pager">
@@ -112,6 +113,13 @@
             {/foreach}
           </tr>
         {/foreach}
+        {if $row.total_count > 0}
+          <tr  class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}">
+            <td colspan="{$row.col_span}"><strong>Totaal {$row.current}</strong></td>
+            <td><strong>{$row.total_count}</strong></td>
+          </tr>
+        {/if}  
+        <tr  class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}"><td colspan="42"><hr /></td></tr>
 
     </table>
     {if $pager and $pager->_response and $pager->_response.numPages > 1}
