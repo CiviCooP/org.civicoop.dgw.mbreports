@@ -11,6 +11,8 @@
  * Licensed to De Goede Woning <http://www.degoedewoning.nl> and CiviCRM under AGPL-3.0
  */
 
+set_time_limit(0);
+
 class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
 
   protected $_addressField = FALSE;
