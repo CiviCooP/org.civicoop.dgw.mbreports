@@ -412,6 +412,7 @@ class CRM_Mbreports_Config {
     foreach ($optionValues['values'] as $optionId => $optionValue) {
       $this->ovTypeList[$optionId] = $optionValue['label'];
     }
+    $this->ovTypeList[0] = '- alle -';
     asort($this->ovTypeList);
   }
 
@@ -425,6 +426,7 @@ class CRM_Mbreports_Config {
     foreach ($optionValues['values'] as $optionId => $optionValue) {
       $this->wfTypeList[$optionId] = $optionValue['label'];
     }
+    $this->wfTypeList[0] = '- alle -';
     asort($this->wfTypeList);
   }
   private function setComplexList() {

@@ -11,6 +11,8 @@
  * Licensed to De Goede Woning <http://www.degoedewoning.nl> and CiviCRM under AGPL-3.0
  */
 
+set_time_limit(0);
+
 class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
 
   protected $_addressField = FALSE;
@@ -34,47 +36,75 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
 
   function select() {
 
-    $this->_select = 'SELECT a.id AS case_id, f.label AS case_type, a.start_date
-      , g.label AS status, a.end_date, b.contact_id_b AS manager_id, c.sort_name AS manager_name
-      , d.ov_type, e.wf_melder';
+    $this->_select = 'SELECT a.id AS case_id, e.label AS case_type, a.start_date
+      , f.label AS status, a.end_date, b.contact_id_b AS case_manager_id
+      , c.ov_type, d.wf_melder';
   }
 
   function from() {
     $mbreportsConfig = CRM_Mbreports_Config::singleton();
     $this->_from = 'FROM civicrm_case a 
       JOIN civicrm_relationship b ON a.id = b.case_id
-      JOIN civicrm_contact c ON b.contact_id_b = c.id
-      LEFT JOIN civicrm_value_ov_data d ON a.id = d.entity_id
-      LEFT JOIN civicrm_value_wf_data e ON a.id = e.entity_id
-      LEFT JOIN civicrm_option_value f ON a.case_type_id = f.value AND f.option_group_id = '
+      LEFT JOIN civicrm_value_ov_data c ON a.id = c.entity_id
+      LEFT JOIN civicrm_value_wf_data d ON a.id = d.entity_id
+      LEFT JOIN civicrm_option_value e ON a.case_type_id = e.value AND e.option_group_id = '
       .$mbreportsConfig->caseTypeOptionGroupId
-      .' LEFT JOIN civicrm_option_value g ON a.status_id = g.value AND g.option_group_id = '
+      .' LEFT JOIN civicrm_option_value f ON a.status_id = f.value AND f.option_group_id = '
       .$mbreportsConfig->caseStatusOptionGroupId;
   }
 
   function where() {
-    $inArray = array();
     $mbreportsConfig = CRM_Mbreports_Config::singleton();
-    foreach ($mbreportsConfig->caseTypes as $caseType) {
-      $inArray[] = $caseType;
+    $this->_where = 'WHERE a.is_deleted = 0';
+    if (!empty($this->_formValues['case_type_value'])) {
+      $this->_where .= ' AND '.$this->setMultipleWhereClause($this->_formValues['case_type_value'], $mbreportsConfig->caseTypes, 'e.label', $this->_formValues['case_type_op']);
     }
-    //$this->_where = 'WHERE a.is_deleted = 0 AND f.label IN("'
-    //  .implode('", "', $inArray).'")';
-    $this->_where = 'WHERE a.is_deleted = 0 AND b.contact_id_b IN(40873, 27)';
+    if (!empty($this->_formValues['case_manager_value'])) {
+      $this->_where .= ' AND b.contact_id_b '.$this->formatOperator($this->_formValues['case_manager_op']).'('.implode(', ', $this->_formValues['case_manager_value']).')';
+    }
+    if (!empty($this->_formValues['ov_type_value']) && $this->_formValues['ov_type_value'] != 0) {
+      $this->_where .= ' AND c.ov_type = "'.CRM_Utils_Array::value($this->_formValues['ov_type_value'], $mbreportsConfig->ovTypeList).'"';
+    }
+  }
+  
+  private function setMultipleWhereClause($keys, $list, $field, $operator) {
+    $values = array();
+    foreach ($keys as $key) {
+      $values[] = CRM_Utils_Array::value($key, $list);
+    }
+    return $field.' '.$this->formatOperator($operator).'("'.implode('", "', $values).'")';
+  }
+  
+  private function formatOperator($operator) {
+    $operator = strtoupper($operator);
+    if ($operator == 'NOTIN') {
+      $operator = 'NOT IN';
+    }
+    return $operator;
+  }
+  
+  private function reverseOperator($operator) {
+    if ($operator == 'in') {
+      $operator = 'NOTIN';
+    } else {
+      $operator = 'IN';
+    }
+    return $operator;
   }
 
+  
   function orderBy() {
     $this->_orderBy = "";
   }
 
   function postProcess() {
     $this->beginPostProcess();
+    $this->_formValues = $this->exportValues();
     $this->select();
     $this->from();
     $this->where();
     $sql = $this->_select.' '.$this->_from.' '.$this->_where;
     
-    $this->_formValues = $this->exportValues();
     $this->getGroupFields();
     $rows = array();
     $this->buildRows($sql, $rows);
@@ -98,43 +128,43 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
           'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
           'options'       => $mbreportsConfig->caseTypes
         ),
-        'complex_id' => array(
+        'complex' => array(
           'title'         => 'Complex',
           'type'          => CRM_Utils_Type::T_INT,
           'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
           'options'       => $mbreportsConfig->complexList,
         ),
-        'wijk_id' => array(
+        'wijk' => array(
           'title'         => 'Wijk',
           'type'          => CRM_Utils_Type::T_INT,
           'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
           'options'       => $mbreportsConfig->wijkList
         ),
-        'buurt_id' => array(
+        'buurt' => array(
           'title'         => 'Buurt',
           'type'          => CRM_Utils_Type::T_INT,
           'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
           'options'       => $mbreportsConfig->buurtList
         ),
-        'manager_id' => array(
+        'case_manager' => array(
           'title'         => 'Dossiermanager',
           'type'          => CRM_Utils_Type::T_INT,
           'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
           'options'       => $mbreportsConfig->dossierManagerList
         ),
-        'ov_type_id' => array(
+        'ov_type' => array(
           'title'         => 'Overlast typering',
           'type'          => CRM_Utils_Type::T_INT,
           'operatorType'  => CRM_Report_Form::OP_SELECT,
           'options'       => $mbreportsConfig->ovTypeList
         ),
-        'wf_type_id' => array(
+        'wf_type' => array(
           'title'         => 'Woonfraude typering',
           'type'          => CRM_Utils_Type::T_INT,
           'operatorType'  => CRM_Report_Form::OP_SELECT,
           'options'       => $mbreportsConfig->wfTypeList
         ),
-        'periode' => array(
+        'start_date' => array(
           'title'        => 'Periode',
           'default'      => 'this.month',
           'operatorType' => CRM_Report_Form::OP_DATE,
@@ -142,7 +172,6 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   }
   
   public function buildRows($sql, &$rows) {
-    // temp
     /*
      * create temporary table to for case and additional data
      */
@@ -157,6 +186,10 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     while ($daoTemp->fetch()) {
       $this->addTempTable($daoTemp);
     }
+    /*
+     * delete from temporary data based on vge selections
+     */
+    $this->removeTempTable();
     /*
      * now select records from temp and build row from them
      */
@@ -175,7 +208,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
    * from civicrm_case and partially updated when building the rows
    */
   private function createTempTable() {
-    $query = 'CREATE TABLE IF NOT EXISTS data_rows (
+    $query = 'CREATE TEMPORARY TABLE IF NOT EXISTS data_rows (
       case_id INT(11),
       complex VARCHAR(25),
       wijk VARCHAR(128),
@@ -191,21 +224,21 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
       start_date VARCHAR(25), 
       end_date VARCHAR(25))';
     CRM_Core_DAO::executeQuery($query);
-    //temp
-    CRM_Core_DAO::executeQuery('TRUNCATE TABLE data_rows');
   }
   /**
    * Function to add  a record to temp table
    */
   private function addTempTable($dao) {    
     $insert = 'INSERT INTO data_rows (case_id, case_manager, case_type, status, start_date,
-      end_date, wf_melder, ov_type, wijk, buurt, complex, wf_type, wf_uitkomst, ov_uitkomst)';
+      end_date, wf_melder, ov_type, buurt, wijk, complex, wf_type, wf_uitkomst, ov_uitkomst)';
     $elementIndex = 1;
     $insValues = array();
     $insParams = array();
     
     $this->setValueLine($dao->case_id, 'String',  $elementIndex, $insParams, $insValues);
-    $this->setValueLine($dao->manager_name, 'String',  $elementIndex, $insParams, $insValues);
+    $mbreportsConfig = CRM_Mbreports_Config::singleton();
+    $caseManager = CRM_Utils_Array::value($dao->case_manager_id, $mbreportsConfig->dossierManagerList);
+    $this->setValueLine($caseManager, 'String',  $elementIndex, $insParams, $insValues);
     $this->setValueLine($dao->case_type, 'String',  $elementIndex, $insParams, $insValues);
     $this->setValueLine($dao->status, 'String',  $elementIndex, $insParams, $insValues);
     $this->setValueLine($dao->start_date, 'String',  $elementIndex, $insParams, $insValues);
@@ -277,6 +310,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   }
   
   private function getGroupFields() {
+    
     if ($this->_formValues['wijkGroupBy'] == TRUE) {
       $this->_groupFields[] = 'wijk';
       $this->_columnHeaders['wijk'] = array('title' => 'Wijk');
@@ -314,6 +348,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
       $row['level_break'] = true;
       $row['total_count'] = $levelCount;
       $row['previous'] = $previousLevel;
+      $row['current'] = $dao->$levelField;
       $row['col_span'] = count($this->_groupFields);
       $previousLevel = $dao->$levelField;
       $levelCount = 0;
@@ -324,5 +359,39 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     $row[count] = $countCases;
     $levelCount = $levelCount + $countCases;
     return $row;
+  }
+  
+  private function removeTempTable() {
+    /*
+     * set remove where clauses
+     */
+    $removeWhere = $this->setRemoveWhereClauses();
+    if (!empty($removeWhere)) {
+      $removeQuery = 'DELETE FROM data_rows WHERE '.$removeWhere;
+      CRM_Core_DAO::executeQuery($removeQuery);
+    }
+  }
+  
+  private function setRemoveWhereClauses() {
+    $mbreportsConfig = CRM_Mbreports_Config::singleton();
+    $whereClauses = array();
+    if (!empty($this->_formValues['complex_value'])) {
+      $operator = $this->reverseOperator($this->_formValues['complex_op']);
+      $whereClauses[] = $this->setMultipleWhereClause($this->_formValues['complex_value'], $mbreportsConfig->complexList, 'complex', $operator);
+    }
+    if (!empty($this->_formValues['wijk_value'])) {
+      $operator = $this->reverseOperator($this->_formValues['wijk_op']);
+      $whereClauses[] = $this->setMultipleWhereClause($this->_formValues['wijk_value'], $mbreportsConfig->wijkList, 'wijk', $operator);
+    }
+    if (!empty($this->_formValues['buurt_value'])) {
+      $operator = $this->reverseOperator($this->_formValues['buurt_op']);
+      $whereClauses[] = $this->setMultipleWhereClause($this->_formValues['buurt_value'], $mbreportsConfig->buurtList, 'buurt', $operator);
+    }
+    if (!empty($whereClauses)) {
+      $whereString = implode(' OR ', $whereClauses);
+    } else {
+      $whereString = '';
+    }
+    return $whereString;
   }
 }    

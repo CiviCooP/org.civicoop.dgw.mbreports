@@ -17,26 +17,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $config = CRM_Mbreports_Config::singleton();
     
     // case types
-    $params = array(
-      'version' => 3,
-      'sequential' => 1,
-      'name' => 'case_types',
-    );
-    $result = civicrm_api('OptionGroup', 'getsingle', $params);
-
-    $params = array(
-      'version' => 3,
-      'sequential' => 1,
-      'option_group_id' => $result['id'],
-    );
-    $result = civicrm_api('OptionValue', 'get', $params);
-    
-    $case_types = array();
-    $case_types[''] = ts('- elke - ');
-    foreach($result['values'] as $key => $case_type){
-      $case_types[$case_type['id']] = $case_type['label'];
-    }
-    
+    $case_types = $config->caseTypes;
     // case status
     $params = array(
       'version' => 3,
