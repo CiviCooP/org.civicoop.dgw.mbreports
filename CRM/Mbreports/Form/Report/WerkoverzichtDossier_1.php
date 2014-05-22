@@ -14,8 +14,6 @@
 
 class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
-  protected $fields = array();
-  
   function __construct() {
     $config = CRM_Mbreports_Config::singleton();
     
@@ -152,276 +150,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $activity_statuss[$activity_status['id']] = $activity_status['label'];
     }
     
-    $this->fields = array
-    (
-      'CA.id' => array(
-        'title' => ts('Dossier ID'),
-        'name' => 'id',
-        'filter_name' => 'CA_id',
-        'required' => TRUE,
-        'filters' => array(),
-        'order_bys' => array(
-          'name' => 'id',
-          'title' => ts('Dossier ID'),
-          'alias' => 'id',
-        ),
-      ),
-      'CA.subject' => array(
-        'title' => ts('Dossier onderwerp'),
-        'name' => 'subject',
-        'filter_name' => 'CA_subject',
-        'required' => TRUE,
-        'filters' => array(),
-        'order_bys' => array(),
-      ),
-      'CA.case_type_id' => array(
-        'title' => ts('Dossier type'),
-        'name' => 'case_type_id',
-        'filter_name' => 'CA_case_type_id',
-        'required' => TRUE,
-        'filters' => array(
-          'title' => ts('Dossier type'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => $case_types,
-        ),
-        'order_bys' => array(),
-      ),
-      'CA.status_id' => array(
-        'title' => ts('Dossier status'),
-        'name' => 'status_id',
-        'filter_name' => 'CA_case_type_id',
-        'required' => TRUE,
-        'filters' => array(
-          'title' => ts('Dossier status'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => $case_statuses,
-        ),
-        'order_bys' => array(
-          'name' => 'status_id',
-          'title' => ts('Dossier status'),
-          'alias' => 'status_id',
-        ),
-      ),
-      'CA.start_date' => array(
-        'title' => ts('Dossier begindatum'),
-        'name' => 'start_date',
-        'filter_name' => 'CA_case_type_id',
-        'filters' => array(
-          'title' => ts('Dossier begindatum'),
-          'default'      => 'this.month',
-          'operatorType' => CRM_Report_Form::OP_DATE,
-        ),
-        'order_bys' => array(
-          'name' => 'start_date',
-          'title' => ts('Dossier begindatum'),
-          'alias' => 'start_date',
-        ),
-      ),
-      'TYPE.typeringen' => array(
-        'title' => ts('Typeringen'),
-        'name' => 'typeringen',
-        'filter_name' => 'CA_case_type_id',
-        'filters' => array(),
-        'order_bys' => array(
-          'name' => 'typeringen',
-          'title' => ts('Typeringen'),
-          'alias' => 'typeringen',
-        ),
-      ),
-      'DOSS.dossiermanager' =>  array(
-        'title' => ts('Dossiermanager'),
-        'name' => 'dossiermanager',
-        'filter_name' => 'DOSS_dossiermanager',
-        'filters' => array(
-          'title' => ts('Dossiermanager'),
-          'operatorType' => CRM_Report_Form::OP_MULTISELECT,
-          'options' => $dossiermanagers,
-        ),
-        'order_bys' => array(
-          'name' => 'dossiermanager',
-          'title' => ts('Dossiermanager'),
-          'alias' => 'dossiermanager',
-        ),
-      ),
-      'DEUR.deurwaarder' => array(
-        'title' => ts('Deurwaarder'),
-        'name' => 'deurwaarder',
-        'filter_name' => 'DEUR_deurwaarder',
-        'filters' => array(
-          'title' => ts('Deurwaarder'),
-          'operatorType' => CRM_Report_Form::OP_MULTISELECT,
-          'options' => $deurwaarders,
-        ),
-        'order_bys' => array(),
-      ),
-      // J / N (Ja of Nee) ontruimt, ontruim id is 41
-      'ONT.ontruiming' => array(
-        'title' => ts('Ontruiming'),
-        'name' => 'ontruiming',
-        'filter_name' => 'ONT_ontruiming',
-        'filters' => array(
-          'title' => ts('Ontruiming'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array('' => ts('- elke - '), 'J' => ts('Ja'), 'N' => ts('Nee')),
-        ),
-        'order_bys' => array(),
-      ),
-      'ONT.status' => array(
-        'title' => ts('Ontruiming status'),
-        'name' => 'ontruiming_status',
-        'filter_name' => 'ONT_status',
-        'filters' => array(
-          'title' => ts('Ontruiming status '),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => $activity_statuss,
-        ),
-        'order_bys' => array(),
-      ),
-      'ONT.activity_date_time' => array(
-        'title' => ts('Ontruiming datum'),
-        'name' => 'ontruiming_status',
-        'filter_name' => 'ONT_activity_date_time',
-        'filters' => array(),
-        'order_bys' => array(),
-      ),
-      // J / N (Ja of Nee) vonnis, vonnis id = 40
-      'VONN.vonnis' => array(
-        'title' => ts('Vonnis'),
-        'name' => 'vonnis',
-        'filter_name' => 'VONN_vonnis',
-        'filters' => array(),
-        'order_bys' => array(),
-      ),
-      'VONN.activity_date_time' => array(
-        'title' => ts('Vonnis datum'),
-        'name' => 'vonnis_activity_date_time',
-        'filter_name' => 'VONN_activity_date_time',
-        'filters' => array(),
-        'order_bys' => array(),
-      ),
-      'PROP.vge_id' => array(
-        'title' => ts('VGE nummer'),
-        'name' => 'PROP_vge_id',
-        'filter_name' => 'PROP_vge_id',
-        'operatorType' => CRM_Report_Form::OP_SELECT,
-        'options' => $complex_ids,
-        'filter_name' => 'PROP_vge_id',
-        'filters' => array(),
-        'order_bys' => array(),
-      ),
-      'PROP.complex_id' => array(
-        'title' => ts('Complex'),
-        'name' => 'complex_id',
-        'filter_name' => 'PROP_complex_id',
-        'filters' => array(
-          'title' => ts('Complex'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => $complex_ids,
-        ),
-        'order_bys' => array(
-          'name' => 'complex_id',
-          'title' => ts('Complex'),
-          'alias' => 'complex_id',
-        ),
-      ),
-      'PROP.block' => array(
-        'title' => ts('Wijk'),
-        'name' => 'block',
-        'filter_name' => 'PROP_block',
-        'filters' => array(
-          'title' => ts('Wijk'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => $blocks,
-        ),
-        'order_bys' => array(
-          'name' => 'block',
-          'title' => ts('Wijk'),
-          'alias' => 'block',
-        ),
-      ),
-      'PROP.city_region' => array(
-        'title' => ts('Buurt'),
-        'name' => 'city_region',
-        'filter_name' => 'PROP_city_region',
-        'filters' => array(
-          'title' => ts('Buurt'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => $city_regions,
-        ),
-        'order_bys' => array(
-          'name' => 'city_region',
-          'title' => ts('Buurt'),
-          'alias' => 'city_region',
-        ),
-      ),
-      'PROP.vge_type_id' => array(
-        'title' => ts('VGE type'),
-        'name' => 'vge_type_id',
-        'filter_name' => 'PROP_vge_type_id',
-        'filters' => array(
-          'title' => ts('VGE type'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => $vge_type_ids,
-        ),
-        'order_bys' => array(
-          'name' => 'vge_type_id',
-          'title' => ts('VGE type'),
-          'alias' => 'vge_type_id',
-        ),
-      ),
-      'HOOFD.hoofdhuurder' => array(
-        'title' => ts('Hoofdhuurder naam'),
-        'name' => 'hoofdhuurder',
-        'required' => TRUE,
-        'filter_name' => 'HOOFD_hoofdhuurder',
-        'filters' => array(),
-        'order_bys' => array(),
-      ),
-      'HOOFDADD.hoofdhuurder_street_address' => array(
-        'title' => ts('Hoofdhuurder adres'),
-        'name' => 'hoofdhuurder_street_address',
-        'required' => TRUE,
-        'filter_name' => 'HOOFD_hoofdhuurder_street_address',
-        'filters' => array(),
-        'order_bys' => array(),
-      ),
-      'HOOFDEM.hoofdhuurder_email' => array(
-        'title' => ts('Hoofdhuurder e-mail'),
-        'name' => 'hoofdhuurder_email',
-        'filter_name' => 'HOOFD_hoofdhuurder_email',
-        'filters' => array(),
-        'order_bys' => array(),
-      ),
-      'HOOFDPHO.hoofdhuurder_phone' => array(
-        'title' => ts('Hoofdhuurder telefoon'),
-        'name' => 'hoofdhuurder_phone',
-        'filter_name' => 'HOOFD_hoofdhuurder_phone',
-        'filters' => array(),
-        'order_bys' => array(),
-      ),
-      'MEDE.medehuurder' => array(
-        'title' => ts('Medehuurder naam'),
-        'name' => 'medehuurder',
-        'filter_name' => 'MEDE_medehuurder',
-        'filters' => array(),
-        'order_bys' => array(),
-      ),
-      'MEDEEM.medehuurder_email' => array(
-        'title' => ts('Medehuurder e-mail'),
-        'name' => 'medehuurder_email',
-        'filter_name' => 'MEDE_medehuurder_email',
-        'filters' => array(),
-        'order_bys' => array(),
-      ),
-      'MEDEPHO.medehuurder_phone' => array(
-        'title' => ts('Medehuurder telefoon'),
-        'name' => 'medehuurder_phone',
-        'filter_name' => 'MEDE_medehuurder_phone',
-        'filters' => array(),
-        'order_bys' => array(),
-      ),
-    );
-        
     $this->_columns = array(
       'civicrm_case' =>
       array(
@@ -530,6 +258,12 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             'title' => ts('Dossier ID'),
             'alias' => 'id',
           ),
+          'TYPE.typeringen' => 
+          array(
+            'name' => 'typeringen',
+            'title' => ts('Typeringen'),
+            'alias' => 'typeringen',
+          ),
           'CA.status_id' => 
           array(
             'name' => 'status_id',
@@ -542,12 +276,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             'title' => ts('Dossier begindatum'),
             'alias' => 'start_date',
           ),
-          'TYPE.typeringen' => 
-          array(
-            'name' => 'typeringen',
-            'title' => ts('Typeringen'),
-            'alias' => 'typeringen',
-          ),
           'DOSS.dossiermanager' => 
           array(
             'name' => 'dossiermanager',
@@ -558,7 +286,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       ),
           
       // property
-      /*'civicrm_property' => array(
+      'civicrm_property' => array(
         'dao' => 'CRM_Core_DAO_CustomField',
         'fields' => array(
           'PROP.vge_id' => array(
@@ -631,7 +359,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             'alias' => 'vge_type_id',
           ),
         ),
-      ),*/
+      ),
       
       // hoofdhuurder
       'hoofdhuurder' => array(
@@ -672,7 +400,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           ),
           'MEDEPHO.medehuurder_phone' => array(
             'title' => ts('Medehuurder telefoon'),
-            'name' => 'medehuurder_phone',
           ),
         ),
       ),
@@ -690,9 +417,14 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     
     set_time_limit(0);
 
-    $config = CRM_Mbreports_Config::singleton();
     
     $this->beginPostProcess();
+
+    $config = CRM_Mbreports_Config::singleton();
+    
+    echo('<pre>');
+    print_r($this->_submitValues);
+    echo('</pre>');
     
     // select
     $sql = "SELECT";
@@ -713,6 +445,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         
         default:
           $sql .= " " . $field . ",";
+          
+          $this->_columnHeaders[$field] = $field;
       }
     }
     
@@ -841,8 +575,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           $sql .= PHP_EOL . PHP_EOL;
           break;
                 
-        case 'HOOFDADD.hoofdhuurder_street_address':
-          $sql .= " LEFT JOIN ( SELECT HOOFDADDADD.street_address AS hoofdhuurder_street_address, HOOFDADDCACON.case_id AS case_id FROM civicrm_contact AS HOOFDADDCON " . PHP_EOL;
+        case 'HOOFDADD.street_address':
+          $sql .= " LEFT JOIN ( SELECT HOOFDADDADD.street_address AS street_address, HOOFDADDCACON.case_id AS case_id FROM civicrm_contact AS HOOFDADDCON " . PHP_EOL;
           // civicrm_relationship
           $sql .= " LEFT JOIN civicrm_relationship AS HOODFREL ON HOODFREL.contact_id_a = HOOFDADDCON.id " . PHP_EOL;
           
@@ -863,8 +597,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           $sql .= PHP_EOL . PHP_EOL;
           break;
         
-        case 'HOOFDEM.hoofdhuurder_email':
-          $sql .= " LEFT JOIN ( SELECT HOOFDEMEM.email AS hoofdhuurder_email, HOOFDEMCACON.case_id AS case_id FROM civicrm_contact AS HOOFDEMCON " . PHP_EOL;
+        case 'HOOFDEM.email':
+          $sql .= " LEFT JOIN ( SELECT HOOFDEMEM.email, HOOFDEMCACON.case_id AS case_id FROM civicrm_contact AS HOOFDEMCON " . PHP_EOL;
           // civicrm_relationship
           $sql .= " LEFT JOIN civicrm_relationship AS HOODFREL ON HOODFREL.contact_id_a = HOOFDEMCON.id " . PHP_EOL;
           
@@ -885,8 +619,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           $sql .= PHP_EOL . PHP_EOL;
           break;
         
-        case 'HOOFDPHO.hoofdhuurder_phone':
-          $sql .= " LEFT JOIN ( SELECT HOOFDPHOPHO.phone AS hoofdhuurder_phone, HOOFDPHOCACON.case_id AS case_id FROM civicrm_contact AS HOOFDPHOCON " . PHP_EOL;
+        case 'HOOFDPHO.phone':
+          $sql .= " LEFT JOIN ( SELECT HOOFDPHOPHO.phone AS phone, HOOFDPHOCACON.case_id AS case_id FROM civicrm_contact AS HOOFDPHOCON " . PHP_EOL;
           // civicrm_relationship
           $sql .= " LEFT JOIN civicrm_relationship AS HOODFREL ON HOODFREL.contact_id_a = HOOFDPHOCON.id " . PHP_EOL;
           
@@ -926,8 +660,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           $sql .= PHP_EOL . PHP_EOL;
           break;
         
-        case 'MEDEEM.medehuurder_email':
-          $sql .= " LEFT JOIN ( SELECT MEDEEMEM.email AS medehuurder_email, MEDEEMCACON.case_id AS case_id FROM civicrm_contact AS MEDEEMCON " . PHP_EOL;
+        case 'MEDEEM.email':
+          $sql .= " LEFT JOIN ( SELECT MEDEEMEM.email AS email, MEDEEMCACON.case_id AS case_id FROM civicrm_contact AS MEDEEMCON " . PHP_EOL;
           // civicrm_relationship
           $sql .= " LEFT JOIN civicrm_relationship AS MEDEEMREL ON MEDEEMREL.contact_id_a = MEDEEMCON.id " . PHP_EOL;
           
@@ -948,8 +682,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           $sql .= PHP_EOL . PHP_EOL;
           break;
         
-        case 'MEDEPHO.medehuurder_phone':
-          $sql .= " LEFT JOIN ( SELECT MEDEPHOPHO.phone AS medehuurder_phone, MEDEPHOCACON.case_id AS case_id FROM civicrm_contact AS MEDEPHOCON " . PHP_EOL;
+        case 'MEDEPHO.phone':
+          $sql .= " LEFT JOIN ( SELECT MEDEPHOPHO.phone AS phone, MEDEPHOCACON.case_id AS case_id FROM civicrm_contact AS MEDEPHOCON " . PHP_EOL;
           // civicrm_relationship
           $sql .= " LEFT JOIN civicrm_relationship AS MEDEPHOREL ON MEDEPHOREL.contact_id_a = MEDEPHOCON.id " . PHP_EOL;
           
@@ -986,7 +720,12 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       
       $filter_name = str_replace('.', '_', $field);
       
+      //echo('$filter_name: ' . $filter_name .  '<br />') . PHP_EOL;
+      
       if(array_key_exists($filter_name . '_value', $this->_submitValues) and !empty($this->_submitValues[$filter_name . '_value'])){
+        //echo('$filter_value : ' . $this->_submitValues[$filter_name . '_value'] .  '<br />') . PHP_EOL;
+        //echo('$filter_op : ' . $this->_submitValues[$filter_name . '_value'] .  '<br />') . PHP_EOL;
+        
         switch ($this->_submitValues[$filter_name . '_op']){
           case 'eq':
             $where .= " " . $field . " = '" . $this->_submitValues[$filter_name . '_value'] . "' AND "; 
@@ -1016,8 +755,11 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $sql .= " WHERE CA.is_deleted = 0 ";
     
     if(!empty($where)){
+      //echo('$where: ' . $where) . PHP_EOL;
+      
       $sql .= " AND " . substr($where, 0, -4);
     }
+    
     
     // group by
     $sql .= " GROUP BY CA.id " . PHP_EOL;
@@ -1029,41 +771,95 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $sql .= " ORDER BY " . $this->_submitValues['order_bys'][1]['column'] . " " . $this->_submitValues['order_bys'][1]['order'] . " ". PHP_EOL;
     }
         
-    //echo($sql);
+    echo($sql);
     //exit();
-        
+    
+    // get the acl clauses built before we assemble the query
+    //$this->buildACLClause($this->_aliases['civicrm_contact']);
+    //$sql = $this->buildQuery(TRUE);
+
+    //$this->_columnHeaders
+    
+    $this->_columns = array(
+      'civicrm_case' =>
+      array(
+        'dao' => 'CRM_Case_DAO_Case',
+        'fields' => array(
+          'CA.id' => array(
+            'title' => ts('Dossier ID'),
+            'name' => 'id',
+            'required' => TRUE,
+          ),
+    
     // columns headers
     foreach($this->_submitValues['fields'] as $field => $true){
-      switch($field){                
-        case 'ONT.ontruiming':
-          $this->_columnHeaders[$this->fields[$field]['name']] = array('title' => $this->fields[$field]['title']);
-          $this->_columnHeaders[$this->fields['ONT.status']['name']] = array('title' => $this->fields[$field]['title']);
-          $this->_columnHeaders[$this->fields['ONT.activity_date_time']['name']] = array('title' => $this->fields[$field]['title']);
-          break;
+        switch($field){                
+          case 'ONT.ontruiming':
+            $sql .= " " . $field . ",";
+            $sql .= " ONT.ontruiming_status,";
+            $sql .= " ONT.ontruiming_activity_date_time,";
+            break;
 
-        case 'VONN.vonnis':
-          $this->_columnHeaders[$this->fields[$field]['name']] = array('title' => $this->fields[$field]['title']);
-          $this->_columnHeaders[$this->fields['VONN.activity_date_time']['name']] = array('title' => $this->fields[$field]['title']);
-          break;
+          case 'VONN.vonnis':
+            $sql .= " " . $field . ",";
+            $sql .= " VONN.vonnis_activity_date_time,";
+            break;
 
-        default:
-          $this->_columnHeaders[$this->fields[$field]['name']] = array('title' => $this->fields[$field]['title']);
+          default:
+            $sql .= " " . $field . ",";
+            $this->_columnHeaders[$this->_columns['name']] = $field;
+        }
       }
-    }
-      
+    
     $rows = array();
+    //$this->buildRows($sql, $rows);
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
+      echo('<pre>');
+      print_r($dao);
+      echo('</pre>');
+      
+      foreach($this->_submitValues['fields'] as $field => $true){
+        switch($field){                
+          case 'ONT.ontruiming':
+            $sql .= " " . $field . ",";
+            $sql .= " ONT.ontruiming_status,";
+            $sql .= " ONT.ontruiming_activity_date_time,";
+            break;
 
-      foreach($this->_columnHeaders as $key => $title){
+          case 'VONN.vonnis':
+            $sql .= " " . $field . ",";
+            $sql .= " VONN.vonnis_activity_date_time,";
+            break;
+
+          default:
+            $sql .= " " . $field . ",";
+
+            $this->_columnHeaders[$field] = $field;
+        }
+      }
+      
+      /*$row = array();
+      foreach ($this->_columnHeaders as $key => $value) {
         $row[$key] = $dao->$key;
       }
       
-      $rows[] = $row;
+      $rows[] = $row;*/
     }
+      
+    
+    /*echo('<pre>');
+    print_r($rows);
+    echo('</pre>');*/
 
     $this->formatDisplay($rows);
     $this->doTemplateAssignment($rows);
     $this->endPostProcess($rows);
+    
+    //parent::postProcess();
+  }
+
+  function alterDisplay(&$rows) {
+    
   }
 }
