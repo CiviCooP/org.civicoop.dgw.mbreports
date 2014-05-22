@@ -220,7 +220,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           ),
         ),
         'filters' => array(
-          'CA.case_type_id' => array(
+          'CA.id' => array(
             'title' => ts('Dossier type'),
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'options' => $case_types,
@@ -232,24 +232,25 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           ),
           'CA.start_date' => array(
             'title' => ts('Dossier begindatum'),
+            'default'      => 'this.month',
             'operatorType' => CRM_Report_Form::OP_DATE,
           ),
-          'dossiermanager' => array(
+          'DOSS.dossiermanager_id' => array(
             'title' => ts('Dossiermanager'),
             'operatorType' => CRM_Report_Form::OP_MULTISELECT,
             'options' => $dossiermanagers,
           ),
-          'deurwaarder' => array(
+          'DEUR.deurwaarder_id' => array(
             'title' => ts('Deurwaarder'),
             'operatorType' => CRM_Report_Form::OP_MULTISELECT,
             'options' => $deurwaarders,
           ),
-          'ontruiming' => array(
+          'ONT.ontruiming' => array(
             'title' => ts('Ontruiming'),
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'options' => array('' => ts('- elke - '), 'J' => ts('Ja'), 'N' => ts('Nee')),
           ),
-          'ontruiming_status_id' => array(
+          'ONT.status_id' => array(
             'title' => ts('Ontruiming status '),
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'options' => $activity_statuss,
@@ -281,7 +282,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             'title' => ts('Dossier begindatum'),
             'alias' => 'start_date',
           ),
-          'dossiermanager' => 
+          'DOSS.dossiermanager' => 
           array(
             'name' => 'dossiermanager',
             'title' => ts('Dossiermanager'),
@@ -413,9 +414,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
 
     $config = CRM_Mbreports_Config::singleton();
     
-    /*echo('<pre>');
+    echo('<pre>');
     print_r($this->_submitValues);
-    echo('</pre>');*/
+    echo('</pre>');
     
     // select
     $sql = "SELECT";
@@ -450,13 +451,13 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           $sql .= " VONN.activity_date_time,";
           break;
         
-        /*case 'PROP.vge_id':
+        case 'PROP.vge_id':
           $sql .= " " . $field . ",";
           $sql .= " PROP.complex_id,";
           $sql .= " PROP.block,";
           $sql .= " PROP.city_region,";
           $sql .= " PROP.vge_type_id,";
-          break;*/
+          break;
         
         case 'HOOFD.hoofdhuurder':
           $sql .= " " . $field . ",";
@@ -503,9 +504,36 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           $sql .= " LEFT JOIN civicrm_property_type AS TYPEPROTY ON TYPEPROTY.id = TYPEOVD.ov_type " . PHP_EOL;
           $sql .= " ) AS TYPE ON CA.id = TYPE.entity_id " . PHP_EOL;
           break;
+          
+        case 'PROP.vge_id':
+          $sql .= " CASE WHEN HOOFD.hoofdhuurder_id IS NOT NULL THEN " . PHP_EOL;
+          // civicrm_property
+          $sql .= " LEFT JOIN ( SELECT vge_id AS vge_id, complex_id AS complex_id, block AS block, city_region AS city_region FROM civicrm_property AS PROPPROP " . PHP_EOL;
+          // civicrm_value_huurovereenkomst_2
+          $sql .= " LEFT JOIN civicrm_value_huurovereenkomst_2 AS PROPVAHUUR ON PROPVAHUUR.cge_nummer_first_6 = PROPPROP.vge_id " . PHP_EOL;
+          // civicrm_relationship
+          $sql .= " LEFT JOIN civicrm_relationship AS PROPREL ON PROPREL.contact_id_b = PROPVAHUUR.entity_id " . PHP_EOL;
+          
+          $sql .= " WHERE PROPREL.contact_id_a = HOOFD.hoofdhuurder_id " . PHP_EOL;
+          
+          $sql .= " ) AS PROP ON CA.id = PROP.case_id " . PHP_EOL;
+          
+          /*$sql .= " ELSE CASE WHEN MEDE.medehuurder_id IS NOT NULL THEN " . PHP_EOL;
+          // civicrm_property
+          $sql .= " LEFT JOIN ( SELECT vge_id AS vge_id, complex_id AS complex_id, block AS block, city_region AS city_region FROM civicrm_property AS PROPPROP " . PHP_EOL;
+          // civicrm_value_huurovereenkomst_2
+          $sql .= " LEFT JOIN civicrm_value_huurovereenkomst_2 AS PROPVAHUUR ON PROPVAHUUR.cge_nummer_first_6 = PROPPROP.vge_id " . PHP_EOL;
+          // civicrm_relationship
+          $sql .= " LEFT JOIN civicrm_relationship AS PROPREL ON PROPREL.contact_id_b = PROPVAHUUR.entity_id " . PHP_EOL;
+          
+          $sql .= " WHERE PROPREL.contact_id_a = HOOFD.hoofdhuurder_id " . PHP_EOL;
+          
+          $sql .= " ) AS PROP ON CA.id = PROP.case_id " . PHP_EOL;*/
+          $sql .= PHP_EOL . PHP_EOL;
+          break;
         
         case 'DOSS.dossiermanager':
-          $sql .= " LEFT JOIN ( SELECT sort_name AS dossiermanager, DOSSREL.case_id FROM civicrm_contact AS DOSSCON " . PHP_EOL;
+          $sql .= " LEFT JOIN ( SELECT DOSSCON.id AS dossiermanager_id, DOSSCON.sort_name AS dossiermanager, DOSSREL.case_id FROM civicrm_contact AS DOSSCON " . PHP_EOL;
           // civicrm_relationship
           $sql .= " LEFT JOIN civicrm_relationship AS DOSSREL ON DOSSREL.contact_id_b = DOSSCON.id " . PHP_EOL;
           $sql .= " WHERE DOSSREL.relationship_type_id = '42' " . PHP_EOL;
@@ -514,16 +542,16 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           break;
         
         case 'DEUR.deurwaarder':
-          $sql .= " LEFT JOIN ( SELECT sort_name AS deurwaarder, DEURREL.case_id FROM civicrm_contact AS DEURCON " . PHP_EOL;
+          $sql .= " LEFT JOIN ( SELECT DEURCON.id AS deurwaarder_id, DEURCON.sort_name AS deurwaarder, DEURREL.case_id FROM civicrm_contact AS DEURCON " . PHP_EOL;
           // civicrm_relationship
           $sql .= " LEFT JOIN civicrm_relationship AS DEURREL ON DEURREL.contact_id_b = DEURCON.id " . PHP_EOL;
           $sql .= " WHERE DEURREL.relationship_type_id = '15' " . PHP_EOL;
           $sql .= " ) AS DEUR ON CA.id = DEUR.case_id " . PHP_EOL;
           $sql .= PHP_EOL . PHP_EOL;
           break;
-        
+                
         case 'ONT.ontruiming':
-          $sql .= " LEFT JOIN ( SELECT status_id, activity_date_time, ONTOPTVA.label AS status, ONTCAACT.case_id, " . PHP_EOL;
+          $sql .= " LEFT JOIN ( SELECT ONTACT.status_id AS status_id, ONTACT.activity_date_time, ONTOPTVA.label AS status, ONTCAACT.case_id, " . PHP_EOL;
           
           // J or N 
           $sql .= " (CASE WHEN 3 = status_id THEN 'J' ELSE 'N' END) AS ontruiming " . PHP_EOL;
@@ -568,13 +596,13 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           break;*/
         
         case 'HOOFD.hoofdhuurder':
-          $sql .= " LEFT JOIN ( SELECT HOOFDCON.sort_name AS hoofdhuurder, HOOFDCACON.case_id AS case_id FROM civicrm_contact AS HOOFDCON " . PHP_EOL;
+          $sql .= " LEFT JOIN ( SELECT HOOFDCON.id AS hoofdhuurder_id, HOOFDCON.sort_name AS hoofdhuurder, HOOFDCACON.case_id AS case_id FROM civicrm_contact AS HOOFDCON " . PHP_EOL;
           
           // civicrm_relationship
-          $sql .= " LEFT JOIN civicrm_relationship AS HOODFREL ON HOODFREL.contact_id_b = HOOFDCON.id " . PHP_EOL;
+          $sql .= " LEFT JOIN civicrm_relationship AS HOODFREL ON HOODFREL.contact_id_a = HOOFDCON.id " . PHP_EOL;
           
           // civicrm_contact
-          $sql .= " LEFT JOIN civicrm_contact AS HOOFDCONA ON HOOFDCONA.id = HOODFREL.contact_id_a " . PHP_EOL;
+          $sql .= " LEFT JOIN civicrm_contact AS HOOFDCONA ON HOOFDCONA.id = HOODFREL.contact_id_b " . PHP_EOL;
           
           // civicrm_case_contact
           $sql .= " LEFT JOIN civicrm_case_contact as HOOFDCACON ON HOOFDCACON.contact_id = HOOFDCONA.id " . PHP_EOL;
@@ -590,10 +618,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         case 'HOOFDADD.street_address':
           $sql .= " LEFT JOIN ( SELECT HOOFDADDADD.street_address AS street_address, HOOFDADDCACON.case_id AS case_id FROM civicrm_contact AS HOOFDADDCON " . PHP_EOL;
           // civicrm_relationship
-          $sql .= " LEFT JOIN civicrm_relationship AS HOODFREL ON HOODFREL.contact_id_b = HOOFDADDCON.id " . PHP_EOL;
+          $sql .= " LEFT JOIN civicrm_relationship AS HOODFREL ON HOODFREL.contact_id_a = HOOFDADDCON.id " . PHP_EOL;
           
           // civicrm_contact
-          $sql .= " LEFT JOIN civicrm_contact AS HOOFDADDCONA ON HOOFDADDCONA.id = HOODFREL.contact_id_a " . PHP_EOL;
+          $sql .= " LEFT JOIN civicrm_contact AS HOOFDADDCONA ON HOOFDADDCONA.id = HOODFREL.contact_id_b " . PHP_EOL;
           
           // civicrm_case_contact
           $sql .= " LEFT JOIN civicrm_case_contact as HOOFDADDCACON ON HOOFDADDCACON.contact_id = HOOFDADDCONA.id " . PHP_EOL;
@@ -612,10 +640,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         case 'HOOFDEM.email':
           $sql .= " LEFT JOIN ( SELECT HOOFDEMEM.email, HOOFDEMCACON.case_id AS case_id FROM civicrm_contact AS HOOFDEMCON " . PHP_EOL;
           // civicrm_relationship
-          $sql .= " LEFT JOIN civicrm_relationship AS HOODFREL ON HOODFREL.contact_id_b = HOOFDEMCON.id " . PHP_EOL;
+          $sql .= " LEFT JOIN civicrm_relationship AS HOODFREL ON HOODFREL.contact_id_a = HOOFDEMCON.id " . PHP_EOL;
           
           // civicrm_contact
-          $sql .= " LEFT JOIN civicrm_contact AS HOOFDEMCONA ON HOOFDEMCONA.id = HOODFREL.contact_id_a " . PHP_EOL;
+          $sql .= " LEFT JOIN civicrm_contact AS HOOFDEMCONA ON HOOFDEMCONA.id = HOODFREL.contact_id_b " . PHP_EOL;
           
           // civicrm_case_contact
           $sql .= " LEFT JOIN civicrm_case_contact as HOOFDEMCACON ON HOOFDEMCACON.contact_id = HOOFDEMCONA.id " . PHP_EOL;
@@ -634,10 +662,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         case 'HOOFDPHO.phone':
           $sql .= " LEFT JOIN ( SELECT HOOFDPHOPHO.phone AS phone, HOOFDPHOCACON.case_id AS case_id FROM civicrm_contact AS HOOFDPHOCON " . PHP_EOL;
           // civicrm_relationship
-          $sql .= " LEFT JOIN civicrm_relationship AS HOODFREL ON HOODFREL.contact_id_b = HOOFDPHOCON.id " . PHP_EOL;
+          $sql .= " LEFT JOIN civicrm_relationship AS HOODFREL ON HOODFREL.contact_id_a = HOOFDPHOCON.id " . PHP_EOL;
           
           // civicrm_contact
-          $sql .= " LEFT JOIN civicrm_contact AS HOOFDPHOCONA ON HOOFDPHOCONA.id = HOODFREL.contact_id_a " . PHP_EOL;
+          $sql .= " LEFT JOIN civicrm_contact AS HOOFDPHOCONA ON HOOFDPHOCONA.id = HOODFREL.contact_id_b " . PHP_EOL;
           
           // civicrm_case_contact
           $sql .= " LEFT JOIN civicrm_case_contact as HOOFDPHOCACON ON HOOFDPHOCACON.contact_id = HOOFDPHOCONA.id " . PHP_EOL;
@@ -654,12 +682,12 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           break;
         
         case 'MEDE.medehuurder':
-          $sql .= " LEFT JOIN ( SELECT MEDECON.sort_name AS medehuurder, MEDECACON.case_id AS case_id FROM civicrm_contact AS MEDECON " . PHP_EOL;
+          $sql .= " LEFT JOIN ( SELECT MEDECON.id AS medehuurder_id, MEDECON.sort_name AS medehuurder, MEDECACON.case_id AS case_id FROM civicrm_contact AS MEDECON " . PHP_EOL;
           // civicrm_relationship
-          $sql .= " LEFT JOIN civicrm_relationship AS MEDEREL ON MEDEREL.contact_id_b = MEDECON.id " . PHP_EOL;
+          $sql .= " LEFT JOIN civicrm_relationship AS MEDEREL ON MEDEREL.contact_id_a = MEDECON.id " . PHP_EOL;
           
           // civicrm_contact
-          $sql .= " LEFT JOIN civicrm_contact AS MEDECONA ON MEDECONA.id = MEDEREL.contact_id_a " . PHP_EOL;
+          $sql .= " LEFT JOIN civicrm_contact AS MEDECONA ON MEDECONA.id = MEDEREL.contact_id_b " . PHP_EOL;
           
           // civicrm_case_contact
           $sql .= " LEFT JOIN civicrm_case_contact as MEDECACON ON MEDECACON.contact_id = MEDECONA.id " . PHP_EOL;
@@ -675,10 +703,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         case 'MEDEEM.email':
           $sql .= " LEFT JOIN ( SELECT MEDEEMEM.email AS email, MEDEEMCACON.case_id AS case_id FROM civicrm_contact AS MEDEEMCON " . PHP_EOL;
           // civicrm_relationship
-          $sql .= " LEFT JOIN civicrm_relationship AS MEDEEMREL ON MEDEEMREL.contact_id_b = MEDEEMCON.id " . PHP_EOL;
+          $sql .= " LEFT JOIN civicrm_relationship AS MEDEEMREL ON MEDEEMREL.contact_id_a = MEDEEMCON.id " . PHP_EOL;
           
           // civicrm_contact
-          $sql .= " LEFT JOIN civicrm_contact AS MEDEEMCONA ON MEDEEMCONA.id = MEDEEMREL.contact_id_a " . PHP_EOL;
+          $sql .= " LEFT JOIN civicrm_contact AS MEDEEMCONA ON MEDEEMCONA.id = MEDEEMREL.contact_id_b " . PHP_EOL;
           
           // civicrm_case_contact
           $sql .= " LEFT JOIN civicrm_case_contact as MEDEEMCACON ON MEDEEMCACON.contact_id = MEDEEMCONA.id " . PHP_EOL;
@@ -697,10 +725,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         case 'MEDEPHO.phone':
           $sql .= " LEFT JOIN ( SELECT MEDEPHOPHO.phone AS phone, MEDEPHOCACON.case_id AS case_id FROM civicrm_contact AS MEDEPHOCON " . PHP_EOL;
           // civicrm_relationship
-          $sql .= " LEFT JOIN civicrm_relationship AS MEDEPHOREL ON MEDEPHOREL.contact_id_b = MEDEPHOCON.id " . PHP_EOL;
+          $sql .= " LEFT JOIN civicrm_relationship AS MEDEPHOREL ON MEDEPHOREL.contact_id_a = MEDEPHOCON.id " . PHP_EOL;
           
           // civicrm_contact
-          $sql .= " LEFT JOIN civicrm_contact AS MEDEPHOCONA ON MEDEPHOCONA.id = MEDEPHOREL.contact_id_a " . PHP_EOL;
+          $sql .= " LEFT JOIN civicrm_contact AS MEDEPHOCONA ON MEDEPHOCONA.id = MEDEPHOREL.contact_id_b " . PHP_EOL;
           
           // civicrm_case_contact
           $sql .= " LEFT JOIN civicrm_case_contact as MEDEPHOCACON ON MEDEPHOCACON.contact_id = MEDEPHOCONA.id " . PHP_EOL;
@@ -718,10 +746,73 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       }
     }
     
+    // where
+    $where = '';
+    foreach($this->_submitValues['fields'] as $field => $true){
+      
+      if('DOSS.dossiermanager' == $field){
+        $field = 'DOSS.dossiermanager_id';
+      }
+      
+      if('DEUR.deurwaarder' == $field){
+        $field = 'DEUR.deurwaarder_id';
+      }
+      
+      $filter_name = str_replace('.', '_', $field);
+      
+      //echo('$filter_name: ' . $filter_name .  '<br />') . PHP_EOL;
+      
+      if(array_key_exists($filter_name . '_value', $this->_submitValues) and !empty($this->_submitValues[$filter_name . '_value'])){
+        //echo('$filter_value : ' . $this->_submitValues[$filter_name . '_value'] .  '<br />') . PHP_EOL;
+        //echo('$filter_op : ' . $this->_submitValues[$filter_name . '_value'] .  '<br />') . PHP_EOL;
+        
+        switch ($this->_submitValues[$filter_name . '_op']){
+          case 'eq':
+            $where .= " " . $field . " = '" . $this->_submitValues[$filter_name . '_value'] . "' AND "; 
+            break;
+          
+          case 'in':
+            $where .= " ( ";
+            foreach($this->_submitValues[$filter_name . '_value'] as $key => $value){
+              $where .= " " . $field . " = '" . $value . "' OR "; 
+            }
+            $where = substr($where, 0, -3);
+            $where .= " ) AND ";
+            break;
+          
+          case 'notin':
+            $where .= " ( ";
+            foreach($this->_submitValues[$filter_name . '_value'] as $key => $value){
+              $where .= " " . $field . " != '" . $value . "' AND "; 
+            }
+            $where = substr($where, 0, -3);
+            $where .= " ) AND ";
+            break;
+        }
+      }
+    }
+    
+    $sql .= " WHERE CA.is_deleted = 0 ";
+    
+    if(!empty($where)){
+      //echo('$where: ' . $where) . PHP_EOL;
+      
+      $sql .= " AND " . substr($where, 0, -4);
+    }
+    
+    
+    // group by
     $sql .= " GROUP BY CA.id " . PHP_EOL;
         
+    // order by
+    if('-' == $this->_submitValues['order_bys'][1]['column']){
+      $sql .= " ORDER BY CA.id ASC ". PHP_EOL;
+    }else {
+      $sql .= " ORDER BY " . $this->_submitValues['order_bys'][1]['column'] . " " . $this->_submitValues['order_bys'][1]['order'] . " ". PHP_EOL;
+    }
+        
     echo($sql);
-    exit();
+    //exit();
     
     // get the acl clauses built before we assemble the query
     //$this->buildACLClause($this->_aliases['civicrm_contact']);
