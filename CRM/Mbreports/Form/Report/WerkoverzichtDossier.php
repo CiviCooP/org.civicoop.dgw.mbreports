@@ -395,9 +395,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
 
     $config = CRM_Mbreports_Config::singleton();
     
-    echo('<pre>');
+    /*echo('<pre>');
     print_r($this->_submitValues);
-    echo('</pre>');
+    echo('</pre>');*/
     
     // select
     $sql = "SELECT";
@@ -792,7 +792,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $sql .= " ORDER BY " . $this->_submitValues['order_bys'][1]['column'] . " " . $this->_submitValues['order_bys'][1]['order'] . " ". PHP_EOL;
     }
         
-    echo($sql);
+    //echo($sql);
     //exit();
     
     // get the acl clauses built before we assemble the query
