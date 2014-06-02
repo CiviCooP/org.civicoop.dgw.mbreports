@@ -680,7 +680,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
                 
         if (CRM_Report_Form::OP_DATE == $filter['operatorType']) {
           $clause = $this->dateClause($field, $filter['relative'], $filter['from'], $filter['to'], CRM_Utils_Type::T_DATE);
-          $where .= $clause . " AND ";
+          $where .= " ( " . $clause . " ) AND ";
           
         }else {
           $clause = $this->whereClause($filter['field'], $filter['op'], $filter['value'], $filter['min'], $filter['max']);
