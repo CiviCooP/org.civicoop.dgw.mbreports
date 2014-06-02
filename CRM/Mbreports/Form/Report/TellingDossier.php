@@ -207,7 +207,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
    * from civicrm_case and partially updated when building the rows
    */
   private function createTempTable() {
-    $query = 'CREATE TABLE IF NOT EXISTS data_rows (
+    $query = 'CREATE TEMPORARY TABLE IF NOT EXISTS data_rows (
       case_id INT(11),
       complex VARCHAR(25),
       wijk VARCHAR(128),
@@ -223,8 +223,6 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
       start_date VARCHAR(25), 
       end_date VARCHAR(25))';
     CRM_Core_DAO::executeQuery($query);
-    //temp
-    CRM_Core_DAO::executeQuery('TRUNCATE TABLE data_rows');
   }
   /**
    * Function to add  a record to temp table
