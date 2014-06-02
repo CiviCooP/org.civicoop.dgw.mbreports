@@ -54,7 +54,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('Dossier type'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array_merge(array('' => ts('- elke - ')), $this->mbreportsConfig->caseTypes),
+          'options' => array_merge(array('' => ts('- select -')), $this->mbreportsConfig->caseTypes),
+          'type' => CRM_Utils_Type::T_INT,
+          'dbAlias' => 'case_type_id',
         ),
         'order_bys' => array(),
       ),
@@ -66,7 +68,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('Dossier status'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array_merge(array('' => ts('- elke - ')), $this->mbreportsConfig->caseStatus),
+          'options' => array_merge(array('' => ts('- select -')), $this->mbreportsConfig->caseStatus),
+          'type' => CRM_Utils_Type::T_INT,
+          'dbAlias' => 'case_status_id',
         ),
         'order_bys' => array(
           'name' => 'status_id',
@@ -82,6 +86,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           'title' => ts('Dossier begindatum'),
           'default'      => 'this.month',
           'operatorType' => CRM_Report_Form::OP_DATE,
+          'type' => CRM_Utils_Type::T_DATE,
+          'dbAlias' => 'case_start_date_stamp',
         ),
         'order_bys' => array(
           'name' => 'start_date',
@@ -108,6 +114,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           'title' => ts('Dossiermanager'),
           'operatorType' => CRM_Report_Form::OP_MULTISELECT,
           'options' => $this->mbreportsConfig->dossierManagerList,
+          'type' => CRM_Utils_Type::T_INT,
+          'dbAlias' => 'dossiermanager_id',
         ),
         'order_bys' => array(
           'name' => 'dossiermanager',
@@ -123,6 +131,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           'title' => ts('Deurwaarder'),
           'operatorType' => CRM_Report_Form::OP_MULTISELECT,
           'options' => $this->mbreportsConfig->dossierManagerList,
+          'type' => CRM_Utils_Type::T_INT,
+          'dbAlias' => 'deurwaarder_id',
         ),
         'order_bys' => array(),
       ),
@@ -134,7 +144,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('Ontruiming'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array('' => ts('- elke - '), 'J' => ts('Ja'), 'N' => ts('Nee')),
+          'options' => array('' => ts('- select -'), 'J' => ts('Ja'), 'N' => ts('Nee')),
+          'type' => CRM_Utils_Type::T_STRING,
+          'dbAlias' => 'ontruiming',
         ),
         'order_bys' => array(),
       ),
@@ -145,7 +157,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('Ontruiming status '),
           'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array_merge(array('' => ts('- elke - ')), $this->mbreportsConfig->activityStatus),
+          'options' => array_merge(array('' => ts('- select -')), $this->mbreportsConfig->activityStatus),
+          'type' => CRM_Utils_Type::T_INT,
+          'dbAlias' => 'ontruiming_status_id',
         ),
         'order_bys' => array(),
       ),
@@ -185,7 +199,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('Complex'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array_merge(array('' => ts('- elke - ')), $this->mbreportsConfig->complexList),
+          'options' => array_merge(array('' => ts('- select -')), $this->mbreportsConfig->complexList),
+          'type' => CRM_Utils_Type::T_STRING,
+          'dbAlias' => 'property_complex_id',
         ),
         'order_bys' => array(
           'name' => 'complex_id',
@@ -200,7 +216,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('Wijk'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array_merge(array('' => ts('- elke - ')), $this->mbreportsConfig->wijkList),
+          'options' => array_merge(array('' => ts('- select -')), $this->mbreportsConfig->wijkList),
+          'type' => CRM_Utils_Type::T_STRING,
+          'dbAlias' => 'property_block',
         ),
         'order_bys' => array(
           'name' => 'block',
@@ -216,7 +234,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           'title' => ts('Buurt'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
           'options' => $city_regions,
-          'options' => array_merge(array('' => ts('- elke - ')), $this->mbreportsConfig->buurtList),
+          'options' => array_merge(array('' => ts('- select -')), $this->mbreportsConfig->buurtList),
+          'type' => CRM_Utils_Type::T_STRING,
+          'dbAlias' => 'property_city_region',
         ),
         'order_bys' => array(
           'name' => 'city_region',
@@ -231,7 +251,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('VGE type'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array_merge(array('' => ts('- elke - ')), $this->mbreportsConfig->VgeTypeList),
+          'options' => array_merge(array('' => ts('- select -')), $this->mbreportsConfig->VgeTypeList),
+          'type' => CRM_Utils_Type::T_INT,
+          'dbAlias' => 'property_vge_type',
         ),
         'order_bys' => array(
           'name' => 'vge_type_id',
@@ -432,8 +454,15 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
                
             $filter_name = $field;
             
+            /*
+             * diffrent filter field then the orginal field
+             */
             if('case_case_type' == $field){
-              $filter_name = 'case_case_type_id';
+              $filter_name = 'case_type_id';
+            }
+            
+            if('case_start_date' == $field){
+              $filter_name = 'case_start_date_stamp';
             }
             
             if('case_status' == $field){
@@ -453,39 +482,40 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             }
             
             // add field at filter  
-            switch($values['filters']['operatorType']){
-              case '4': // OP_DATE
-                
-                if(!empty($this->_submitValues[$field . '_relative'])) { // if not empty add to filter
-                  $this->formFilter[$filter_name] = array(
-                    'operatorType' => $values['filters']['operatorType'],
-                    'relative' => $this->_submitValues[$field . '_relative'],
-                    'from' => $this->_submitValues[$field . '_from'],
-                    'from_display' => $this->_submitValues[$field . '_from_display'],
-                    'to' => $this->_submitValues[$field . '_to'],
-                    'to_display' => $this->_submitValues[$field . '_to_display'],
-                  );
-                  
-                  if(!isset($this->formFields[$field])){ // add field if it exists in filter
-                    $this->formFields[$field] = true; 
-                  }
+            if(CRM_Report_Form::OP_DATE == $values['filters']['operatorType']){ // OP_DATE
+
+              if('' != $this->_submitValues[$field . '_relative']) { // if not empty add to filter
+                $this->formFilter[$filter_name] = array(
+                  'operatorType' => $values['filters']['operatorType'],
+                  'relative' => $this->_submitValues[$field . '_relative'],
+                  'from' => $this->_submitValues[$field . '_from'],
+                  'from_display' => $this->_submitValues[$field . '_from_display'],
+                  'to' => $this->_submitValues[$field . '_to'],
+                  'to_display' => $this->_submitValues[$field . '_to_display'],
+                  'field' => $values['filters'],
+                );
+
+                if(!isset($this->formFields[$field])){ // add field if it exists in filter
+                  $this->formFields[$field] = true; 
                 }
-                break;
-              
-              case '64': // OP_SELECT
-              case '65': // OP_MULTISELECT
-                if(!empty($this->_submitValues[$field . '_value'])){ // if not empty add to filter
-                  $this->formFilter[$filter_name] = array(
-                    'operatorType' => $values['filters']['operatorType'],
-                    'op' => $this->_submitValues[$field . '_op'],
-                    'value' => $this->_submitValues[$field . '_value'],
-                  );
-                  
-                  if(!isset($this->formFields[$field])){ // add field if it exists in filter
-                    $this->formFields[$field] = true; 
-                  }
+              }
+
+            }else {
+
+              if('' != $this->_submitValues[$field . '_value']){ // if not empty add to filter
+                $this->formFilter[$filter_name] = array(
+                  'operatorType' => $values['filters']['operatorType'],
+                  'op' => $this->_submitValues[$field . '_op'],
+                  'value' => $this->_submitValues[$field . '_value'],
+                  'field' => $values['filters'],
+                  'min' => '',
+                  'max' => '',
+                );
+
+                if(!isset($this->formFields[$field])){ // add field if it exists in filter
+                  $this->formFields[$field] = true; 
                 }
-                break;
+              }
             } 
           }
         }
@@ -502,27 +532,27 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   public function buildRows($sql, &$rows) {
     set_time_limit(0);
     
-    echo('_submitValues') . '<br/>' . PHP_EOL;
+    /*echo('_submitValues') . '<br/>' . PHP_EOL;
     echo('<pre>');
     print_r($this->_submitValues);
-    echo('</pre>') . '<br/>' . PHP_EOL;
+    echo('</pre>') . '<br/>' . PHP_EOL;*/
        
-    /*echo('formFields') . '<br/>' . PHP_EOL;
-    echo('<pre>');
-    print_r($this->formFields);
-    echo('</pre>') . '<br/>' . PHP_EOL;
-    
-    echo('_columnHeaders') . '<br/>' . PHP_EOL;
+    /*echo('_columnHeaders') . '<br/>' . PHP_EOL;
     echo('<pre>');
     print_r($this->_columnHeaders);
     echo('</pre>') . '<br/>' . PHP_EOL;*/
     
-    echo('formFilter') . '<br/>' . PHP_EOL;
+    /*echo('formFields') . '<br/>' . PHP_EOL;
+    echo('<pre>');
+    print_r($this->formFields);
+    echo('</pre>') . '<br/>' . PHP_EOL;
+    */
+    /*echo('formFilter') . '<br/>' . PHP_EOL;
     echo('<pre>');
     print_r($this->formFilter);
-    echo('</pre>') . '<br/>' . PHP_EOL;
+    echo('</pre>') . '<br/>' . PHP_EOL;*/
     
-    echo('formGroupBy') . '<br/>' . PHP_EOL;
+    /*echo('formGroupBy') . '<br/>' . PHP_EOL;
     echo('<pre>');
     print_r($this->formGroupBy);
     echo('</pre>') . '<br/>' . PHP_EOL;
@@ -530,99 +560,96 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     echo('formOrderBy') . '<br/>' . PHP_EOL;
     echo('<pre>');
     print_r($this->formOrderBy);
-    echo('</pre>') . '<br/>' . PHP_EOL;
+    echo('</pre>') . '<br/>' . PHP_EOL;*/
     
     /*
      * create temporary table to for case and additional data
      */
-    /*$this->createTempTable(); 
+    $this->createTempTable(); 
     $this->truncateTempTable();
     
     $daoTemp = CRM_Core_DAO::executeQuery($sql);
-    if (!is_array($rows)) {
-      $rows = array();
-    }*/
     
     /*
      * add records to temporary table
      */
-    /*while ($daoTemp->fetch()) {
+    while ($daoTemp->fetch()) {
       $sql = "INSERT INTO werkoverzicht_dossier 
-        (case_id, case_subject, case_type_id, case_case_type, case_status_id, case_status, case_start_date, case_contact_id)
-        VALUES ('" . $daoTemp->case_id . "', '" . addslashes($daoTemp->case_subject) . "', '" . $daoTemp->case_type_id . "', '" . addslashes($daoTemp->case_case_type) . "', '" . $daoTemp->case_status_id . "', '" . addslashes($daoTemp->case_status) . "', '" . $daoTemp->case_start_date . "', '" . $daoTemp->case_contact_id . "' )";
+        (case_id, case_subject, case_type_id, case_case_type, case_status_id, case_status, case_start_date_stamp, case_start_date, case_contact_id)
+        VALUES ('" . $daoTemp->case_id . "', '" . addslashes($daoTemp->case_subject) . "', '" . $daoTemp->case_type_id . "', '" . addslashes($daoTemp->case_case_type) . "', '" . $daoTemp->case_status_id . "', '" . addslashes($daoTemp->case_status) . "', '" . str_replace('-', '', $daoTemp->case_start_date) . "', '" . $daoTemp->case_start_date . "', '" . $daoTemp->case_contact_id . "' )";
       
-      echo('insert sql: ' . $sql);
+      //echo('insert sql: ' . $sql);
       CRM_Core_DAO::executeQuery($sql);
-      */
+      
       /*
       * add vge to temporary table
       * one vge at the time
       */
-      /*if($this->formFields['property_vge_id'] or $this->formFields['property_complex_id']
+      if($this->formFields['property_vge_id'] or $this->formFields['property_complex_id']
       or $this->formFields['property_block'] or $this->formFields['property_city_region']
       or $this->formFields['property_vge_type']){
         $this->addTempVge($daoTemp);
-      }*/
+      }
       
       /*
       * add hoofdhuurder to temporary table
       * one hoofdhuurder at the time
       */
-      /*if($this->formFields['hoofdhuurder'] or $this->formFields['hoofdhuurder_street_address'] 
+      if($this->formFields['hoofdhuurder'] or $this->formFields['hoofdhuurder_street_address'] 
       or $this->formFields['hoofdhuurder_email'] or $this->formFields['hoofdhuurder_phone']){
         $this->addTempHoofdhuurder($daoTemp);
-      }*/
+      }
       
       /*
       * add medehuurder to temporary table
       * one medehuurder at the time
       */
-      /*if($this->formFields['medehuurder'] or $this->formFields['medehuurder_email'] 
+      if($this->formFields['medehuurder'] or $this->formFields['medehuurder_email'] 
       or $this->formFields['medehuurder_phone']){
         $this->addTempMedehuurder($daoTemp);
-      }*/
-    /*}*/
+      }
+    }
     
     /*
     * add typeringen to temporary table
     * all typeringen at once
     */
-    /*if($this->formFields['typeringen']){
+    if($this->formFields['typeringen']){
       $this->addTempTyperingen();
-    }*/
+    }
     
     /*
     * add dossiermanager to temporary table
     * all dossiermanagers at once
     */
-    /*if($this->formFields['dossiermanager']){
+    if($this->formFields['dossiermanager']){
       $this->addTempDossiermanager();
-    }*/
+    }
     
     /*
     * add deurwaarders to temporary table
     * all deurwaarders at once
     */
-    /*if($this->formFields['deurwaarder']){
+    if($this->formFields['deurwaarder']){
       $this->addTempDeurwaarder();
-    }*/
+    }
     
     /*
     * add ontruiming to temporary table
     * all ontruiming at once
     */
-    /*if($this->formFields['ontruiming'] or $this->formFields['ontruiming_status'] 
+    if($this->formFields['ontruiming'] or $this->formFields['ontruiming_status'] 
     or $this->formFields['ontruiming_activity_date_time']){
       $this->addTempOntruiming();
-    }*/
+    }
     
     /*
     * add vonnis to temporary table
     * all vonnis at once
     */
-    /*if($this->formFields['vonnis'] or $this->formFields['vonnis_activity_date_time']){
+    if($this->formFields['vonnis'] or $this->formFields['vonnis_activity_date_time']){
       $this->addTempVonnis();
-    }   */ 
+    } 
     
     /*
      * now select records from temp and build row from them
@@ -650,32 +677,14 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     if(!empty($this->formFilter)){
       $where = " WHERE ";
       foreach($this->formFilter as $field => $filter){
-        switch($filter['operatorType']){
-          case '4': // OP_DATE
-
-            break;
-
-          case '64': // OP_SELECT
-            $where .= "( " . $field . " = '" . $filter['value'] . "') AND ";
-            break;
-
-          case '65': // OP_MULTISELECT
-            $where .= " ( ";
-
-            if('in' == $filter['op']){
-              foreach($filter['value'] as $key => $value){
-                $where .= " " . $field . " = '" . $value . "' OR ";
-              }
-            }
-
-            if('notin' == $filter['op']){
-              foreach($filter['value'] as $key => $value){
-                $where .= " " . $field . " != '" . $value . "' AND ";
-              }
-            }
-
-            $where = substr($where, 0, -3) . " ) AND ";
-            break;
+                
+        if (CRM_Report_Form::OP_DATE == $filter['operatorType']) {
+          $clause = $this->dateClause($field, $filter['relative'], $filter['from'], $filter['to'], CRM_Utils_Type::T_DATE);
+          $where .= " ( " . $clause . " ) AND ";
+          
+        }else {
+          $clause = $this->whereClause($filter['field'], $filter['op'], $filter['value'], $filter['min'], $filter['max']);
+          $where .= $clause . " AND ";
         }
       }
     }
@@ -735,6 +744,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       case_case_type VARCHAR(128),
       case_status_id INT(10),
       case_status VARCHAR(225),
+      case_start_date_stamp VARCHAR(255),
       case_start_date DATE,
       case_contact_id INT(11),
       typeringen VARCHAR(128),
@@ -774,8 +784,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   private function addTempTyperingen(){
-    $sql = "SELECT civicrm_value_ov_data.entity_id, civicrm_property_type.label FROM civicrm_value_ov_data 
-      LEFT JOIN civicrm_property_type ON civicrm_property_type.id = civicrm_value_ov_data.ov_type";
+    $sql = "SELECT civicrm_value_ov_data.entity_id, civicrm_property_type.label FROM civicrm_value_ov_data
+      LEFT JOIN civicrm_property_type ON civicrm_value_ov_data.ov_type LIKE CONCAT('%',civicrm_property_type.id,'%')";
     $dao = CRM_Core_DAO::executeQuery($sql);
         
     while ($dao->fetch()) {
