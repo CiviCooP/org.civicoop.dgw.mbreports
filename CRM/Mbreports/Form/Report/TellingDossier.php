@@ -36,34 +36,33 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
 
   function select() {
 
-    $this->_select = 'SELECT a.id AS case_id, e.label AS case_type, a.start_date
-      , f.label AS status, a.end_date, b.contact_id_b AS case_manager_id
-      , c.ov_type, d.wf_melder';
+    $this->_select = 'SELECT a.id AS case_id, d.label AS case_type, a.start_date
+      , e.label AS status, a.end_date, b.contact_id_b AS case_manager_id, c.wf_melder, f.ov_type';
   }
 
   function from() {
     $mbreportsConfig = CRM_Mbreports_Config::singleton();
     $this->_from = 'FROM civicrm_case a 
       JOIN civicrm_relationship b ON a.id = b.case_id
-      LEFT JOIN civicrm_value_ov_data c ON a.id = c.entity_id
-      LEFT JOIN civicrm_value_wf_data d ON a.id = d.entity_id
-      LEFT JOIN civicrm_option_value e ON a.case_type_id = e.value AND e.option_group_id = '
+      LEFT JOIN civicrm_value_wf_data c ON a.id = c.entity_id
+      LEFT JOIN civicrm_option_value d ON a.case_type_id = d.value AND d.option_group_id = '
       .$mbreportsConfig->caseTypeOptionGroupId
-      .' LEFT JOIN civicrm_option_value f ON a.status_id = f.value AND f.option_group_id = '
-      .$mbreportsConfig->caseStatusOptionGroupId;
+      .' LEFT JOIN civicrm_option_value e ON a.status_id = e.value AND e.option_group_id = '
+      .$mbreportsConfig->caseStatusOptionGroupId
+      .' LEFT JOIN '.$mbreportsConfig->ovCustomTableName.' f ON a.id = f.entity_id';
   }
 
   function where() {
     $mbreportsConfig = CRM_Mbreports_Config::singleton();
     $this->_where = 'WHERE a.is_deleted = 0';
     if (!empty($this->_formValues['case_type_value'])) {
-      $this->_where .= ' AND '.$this->setMultipleWhereClause($this->_formValues['case_type_value'], $mbreportsConfig->caseTypes, 'e.label', $this->_formValues['case_type_op']);
+      $this->_where .= ' AND '.$this->setMultipleWhereClause($this->_formValues['case_type_value'], $mbreportsConfig->caseTypes, 'd.label', $this->_formValues['case_type_op']);
     }
     if (!empty($this->_formValues['case_manager_value'])) {
       $this->_where .= ' AND b.contact_id_b '.$this->formatOperator($this->_formValues['case_manager_op']).'('.implode(', ', $this->_formValues['case_manager_value']).')';
     }
-    if (!empty($this->_formValues['ov_type_value']) && $this->_formValues['ov_type_value'] != 0) {
-      $this->_where .= ' AND c.ov_type = "'.CRM_Utils_Array::value($this->_formValues['ov_type_value'], $mbreportsConfig->ovTypeList).'"';
+    if (!empty($this->_formValues['ov_type_value'])) {
+      $this->_where .= ' AND f.ov_type LIKE "%'.$this->_formValues['ov_type_value'].'%"';
     }
   }
   
@@ -393,5 +392,10 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
       $whereString = '';
     }
     return $whereString;
+  }
+  
+  private function removeOvTypes() {
+    $selectedOvType = $this->_formValues['ov_type_value'];
+    
   }
 }    
