@@ -37,7 +37,8 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   function select() {
 
     $this->_select = 'SELECT a.id AS case_id, d.label AS case_type, a.start_date
-      , e.label AS status, a.end_date, b.contact_id_b AS case_manager_id, c.wf_melder, f.ov_type';
+      , e.label AS status, a.end_date, b.contact_id_b AS case_manager_id, c.wf_melder
+      , f.ov_type, g.wf_type';
   }
 
   function from() {
@@ -49,7 +50,8 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
       .$mbreportsConfig->caseTypeOptionGroupId
       .' LEFT JOIN civicrm_option_value e ON a.status_id = e.value AND e.option_group_id = '
       .$mbreportsConfig->caseStatusOptionGroupId
-      .' LEFT JOIN '.$mbreportsConfig->ovCustomTableName.' f ON a.id = f.entity_id';
+      .' LEFT JOIN '.$mbreportsConfig->ovCustomTableName.' f ON a.id = f.entity_id 
+      LEFT JOIN '.$mbreportsConfig->wfUitkomstCustomTableName.' g ON a.id = g.entity_id';
   }
 
   function where() {
@@ -63,6 +65,9 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     }
     if (!empty($this->_formValues['ov_type_value'])) {
       $this->_where .= ' AND f.ov_type LIKE "%'.$this->_formValues['ov_type_value'].'%"';
+    }
+    if (!empty($this->_formValues['wf_type_value'])) {
+      $this->_where .= ' AND g.wf_type LIKE "%'.$this->_formValues['wf_type_value'].'%"';
     }
   }
   
