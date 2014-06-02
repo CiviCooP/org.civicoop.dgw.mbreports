@@ -19,8 +19,6 @@ function civicrm_api3_case_typeringen_migrate($params) {
   $qryOld = 'SELECT a.entity_id, a.'.$oldOverlastField.', b.case_id FROM '
     .$oldTable.' a LEFT JOIN civicrm_case_activity b ON a.entity_id = b.activity_id
     WHERE '.$oldOverlastField.' != ""';
-  CRM_Core_Error::debug('qryOld', $qryOld);
-  exit();
   $daoOld = CRM_Core_DAO::executeQuery($qryOld);
   while ($daoOld->fetch()) {
     $newTyperingen = array();
