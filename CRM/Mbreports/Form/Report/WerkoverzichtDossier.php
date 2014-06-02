@@ -566,7 +566,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
      * create temporary table to for case and additional data
      */
     $this->createTempTable(); 
-    //$this->truncateTempTable();
+    $this->truncateTempTable();
     
     $daoTemp = CRM_Core_DAO::executeQuery($sql);
     
@@ -574,12 +574,12 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
      * add records to temporary table
      */
     while ($daoTemp->fetch()) {
-      /*$sql = "INSERT INTO werkoverzicht_dossier 
+      $sql = "INSERT INTO werkoverzicht_dossier 
         (case_id, case_subject, case_type_id, case_case_type, case_status_id, case_status, case_start_date_stamp, case_start_date, case_contact_id)
         VALUES ('" . $daoTemp->case_id . "', '" . addslashes($daoTemp->case_subject) . "', '" . $daoTemp->case_type_id . "', '" . addslashes($daoTemp->case_case_type) . "', '" . $daoTemp->case_status_id . "', '" . addslashes($daoTemp->case_status) . "', '" . str_replace('-', '', $daoTemp->case_start_date) . "', '" . $daoTemp->case_start_date . "', '" . $daoTemp->case_contact_id . "' )";
       
       //echo('insert sql: ' . $sql);
-      CRM_Core_DAO::executeQuery($sql);*/
+      CRM_Core_DAO::executeQuery($sql);
       
       /*
       * add vge to temporary table
