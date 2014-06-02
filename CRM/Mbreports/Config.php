@@ -60,11 +60,13 @@ class CRM_Mbreports_Config {
   public $ovTypeColumnName = NULL;
   public $ovTypeList = array();
   public $overlastCaseTypeId = NULL;
+  public $ovTypeOptionGroupId = NULL;
   
   /*
    * array with case types that are available for M&B reporting
    */
   public $validCaseTypes = array();
+
   /**
    * Constructor function
    */
@@ -407,10 +409,10 @@ class CRM_Mbreports_Config {
       'name'            =>  $this->ovTypeCustomFieldName,
       'custom_group_id' =>  $this->ovCustomGroupId,
       'return'          =>  'option_group_id');
-    $ovOptionGroup = civicrm_api3('CustomField', 'Getvalue', $params);
-    $optionValues = civicrm_api3('OptionValue', 'Get', array('option_group_id' => $ovOptionGroup));
+    $this->ovTypeOptionGroupId = civicrm_api3('CustomField', 'Getvalue', $params);
+    $optionValues = civicrm_api3('OptionValue', 'Get', array('option_group_id' => $this->ovTypeOptionGroupId));
     foreach ($optionValues['values'] as $optionId => $optionValue) {
-      $this->ovTypeList[$optionId] = $optionValue['label'];
+      $this->ovTypeList[$optionValue['value']] = $optionValue['label'];
     }
     $this->ovTypeList[0] = '- alle -';
     asort($this->ovTypeList);
@@ -424,7 +426,7 @@ class CRM_Mbreports_Config {
     $wfOptionGroup = civicrm_api3('CustomField', 'Getvalue', $params);
     $optionValues = civicrm_api3('OptionValue', 'Get', array('option_group_id' => $wfOptionGroup));
     foreach ($optionValues['values'] as $optionId => $optionValue) {
-      $this->wfTypeList[$optionId] = $optionValue['label'];
+      $this->wfTypeList[$optionValue['value']] = $optionValue['label'];
     }
     $this->wfTypeList[0] = '- alle -';
     asort($this->wfTypeList);
