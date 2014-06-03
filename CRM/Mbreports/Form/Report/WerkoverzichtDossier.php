@@ -23,7 +23,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   function __construct() {
     $this->mbreportsConfig = CRM_Mbreports_Config::singleton();
-    
+        
     $this->fields = array
     (
       'case_id' => array(
@@ -813,8 +813,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = civicrm_activity.id
       LEFT JOIN civicrm_option_value ON civicrm_option_value.value = civicrm_activity.status_id
       WHERE civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->ontruimingActTypeId . "'
+      AND civicrm_option_value.option_group_id = '" . $this->mbreportsConfig->activityStatusTypeOptionGroupId . "'
       GROUP BY civicrm_case_activity.case_id ORDER BY civicrm_activity.activity_date_time DESC ";
-    
+        
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
       $sql = "UPDATE werkoverzicht_dossier SET ontruiming = '" . $dao->ontruiming . "', ontruiming_status_id = '" . $dao->status_id . "', ontruiming_status= '" . addslashes($dao->label) . "', ontruiming_activity_date_time = '" . $dao->activity_date_time . "' WHERE case_id = '" . $dao->case_id . "'";
