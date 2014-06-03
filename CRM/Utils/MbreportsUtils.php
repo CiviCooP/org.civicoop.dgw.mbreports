@@ -128,4 +128,40 @@ class CRM_Utils_MbreportsUtils {
       return 0;
     }
   }
+  
+  public static function getHoofdhuurderContact($contactId){
+    if (empty($contactId) || !is_numeric(($contactId))) {
+      return array();
+    }
+
+    /*
+     * assume first one is the one we need, De Goede Woning do not assign more
+     * customers to a case
+     */
+    if (self::checkHuishouden($contactId) == FALSE) {
+      $huishoudenId = self::getHuishouden($contactId);
+    } else {
+      $huishoudenId = $contactId;
+    }
+    
+    return CRM_Utils_DgwUtils::getHoofdhuurders($huishoudenId);
+  }
+  
+  public static function getMedehuurderContact($contactId){
+    if (empty($contactId) || !is_numeric(($contactId))) {
+      return array();
+    }
+
+    /*
+     * assume first one is the one we need, De Goede Woning do not assign more
+     * customers to a case
+     */
+    if (self::checkHuishouden($contactId) == FALSE) {
+      $huishoudenId = self::getHuishouden($contactId);
+    } else {
+      $huishoudenId = $contactId;
+    }
+    
+    return CRM_Utils_DgwUtils::getMedeHuurders($huishoudenId);
+  }
 }
