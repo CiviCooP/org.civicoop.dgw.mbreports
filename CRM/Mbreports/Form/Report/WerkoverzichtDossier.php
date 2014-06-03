@@ -531,38 +531,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   public function buildRows($sql, &$rows) {
     set_time_limit(0);
-    
-    
-    /*echo('_submitValues') . '<br/>' . PHP_EOL;
-    echo('<pre>');
-    print_r($this->_submitValues);
-    echo('</pre>') . '<br/>' . PHP_EOL;*/
-       
-    /*echo('_columnHeaders') . '<br/>' . PHP_EOL;
-    echo('<pre>');
-    print_r($this->_columnHeaders);
-    echo('</pre>') . '<br/>' . PHP_EOL;*/
-    
-    /*echo('formFields') . '<br/>' . PHP_EOL;
-    echo('<pre>');
-    print_r($this->formFields);
-    echo('</pre>') . '<br/>' . PHP_EOL;
-    */
-    /*echo('formFilter') . '<br/>' . PHP_EOL;
-    echo('<pre>');
-    print_r($this->formFilter);
-    echo('</pre>') . '<br/>' . PHP_EOL;*/
-    
-    /*echo('formGroupBy') . '<br/>' . PHP_EOL;
-    echo('<pre>');
-    print_r($this->formGroupBy);
-    echo('</pre>') . '<br/>' . PHP_EOL;
-    
-    echo('formOrderBy') . '<br/>' . PHP_EOL;
-    echo('<pre>');
-    print_r($this->formOrderBy);
-    echo('</pre>') . '<br/>' . PHP_EOL;*/
-    
+        
     /*
      * create temporary table to for case and additional data
      */
