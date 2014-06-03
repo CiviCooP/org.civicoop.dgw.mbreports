@@ -582,8 +582,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     unset($sql);
     unset($daoTemp);
     
-    exit();
-    
     /*
     * add typeringen to temporary table
     * all typeringen at once
@@ -867,9 +865,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   private function addTempHoofdhuurder($daoTemp){    
     $hoofdhuurder = CRM_Utils_MbreportsUtils::getHoofdhuurderContact($daoTemp->case_contact_id);
-    echo('<pre>');
-    print_r($hoofdhuurder);
-    echo('</pre>');
     
     $sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
       LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
@@ -890,14 +885,11 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   private function addTempMedehuurder($daoTemp){
     $medehuurder = CRM_Utils_MbreportsUtils::getMedehuurderContact($daoTemp->case_contact_id);
-    echo('<pre>');
-    print_r($medehuurder);
-    echo('</pre>');
     
     $sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
       LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
       LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
-      WHERE civicrm_contact.id = '" . $medehuurder[0]['contact_id'] . "'";
+      WHERE civicrm_contact.id = '" . $medehuurder[0]['medehuurder_id'] . "'";
     
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
