@@ -134,12 +134,7 @@ class CRM_Utils_MbreportsUtils {
       return array();
     }
     $caseClients = CRM_Case_BAO_Case::getCaseClients($caseId);
-    
-    echo('$caseClients');
-    echo('<pre>');
-    print_r($caseClients);
-    echo('</pre>');
-    
+        
     /*
      * assume first one is the one we need, De Goede Woning do not assign more
      * customers to a case
@@ -152,8 +147,6 @@ class CRM_Utils_MbreportsUtils {
     } else {
       $huishoudenId = $clientId;
     }
-    
-    echo('$huishoudenId: ' .  $huishoudenId);
     
     return CRM_Utils_DgwUtils::getHoofdhuurders($huishoudenId, false);
   }
