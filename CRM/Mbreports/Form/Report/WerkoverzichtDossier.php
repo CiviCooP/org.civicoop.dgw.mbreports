@@ -381,7 +381,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $this->_select = "SELECT civicrm_case.id AS case_id, civicrm_case.case_type_id AS case_type_id, civicrm_case.status_id AS case_status_id, civicrm_case.subject AS case_subject, 
     (SELECT label FROM civicrm_option_value WHERE option_group_id = '" . $this->mbreportsConfig->caseTypeOptionGroupId . "' AND value = civicrm_case.case_type_id) AS case_case_type, 
     (SELECT label FROM civicrm_option_value WHERE option_group_id = '" . $this->mbreportsConfig->caseStatusOptionGroupId . "' AND value = civicrm_case.status_id) AS case_status, 
-      civicrm_case.start_date AS case_start_date, civicrm_case_contact.contact_id AS case_contact_id ";
+    civicrm_case.start_date AS case_start_date, civicrm_case_contact.contact_id AS case_contact_id ";
   }
   
   function from() {
@@ -548,7 +548,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         (case_id, case_subject, case_type_id, case_case_type, case_status_id, case_status, case_start_date_stamp, case_start_date, case_contact_id)
         VALUES ('" . $daoTemp->case_id . "', '" . addslashes($daoTemp->case_subject) . "', '" . $daoTemp->case_type_id . "', '" . addslashes($daoTemp->case_case_type) . "', '" . $daoTemp->case_status_id . "', '" . addslashes($daoTemp->case_status) . "', '" . str_replace('-', '', $daoTemp->case_start_date) . "', '" . $daoTemp->case_start_date . "', '" . $daoTemp->case_contact_id . "' )";
       
-      //echo('insert sql: ' . $sql);
       CRM_Core_DAO::executeQuery($sql);
       
       /*
@@ -579,6 +578,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         $this->addTempMedehuurder($daoTemp);
       }
     }
+    
+    unset($sql);
+    unset($daoTemp);
     
     /*
     * add typeringen to temporary table
@@ -704,6 +706,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       
       $rows[] = $row;
     }
+    
+    unset($sql);
+    unset($dao);
   }
   
   private function createTempTable(){
@@ -742,11 +747,15 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       medehuurder_phone VARCHAR(32))";
     
     CRM_Core_DAO::executeQuery($sql);
+    
+    unset($sql);
   }
   
   private function truncateTempTable(){
     $sql = "TRUNCATE TABLE werkoverzicht_dossier";
     CRM_Core_DAO::executeQuery($sql);
+    
+    unset($sql);
   }
   
   private function removeTempTable(){
@@ -762,6 +771,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $sql = "UPDATE werkoverzicht_dossier SET typeringen = '" . addslashes($dao->label) . "' WHERE case_id = '" . $dao->entity_id . "'";
       CRM_Core_DAO::executeQuery($sql);
     }
+    
+    unset($sql);
+    unset($dao);
   }
   
   private function addTempDossiermanager(){
@@ -775,6 +787,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         WHERE case_id = '" . $dao->case_id . "'";
       CRM_Core_DAO::executeQuery($sql);
     }
+    
+    unset($sql);
+    unset($dao);
   }
   
   private function addTempDeurwaarder(){
@@ -788,6 +803,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         WHERE case_id = '" . $dao->case_id . "'";
       CRM_Core_DAO::executeQuery($sql);
     }
+    
+    unset($sql);
+    unset($dao);
   }
   
   private function addTempOntruiming(){    
@@ -802,6 +820,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $sql = "UPDATE werkoverzicht_dossier SET ontruiming = '" . $dao->ontruiming . "', ontruiming_status_id = '" . $dao->status_id . "', ontruiming_status= '" . addslashes($dao->label) . "', ontruiming_activity_date_time = '" . $dao->activity_date_time . "' WHERE case_id = '" . $dao->case_id . "'";
       CRM_Core_DAO::executeQuery($sql);
     }
+    
+    unset($sql);
+    unset($dao);
   }
   
   private function addTempVonnis(){
@@ -815,6 +836,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $sql = "UPDATE werkoverzicht_dossier SET vonnis = '" . $dao->vonnis . "', vonnis_activity_date_time = '" . $dao->activity_date_time . "' WHERE case_id = '" . $dao->case_id . "'";
       CRM_Core_DAO::executeQuery($sql);
     }
+    
+    unset($sql);
+    unset($dao);
   }
   
   private function addTempVge($daoTemp)
@@ -832,6 +856,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         WHERE case_id = '" . $daoTemp->case_id . "'";
       CRM_Core_DAO::executeQuery($sql);
     }
+    
+    unset($caseVgeData);
+    unset($sql);
+    unset($dao);
   }
   
   private function addTempHoofdhuurder($daoTemp){
@@ -850,6 +878,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         WHERE case_id = '" . $daoTemp->case_id . "'";
       CRM_Core_DAO::executeQuery($sql);
     }
+    
+    unset($hoofdhuurder);
+    unset($sql);
+    unset($dao);
   }
   
   private function addTempMedehuurder($daoTemp){
@@ -867,5 +899,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         WHERE case_id = '" . $daoTemp->case_id . "'";
       CRM_Core_DAO::executeQuery($sql);
     }
+    
+    unset($medehuurder);
+    unset($sql);
+    unset($dao);
   }
 }
