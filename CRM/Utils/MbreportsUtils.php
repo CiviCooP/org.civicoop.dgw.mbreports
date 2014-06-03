@@ -129,39 +129,53 @@ class CRM_Utils_MbreportsUtils {
     }
   }
   
-  public static function getHoofdhuurderContact($contactId){
-    if (empty($contactId) || !is_numeric(($contactId))) {
+  public static function getCaseHoofdhuurder($caseId){
+    if (empty($caseId) || !is_numeric(($caseId))) {
       return array();
     }
-
+    $caseClients = CRM_Case_BAO_Case::getCaseClients($caseId);
+    
+    echo('$caseClients');
+    echo('<pre>');
+    print_r($caseClients);
+    echo('</pre>');
+    
     /*
      * assume first one is the one we need, De Goede Woning do not assign more
      * customers to a case
      */
-    if (self::checkHuishouden($contactId) == FALSE) {
-      $huishoudenId = self::getHuishouden($contactId);
+    if (!empty($caseClients)) {
+      $clientId = $caseClients[0];
+    }
+    if (self::checkHuishouden($clientId) == FALSE) {
+      $huishoudenId = self::getHuishouden($clientId);
     } else {
-      $huishoudenId = $contactId;
+      $huishoudenId = $clientId;
     }
     
-    return CRM_Utils_DgwUtils::getHoofdhuurders($huishoudenId);
+    echo('$huishoudenId: ' .  $huishoudenId);
+    
+    return CRM_Utils_DgwUtils::getHoofdhuurders($huishoudenId, false);
   }
   
-  public static function getMedehuurderContact($contactId){
-    if (empty($contactId) || !is_numeric(($contactId))) {
+  public static function getCaseMedehuurder($caseId){
+    if (empty($caseId) || !is_numeric(($caseId))) {
       return array();
     }
-
+    $caseClients = CRM_Case_BAO_Case::getCaseClients($caseId);
     /*
      * assume first one is the one we need, De Goede Woning do not assign more
      * customers to a case
      */
-    if (self::checkHuishouden($contactId) == FALSE) {
-      $huishoudenId = self::getHuishouden($contactId);
+    if (!empty($caseClients)) {
+      $clientId = $caseClients[0];
+    }
+    if (self::checkHuishouden($clientId) == FALSE) {
+      $huishoudenId = self::getHuishouden($clientId);
     } else {
-      $huishoudenId = $contactId;
+      $huishoudenId = $clientId;
     }
     
-    return CRM_Utils_DgwUtils::getMedeHuurders($huishoudenId);
+    return CRM_Utils_DgwUtils::getMedeHuurders($huishoudenId, false);
   }
 }

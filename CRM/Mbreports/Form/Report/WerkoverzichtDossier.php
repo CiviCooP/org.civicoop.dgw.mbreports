@@ -23,7 +23,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   function __construct() {
     $this->mbreportsConfig = CRM_Mbreports_Config::singleton();
-       
+        
     $this->fields = array
     (
       'case_id' => array(
@@ -693,9 +693,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     }
     
     $sql .= $orderby;
-    
-    echo('$sql: ' . $sql);
-    
+        
     $rows = array();
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
@@ -864,7 +862,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   private function addTempHoofdhuurder($daoTemp){    
-    $hoofdhuurder = CRM_Utils_MbreportsUtils::getHoofdhuurderContact($daoTemp->case_contact_id);
+    $hoofdhuurder = CRM_Utils_MbreportsUtils::getCaseHoofdhuurder($daoTemp->case_id);
     
     $sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
       LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
@@ -879,12 +877,13 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       CRM_Core_DAO::executeQuery($sql);
     }
     
+    unset($hoofdhuurder);
     unset($sql);
     unset($dao);
   }
   
   private function addTempMedehuurder($daoTemp){
-    $medehuurder = CRM_Utils_MbreportsUtils::getMedehuurderContact($daoTemp->case_contact_id);
+    $medehuurder = CRM_Utils_MbreportsUtils::getCaseMedehuurder($daoTemp->case_id);
     
     $sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
       LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
