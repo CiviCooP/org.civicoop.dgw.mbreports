@@ -532,6 +532,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   public function buildRows($sql, &$rows) {
     set_time_limit(0);
     
+    
     /*echo('_submitValues') . '<br/>' . PHP_EOL;
     echo('<pre>');
     print_r($this->_submitValues);
@@ -825,7 +826,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = civicrm_activity.id
       LEFT JOIN civicrm_option_value ON civicrm_option_value.value = civicrm_activity.status_id
       WHERE civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->ontruimingActTypeId . "'
-      AND civicrm_option_value.option_group_id = '" . $this->mbreportsConfig->activityStatusTypeOptionGroupId . "' 
       GROUP BY civicrm_case_activity.case_id ORDER BY civicrm_activity.activity_date_time DESC ";
     
     $dao = CRM_Core_DAO::executeQuery($sql);
