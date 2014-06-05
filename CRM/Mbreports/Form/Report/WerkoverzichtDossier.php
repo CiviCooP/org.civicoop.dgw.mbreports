@@ -870,6 +870,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     print_r($daoTemp);
     echo('</pre>');
     
+    if(!empty($daoTemp->case_contact_id)){
     echo('check house') . '<br/>' . PHP_EOL;
     
     // check if it is a household
@@ -943,11 +944,12 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     echo('$sql: ') . $sql . '<br/>' . PHP_EOL;
     
     CRM_Core_DAO::executeQuery($sql);
-
+    
     unset($params);
     unset($result);
     unset($sql);
     unset($dao);
+    }
   }
   
   private function addTempMedehuurder($daoTemp){
