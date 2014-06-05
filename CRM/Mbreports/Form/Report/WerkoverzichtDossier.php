@@ -863,9 +863,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     unset($dao);
   }
   
-  private function addTempHoofdhuurder($daoTemp){    
-    echo('$daoTemp->case_contact_id: ' . $daoTemp->case_contact_id) . '<br/>' . PHP_EOL;
-    
+  private function addTempHoofdhuurder($daoTemp){
     // check if it is a household
     $params = array(
       'version' => 3,
@@ -873,59 +871,31 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       'id' => $daoTemp->case_contact_id,
     );
     $result = civicrm_api('Contact', 'getsingle', $params);
-    
-    echo('$result') . '<br/>' . PHP_EOL;
-    echo('<pre>');
-    print_r($result);
-    echo('</pre>');
-    
-    // if it is a household get the contact_id of the hoofdhuurder
+        // if it is a household get the contact_id of the hoofdhuurder
     if('Household' == $result['contact_type']){ // if household
-      $sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
-        LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
-        LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
-        
-        LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
-
-        WHERE civicrm_relationship.contact_id_b = '" . $daoTemp->case_contact_id . "'
-        AND civicrm_relationship.relationship_type_id = '11' 
-        AND civicrm_phone.is_primary = '1'
-        AND civicrm_email.is_primary = '1' 
-        LIMIT 1 ";
+      $params = array(
+        'version' => 3,
+        'sequential' => 1,
+        'relationship_type_id' => 11,
+        'contact_id_b' => 81629,
+      );
+      $result = civicrm_api('Relationship', 'getsingle', $params);
       
-    }else { // is not a household, just get the contact information
-      $sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
-        LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
-        LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
-        WHERE civicrm_contact.id = '" . $daoTemp->case_contact_id . "'
-        AND civicrm_phone.is_primary = '1'
-        AND civicrm_email.is_primary = '1'
-        LIMIT 1 ";
+      $params = array(
+      'version' => 3,
+      'sequential' => 1,
+      'id' => $result['contact_id_a'],
+    );
+    $result = civicrm_api('Contact', 'getsingle', $params);
     }
     
-     echo('$sql: ' . $sql) . '<br/>' . PHP_EOL;
-    
-    /*$hoofdhuurder = CRM_Utils_MbreportsUtils::getCaseHoofdhuurder($daoTemp->case_id);*/
-    
-    /*$sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
-      LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
-      LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
-      WHERE civicrm_contact.id = '" . $hoofdhuurder[0]['contact_id'] . "'";*/
-    
-    $dao = CRM_Core_DAO::executeQuery($sql);
-    echo('dao') . '<br/>' . PHP_EOL;
-    echo('<pre>');
-    print_r($dao);
-    echo('</pre>');
-    
-    while ($dao->fetch()) {
-      $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder = '" . $dao->sort_name . "', hoofdhuurder_street_address = '" . $dao->street_address . "',
-        hoofdhuurder_email = '" . $dao->email . "', hoofdhuurder_phone = '" . $dao->phone . "'
-        WHERE case_id = '" . $daoTemp->case_id . "'";
-      CRM_Core_DAO::executeQuery($sql);
-    }
-    
-    //unset($hoofdhuurder);
+    $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder = '" . $result['sort_name'] . "', hoofdhuurder_street_address = '" . $result['street_address'] . "',
+      hoofdhuurder_email = '" . $result['email'] . "', hoofdhuurder_phone = '" . $result['phone'] . "'
+      WHERE case_id = '" . $daoTemp->case_id . "'";
+    CRM_Core_DAO::executeQuery($sql);
+
+    unset($params);
+    unset($result);
     unset($sql);
     unset($dao);
   }
