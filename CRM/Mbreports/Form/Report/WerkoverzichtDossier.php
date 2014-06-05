@@ -484,7 +484,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             // add field at filter  
             if(CRM_Report_Form::OP_DATE == $values['filters']['operatorType']){ // OP_DATE
 
-              if('' != $this->_submitValues[$field . '_relative']) { // if not empty add to filter
+              if(!empty($this->_submitValues[$field . '_relative'])) { // if not empty add to filter
                 $this->formFilter[$filter_name] = array(
                   'operatorType' => $values['filters']['operatorType'],
                   'relative' => $this->_submitValues[$field . '_relative'],
@@ -502,7 +502,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
 
             }else {
 
-              if('' != $this->_submitValues[$field . '_value']){ // if not empty add to filter
+              if(!empty($this->_submitValues[$field . '_value'])){ // if not empty add to filter
                 $this->formFilter[$filter_name] = array(
                   'operatorType' => $values['filters']['operatorType'],
                   'op' => $this->_submitValues[$field . '_op'],
