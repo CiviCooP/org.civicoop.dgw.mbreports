@@ -23,7 +23,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   function __construct() {
     $this->mbreportsConfig = CRM_Mbreports_Config::singleton();
-            
+    
     $this->fields = array
     (
       'case_id' => array(
@@ -817,7 +817,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       WHERE civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->ontruimingActTypeId . "'
       AND civicrm_option_value.option_group_id = '" . $this->mbreportsConfig->activityStatusTypeOptionGroupId . "'
       AND civicrm_activity.is_current_revision = '1' 
-      GROUP BY civicrm_case_activity.case_id ORDER BY civicrm_activity.activity_date_time DESC ";
+      ORDER BY civicrm_activity.activity_date_time DESC LIMIT 1";
         
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
@@ -834,7 +834,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = civicrm_activity.id
       WHERE civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->vonnisActTypeId . "'
       AND civicrm_activity.is_current_revision = '1' 
-      GROUP BY civicrm_case_activity.case_id ORDER BY civicrm_activity.activity_date_time DESC ";
+      ORDER BY civicrm_activity.activity_date_time DESC  LIMIT 1";
     
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
@@ -888,7 +888,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
 
       WHERE civicrm_relationship.contact_id_b = '" . $daoTemp->case_contact_id . "'
-      AND civicrm_relationship.relationship_type_id = '11'
+      AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
       AND civicrm_relationship.is_active = '1'
       ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
       
@@ -915,7 +915,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     // get household from hoofhuurder id
     $sql = "SELECT civicrm_relationship.contact_id_b FROM civicrm_relationship 
       WHERE civicrm_relationship.contact_id_a = '" . $dao->hoofdhuurder_id . "'
-      AND civicrm_relationship.relationship_type_id = '11'
+      AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
       AND civicrm_relationship.is_active = '1' LIMIT 1 ";
     $dao = CRM_Core_DAO::executeQuery($sql);
     $dao->fetch();
@@ -928,7 +928,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
       
       WHERE civicrm_relationship.contact_id_b = '" . $dao->contact_id_b . "' 
-      AND civicrm_relationship.relationship_type_id = '13'
+      AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->medehuurderRelationshipTypeId . "'
       AND civicrm_relationship.is_active = '1'
       ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
     
