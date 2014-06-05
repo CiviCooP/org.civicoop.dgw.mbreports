@@ -864,7 +864,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   private function addTempHoofdhuurder($daoTemp){    
-    /*echo('$daoTemp->case_contact_id: ' . $daoTemp->case_contact_id) . '<br/>' . PHP_EOL;
+    echo('$daoTemp->case_contact_id: ||' . $daoTemp->case_contact_id) . '||<br/>' . PHP_EOL;
     
     var_dump($daoTemp->case_contact_id);
     
@@ -908,7 +908,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     
     unset($sql);
     unset($dao);
-    }*/
+    }
   }
   
   private function addTempMedehuurder($daoTemp){
