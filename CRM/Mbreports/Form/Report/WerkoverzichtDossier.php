@@ -903,7 +903,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         LIMIT 1 ";
     }
     
-    
+     echo('$sql: ' . $sql) . '<br/>' . PHP_EOL;
     
     /*$hoofdhuurder = CRM_Utils_MbreportsUtils::getCaseHoofdhuurder($daoTemp->case_id);*/
     
