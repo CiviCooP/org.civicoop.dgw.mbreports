@@ -871,27 +871,49 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       'id' => $daoTemp->case_contact_id,
     );
     $result = civicrm_api('Contact', 'getsingle', $params);
-        // if it is a household get the contact_id of the hoofdhuurder
+    
+    echo('check house') . '<br/>' . PHP_EOL;
+    echo('<pre>');
+    print_r($params);
+    print_r($result);
+    echo('</pre>');
+    
+    // if it is a household get the contact_id of the hoofdhuurder
     if('Household' == $result['contact_type']){ // if household
       $params = array(
         'version' => 3,
         'sequential' => 1,
         'relationship_type_id' => 11,
-        'contact_id_b' => 81629,
+        'contact_id_b' => $daoTemp->case_contact_id,
       );
       $result = civicrm_api('Relationship', 'getsingle', $params);
       
+      echo('Household') . '<br/>' . PHP_EOL;
+      echo('<pre>');
+      print_r($params);
+      print_r($result);
+      echo('</pre>');
+      
       $params = array(
-      'version' => 3,
-      'sequential' => 1,
-      'id' => $result['contact_id_a'],
-    );
-    $result = civicrm_api('Contact', 'getsingle', $params);
+        'version' => 3,
+        'sequential' => 1,
+        'id' => $result['contact_id_a'],
+      );
+      $result = civicrm_api('Contact', 'getsingle', $params);
+      
+      echo('contact_id_a') . '<br/>' . PHP_EOL;
+      echo('<pre>');
+      print_r($params);
+      print_r($result);
+      echo('</pre>');
     }
     
     $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder = '" . $result['sort_name'] . "', hoofdhuurder_street_address = '" . $result['street_address'] . "',
       hoofdhuurder_email = '" . $result['email'] . "', hoofdhuurder_phone = '" . $result['phone'] . "'
       WHERE case_id = '" . $daoTemp->case_id . "'";
+    
+    echo('$sql: ') . $sql . '<br/>' . PHP_EOL;
+    
     CRM_Core_DAO::executeQuery($sql);
 
     unset($params);
