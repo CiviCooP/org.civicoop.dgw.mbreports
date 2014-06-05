@@ -405,6 +405,11 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     
     $this->setformFields();  
     
+    echo('<pre>');
+    print_r($this->formFilter);
+    echo('</pre>');
+    exit();
+    
     $this->select();
     $this->from();
     $this->where();
