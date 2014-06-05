@@ -870,6 +870,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     print_r($daoTemp);
     echo('</pre>');
     
+    var_dump($daoTemp->case_contact_id);
+    
     if(!empty($daoTemp->case_contact_id)){
     echo('check house') . '<br/>' . PHP_EOL;
     
