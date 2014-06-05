@@ -896,8 +896,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $dao->fetch();
     }
     
-    $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder = '" . $result['sort_name'] . "', hoofdhuurder_street_address = '" . $result['street_address'] . "',
-      hoofdhuurder_email = '" . $result['email'] . "', hoofdhuurder_phone = '" . $resultphone . "'
+    $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder = '" . $dao->sort_name . "', hoofdhuurder_street_address = '" . $dao->street_address . "',
+      hoofdhuurder_email = '" . $dao->email . "', hoofdhuurder_phone = '" . $dao->phone . "'
       WHERE case_id = '" . $daoTemp->case_id . "'";
     
     echo('$sql c: ' . $sql) . '<br/>' . PHP_EOL;
