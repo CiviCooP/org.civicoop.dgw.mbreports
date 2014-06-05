@@ -864,6 +864,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   private function addTempHoofdhuurder($daoTemp){    
+    echo('$daoTemp->contact_id: ' . $daoTemp->contact_id) . '<br/>' . PHP_EOL;
+    
     // check if it is a household
     $params = array(
       'version' => 3,
@@ -888,7 +890,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         WHERE civicrm_relationship.contact_id_b = '" . $daoTemp->contact_id . "'
         AND civicrm_relationship.relationship_type_id = '11' 
         AND civicrm_phone.is_primary = '1'
-        AND civicrm_email.is_primary = '1' ";
+        AND civicrm_email.is_primary = '1' 
+        LIMIT 1 ";
       
     }else { // is not a household, just get the contact information
       $sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
@@ -896,7 +899,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
         WHERE civicrm_contact.id = '" . $daoTemp->contact_id . "'
         AND civicrm_phone.is_primary = '1'
-        AND civicrm_email.is_primary = '1' ";
+        AND civicrm_email.is_primary = '1'
+        LIMIT 1 ";
     }
     
     
