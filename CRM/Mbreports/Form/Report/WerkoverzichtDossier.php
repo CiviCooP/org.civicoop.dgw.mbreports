@@ -23,7 +23,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   function __construct() {
     $this->mbreportsConfig = CRM_Mbreports_Config::singleton();
-        
+            
     $this->fields = array
     (
       'case_id' => array(
@@ -812,6 +812,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       LEFT JOIN civicrm_option_value ON civicrm_option_value.value = civicrm_activity.status_id
       WHERE civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->ontruimingActTypeId . "'
       AND civicrm_option_value.option_group_id = '" . $this->mbreportsConfig->activityStatusTypeOptionGroupId . "'
+      AND civicrm_activity.is_current_revision = '1' 
       GROUP BY civicrm_case_activity.case_id ORDER BY civicrm_activity.activity_date_time DESC ";
         
     $dao = CRM_Core_DAO::executeQuery($sql);
@@ -828,6 +829,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $sql = "SELECT (CASE WHEN status_id IS NULL THEN 'N' ELSE 'J' END) AS vonnis, civicrm_case_activity.case_id, civicrm_activity.activity_date_time FROM civicrm_activity 
       LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = civicrm_activity.id
       WHERE civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->vonnisActTypeId . "'
+      AND civicrm_activity.is_current_revision = '1' 
       GROUP BY civicrm_case_activity.case_id ORDER BY civicrm_activity.activity_date_time DESC ";
     
     $dao = CRM_Core_DAO::executeQuery($sql);
@@ -862,14 +864,46 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   private function addTempHoofdhuurder($daoTemp){    
-    $hoofdhuurder = CRM_Utils_MbreportsUtils::getCaseHoofdhuurder($daoTemp->case_id);
+    // check if it is a household
+    $params = array(
+      'version' => 3,
+      'sequential' => 1,
+      'id' => $daoTemp->contact_id,
+    );
+    $result = civicrm_api('Contact', 'getsingle', $params);
     
-    $sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
+    // if it is a household get the contact_id of the hoofdhuurder
+    if('Household' == $result['contact_type']){ // if household
+      $sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
+        LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
+        LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
+        
+        LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
+
+        WHERE civicrm_relationship.contact_id_b = '" . $daoTemp->contact_id . "'
+        AND civicrm_relationship.relationship_type_id = '11' ";
+      
+    }else { // is not a household, just get the contact information
+      $sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
+        LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
+        LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
+        WHERE civicrm_contact.id = '" . $daoTemp->contact_id . "'";
+    }
+    
+    
+    
+    /*$hoofdhuurder = CRM_Utils_MbreportsUtils::getCaseHoofdhuurder($daoTemp->case_id);*/
+    
+    /*$sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
       LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
       LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
-      WHERE civicrm_contact.id = '" . $hoofdhuurder[0]['contact_id'] . "'";
+      WHERE civicrm_contact.id = '" . $hoofdhuurder[0]['contact_id'] . "'";*/
     
     $dao = CRM_Core_DAO::executeQuery($sql);
+    echo('<pre>');
+    print_r($dao);
+    echo('</pre>');
+    
     while ($dao->fetch()) {
       $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder = '" . $dao->sort_name . "', hoofdhuurder_street_address = '" . $dao->street_address . "',
         hoofdhuurder_email = '" . $dao->email . "', hoofdhuurder_phone = '" . $dao->phone . "'
@@ -877,7 +911,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       CRM_Core_DAO::executeQuery($sql);
     }
     
-    unset($hoofdhuurder);
+    //unset($hoofdhuurder);
     unset($sql);
     unset($dao);
   }

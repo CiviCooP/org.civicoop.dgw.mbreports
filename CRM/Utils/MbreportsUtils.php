@@ -134,7 +134,7 @@ class CRM_Utils_MbreportsUtils {
       return array();
     }
     $caseClients = CRM_Case_BAO_Case::getCaseClients($caseId);
-        
+    
     /*
      * assume first one is the one we need, De Goede Woning do not assign more
      * customers to a case
@@ -142,12 +142,12 @@ class CRM_Utils_MbreportsUtils {
     if (!empty($caseClients)) {
       $clientId = $caseClients[0];
     }
+    
     if (self::checkHuishouden($clientId) == FALSE) {
-      $huishoudenId = self::getHuishouden($clientId);
+      $huishoudenId = self::getHuishoudenId($clientId, 'hoofdhuurder');
     } else {
       $huishoudenId = $clientId;
     }
-    
     return CRM_Utils_DgwUtils::getHoofdhuurders($huishoudenId, false);
   }
   
@@ -164,7 +164,7 @@ class CRM_Utils_MbreportsUtils {
       $clientId = $caseClients[0];
     }
     if (self::checkHuishouden($clientId) == FALSE) {
-      $huishoudenId = self::getHuishouden($clientId);
+      $huishoudenId = self::getHuishoudenId($clientId, 'medehuurder');
     } else {
       $huishoudenId = $clientId;
     }
