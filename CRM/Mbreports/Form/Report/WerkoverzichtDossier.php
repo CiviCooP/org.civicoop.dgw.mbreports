@@ -655,7 +655,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           $where .= " ( " . $clause . " ) AND ";
           
         }else {
-          $clause = $this->whereClause($filter['field'], $filter['op'], $filter['value'], $filter['min'], $filter['max']);
+          $clause = $this->whereClause($filter['field'], $filter['op'], '\'' . $filter['value'] . '\'', $filter['min'], $filter['max']);
           $where .= $clause . " AND ";
         }
       }
