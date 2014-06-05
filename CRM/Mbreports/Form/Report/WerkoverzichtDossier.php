@@ -926,7 +926,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
       
       WHERE civicrm_relationship.contact_id_b = '" . $dao->contact_id_b . "' 
-      AND civicrm_relationship.relationship_type_id = '11'
+      AND civicrm_relationship.relationship_type_id = '13'
       AND civicrm_relationship.is_active = '1'
       ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
     
