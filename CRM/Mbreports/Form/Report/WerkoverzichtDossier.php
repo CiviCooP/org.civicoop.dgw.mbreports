@@ -54,7 +54,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('Dossier type'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array_merge(array('0' => ts('- select -')), $this->mbreportsConfig->caseTypes),
+          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->caseTypes,
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => 'case_type_id',
         ),
@@ -68,7 +68,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('Dossier status'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array_merge(array('0' => ts('- select -')), $this->mbreportsConfig->caseStatus),
+          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->caseStatus,
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => 'case_status_id',
         ),
@@ -144,7 +144,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('Ontruiming'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array('0' => ts('- select -'), 'J' => ts('Ja'), 'N' => ts('Nee')),
+          'options' => array('' => ts('- select -'), 'J' => ts('Ja'), 'N' => ts('Nee')),
           'type' => CRM_Utils_Type::T_STRING,
           'dbAlias' => 'ontruiming',
         ),
@@ -157,7 +157,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('Ontruiming status '),
           'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array_merge(array('0' => ts('- select -')), $this->mbreportsConfig->activityStatus),
+          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->activityStatus,
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => 'ontruiming_status_id',
         ),
@@ -199,7 +199,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('Complex'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array_merge(array('0' => ts('- select -')), $this->mbreportsConfig->complexList),
+          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->complexList,
           'type' => CRM_Utils_Type::T_STRING,
           'dbAlias' => 'property_complex_id',
         ),
@@ -216,7 +216,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('Wijk'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array_merge(array('0' => ts('- select -')), $this->mbreportsConfig->wijkList),
+          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->wijkList,
           'type' => CRM_Utils_Type::T_STRING,
           'dbAlias' => 'property_block',
         ),
@@ -234,7 +234,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           'title' => ts('Buurt'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
           'options' => $city_regions,
-          'options' => array_merge(array('0' => ts('- select -')), $this->mbreportsConfig->buurtList),
+          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->buurtList,
           'type' => CRM_Utils_Type::T_STRING,
           'dbAlias' => 'property_city_region',
         ),
@@ -251,7 +251,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('VGE type'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array_merge(array('0' => ts('- select -')), $this->mbreportsConfig->VgeTypeList),
+          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->VgeTypeList,
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => 'property_vge_type',
         ),
@@ -404,12 +404,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $this->beginPostProcess();
     
     $this->setformFields();  
-    
-    echo('<pre>');
-    print_r($this->formFilter);
-    echo('</pre>');
-    exit();
-    
+        
     $this->select();
     $this->from();
     $this->where();
