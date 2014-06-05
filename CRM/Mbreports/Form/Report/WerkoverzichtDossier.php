@@ -694,6 +694,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     
     $sql .= $orderby;
         
+    echo('sql: ' . $sql) . '<br/>' . PHP_EOL;
+    
     $rows = array();
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
