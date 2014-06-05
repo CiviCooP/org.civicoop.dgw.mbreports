@@ -907,7 +907,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   private function addTempMedehuurder($daoTemp){
     // get hoofdhuurder id
     $sql = "SELECT hoofdhuurder_id FROM werkoverzicht_dossier WHERE case_id = '" . $daoTemp->case_id . "' LIMIT 1";
-    CRM_Core_DAO::executeQuery($sql);
+    $dao = CRM_Core_DAO::executeQuery($sql);
     $dao->fetch();
     
     // get household from hoofhuurder id
@@ -915,7 +915,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       WHERE civicrm_relationship.contact_id_a = '" . $dao->hoofdhuurder_id . "'
       AND civicrm_relationship.relationship_type_id = '11'
       AND civicrm_relationship.is_active = '1' LIMIT 1 ";
-    CRM_Core_DAO::executeQuery($sql);
+    $dao = CRM_Core_DAO::executeQuery($sql);
     $dao->fetch();
     
     // get medehuurder from household
@@ -925,7 +925,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       WHERE civicrm_contact.id = '" . $dao->contact_id_b . "' 
       ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
     
-    CRM_Core_DAO::executeQuery($sql);
+    $dao = CRM_Core_DAO::executeQuery($sql);
     $dao->fetch();
     
     $sql = "UPDATE werkoverzicht_dossier SET medehuurder_id =  '" . $dao->id . "', medehuurder = '" . $dao->sort_name . "', 
