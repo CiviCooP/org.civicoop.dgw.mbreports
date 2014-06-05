@@ -863,95 +863,48 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     unset($dao);
   }
   
-  private function addTempHoofdhuurder($daoTemp){
-    
-    echo('$daoTemp') . '<br/>' . PHP_EOL;
-    echo('<pre>');
-    print_r($daoTemp);
-    echo('</pre>');
-    
-    var_dump($daoTemp->case_contact_id);
-    
-    if(!empty($daoTemp->case_contact_id) and NULL != $daoTemp->case_contact_id){
-    echo('check house') . '<br/>' . PHP_EOL;
+  private function addTempHoofdhuurder($daoTemp){    
+    echo('$daoTemp->case_contact_id: ' . $daoTemp->case_contact_id) . '<br/>' . PHP_EOL;
     
     // check if it is a household
-    $params = array(
-      'version' => 3,
-      'sequential' => 1,
-      'id' => $daoTemp->case_contact_id,
-    );
+    $sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
+      LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
+      LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
+      WHERE civicrm_contact.id = '" . $daoTemp->case_contact_id . "' 
+      ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
     
-    echo('check house $params') . '<br/>' . PHP_EOL;
-    echo('<pre>');
-    print_r($params);
-    echo('</pre>');
+    echo('$sql a: ' . $sql) . '<br/>' . PHP_EOL;
     
-    $result = civicrm_api('Contact', 'getsingle', $params);
+    $dao = CRM_Core_DAO::executeQuery($sql);
     
-    echo('check house $result') . '<br/>' . PHP_EOL;
-    echo('<pre>');
-    print_r($result);
-    echo('</pre>');
-    
-    // if it is a household get the contact_id of the hoofdhuurder
-    if('Household' == $result['contact_type']){ // if household
+    $dao->fetch();
+    if('Household' == $dao->contact_type){
+      // get hoofdhuurder from household
+      $sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
+      LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
+      LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
       
-      echo('Household') . '<br/>' . PHP_EOL;
+      LEFT JOIN civicrm_relationship.contact_id_a = civicrm_contact.id
+
+      WHERE civicrm_relationship.contact_id_b = '" . $daoTemp->case_contact_id . "'
+      AND civicrm_relationship.relationship_type_id = '11'
+      ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
+      echo('$sql b: ' . $sql) . '<br/>' . PHP_EOL;
       
-      $params = array(
-        'version' => 3,
-        'sequential' => 1,
-        'relationship_type_id' => 11,
-        'contact_id_b' => $daoTemp->case_contact_id,
-      );
-      
-      echo('Household $params') . '<br/>' . PHP_EOL;
-      echo('<pre>');
-      print_r($params);
-      echo('</pre>');
-      
-      $result = civicrm_api('Relationship', 'getsingle', $params);
-      
-      echo('Household $result') . '<br/>' . PHP_EOL;
-      echo('<pre>');
-      print_r($result);
-      echo('</pre>');
-      
-      echo('contact_id_a') . '<br/>' . PHP_EOL;
-      
-      $params = array(
-        'version' => 3,
-        'sequential' => 1,
-        'id' => $result['contact_id_a'],
-      );
-      
-      echo('contact_id_a $params') . '<br/>' . PHP_EOL;
-      echo('<pre>');
-      print_r($params);
-      echo('</pre>');
-      
-      $result = civicrm_api('Contact', 'getsingle', $params);
-      
-      echo('contact_id_a $result') . '<br/>' . PHP_EOL;
-      echo('<pre>');
-      print_r($result);
-      echo('</pre>');
+      $dao = CRM_Core_DAO::executeQuery($sql);
+      $dao->fetch();
     }
     
     $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder = '" . $result['sort_name'] . "', hoofdhuurder_street_address = '" . $result['street_address'] . "',
-      hoofdhuurder_email = '" . $result['email'] . "', hoofdhuurder_phone = '" . $result['phone'] . "'
+      hoofdhuurder_email = '" . $result['email'] . "', hoofdhuurder_phone = '" . $resultphone . "'
       WHERE case_id = '" . $daoTemp->case_id . "'";
     
-    echo('$sql: ') . $sql . '<br/>' . PHP_EOL;
+    echo('$sql c: ' . $sql) . '<br/>' . PHP_EOL;
     
     CRM_Core_DAO::executeQuery($sql);
     
-    unset($params);
-    unset($result);
     unset($sql);
     unset($dao);
-    }
   }
   
   private function addTempMedehuurder($daoTemp){
