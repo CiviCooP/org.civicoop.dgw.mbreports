@@ -871,6 +871,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       'id' => $daoTemp->contact_id,
     );
     $result = civicrm_api('Contact', 'getsingle', $params);
+    
+    echo('$result') . '<br/>' . PHP_EOL;
     echo('<pre>');
     print_r($result);
     echo('</pre>');
@@ -907,6 +909,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       WHERE civicrm_contact.id = '" . $hoofdhuurder[0]['contact_id'] . "'";*/
     
     $dao = CRM_Core_DAO::executeQuery($sql);
+    echo('dao') . '<br/>' . PHP_EOL;
     echo('<pre>');
     print_r($dao);
     echo('</pre>');
