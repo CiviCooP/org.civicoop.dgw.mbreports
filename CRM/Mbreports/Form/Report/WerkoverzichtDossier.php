@@ -868,7 +868,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     
     var_dump($daoTemp->case_contact_id);
     
-    if(!empty($daoTemp->case_contact_id) and 'NULL' != $daoTemp->case_contact_id and NULL != $daoTemp->case_contact_id and !is_null($daoTemp->case_contact_id)){
     // check if it is a household
     $sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
       LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
@@ -908,7 +907,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     
     unset($sql);
     unset($dao);
-    }
   }
   
   private function addTempMedehuurder($daoTemp){
