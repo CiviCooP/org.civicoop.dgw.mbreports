@@ -864,13 +864,13 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   private function addTempHoofdhuurder($daoTemp){    
-    echo('$daoTemp->contact_id: ' . $daoTemp->contact_id) . '<br/>' . PHP_EOL;
+    echo('$daoTemp->case_contact_id: ' . $daoTemp->case_contact_id) . '<br/>' . PHP_EOL;
     
     // check if it is a household
     $params = array(
       'version' => 3,
       'sequential' => 1,
-      'id' => $daoTemp->contact_id,
+      'id' => $daoTemp->case_contact_id,
     );
     $result = civicrm_api('Contact', 'getsingle', $params);
     
@@ -887,7 +887,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         
         LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
 
-        WHERE civicrm_relationship.contact_id_b = '" . $daoTemp->contact_id . "'
+        WHERE civicrm_relationship.contact_id_b = '" . $daoTemp->case_contact_id . "'
         AND civicrm_relationship.relationship_type_id = '11' 
         AND civicrm_phone.is_primary = '1'
         AND civicrm_email.is_primary = '1' 
@@ -897,7 +897,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
         LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
         LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
-        WHERE civicrm_contact.id = '" . $daoTemp->contact_id . "'
+        WHERE civicrm_contact.id = '" . $daoTemp->case_contact_id . "'
         AND civicrm_phone.is_primary = '1'
         AND civicrm_email.is_primary = '1'
         LIMIT 1 ";
