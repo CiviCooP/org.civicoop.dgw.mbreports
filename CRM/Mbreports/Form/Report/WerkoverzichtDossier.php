@@ -922,7 +922,12 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
       LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
       LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
-      WHERE civicrm_contact.id = '" . $dao->contact_id_b . "' 
+      
+      LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
+      
+      WHERE civicrm_relationship.contact_id_b = '" . $dao->contact_id_b . "' 
+      AND civicrm_relationship.relationship_type_id = '11'
+      AND civicrm_relationship.is_active = '1'
       ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
     
     $dao = CRM_Core_DAO::executeQuery($sql);
