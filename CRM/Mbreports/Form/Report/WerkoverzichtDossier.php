@@ -779,6 +779,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   private function addTempDossiermanager(){
     $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_relationship.case_id FROM civicrm_contact
       LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_b = civicrm_contact.id
+      AND civicrm_relationship.is_active = '1'
       WHERE civicrm_relationship.relationship_type_id = '" . $this->mbreportsConfig->dossierManagerRelationshipTypeId . "'";
     
     $dao = CRM_Core_DAO::executeQuery($sql);
@@ -795,6 +796,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   private function addTempDeurwaarder(){
     $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_relationship.case_id FROM civicrm_contact
       LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_b = civicrm_contact.id
+      AND civicrm_relationship.is_active = '1'
       WHERE civicrm_relationship.relationship_type_id = '" . $this->mbreportsConfig->deurwaarderRelationshipTypeId . "'";
     
     $dao = CRM_Core_DAO::executeQuery($sql);
@@ -867,7 +869,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   private function addTempHoofdhuurder($daoTemp){
     // check if it is a household
-    $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_address.street_address, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
+    $sql = "SELECT civicrm_contact.id, civicrm_contact.contact_type, civicrm_contact.sort_name, civicrm_address.street_address, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
       LEFT JOIN civicrm_address ON civicrm_address.contact_id = civicrm_contact.id
       LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
       LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
@@ -883,7 +885,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
       LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
       
-      LEFT JOIN civicrm_relationship.contact_id_a = civicrm_contact.id
+      LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
 
       WHERE civicrm_relationship.contact_id_b = '" . $daoTemp->case_contact_id . "'
       AND civicrm_relationship.relationship_type_id = '11'
