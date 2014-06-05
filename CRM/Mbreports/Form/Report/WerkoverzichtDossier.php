@@ -865,6 +865,11 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   private function addTempHoofdhuurder($daoTemp){
     
+    echo('$daoTemp') . '<br/>' . PHP_EOL;
+    echo('<pre>');
+    print_r($daoTemp);
+    echo('</pre>');
+    
     echo('check house') . '<br/>' . PHP_EOL;
     
     // check if it is a household
