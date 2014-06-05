@@ -866,6 +866,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   private function addTempHoofdhuurder($daoTemp){    
     echo('$daoTemp->case_contact_id: ' . $daoTemp->case_contact_id) . '<br/>' . PHP_EOL;
     
+    var_dump($daoTemp->case_contact_id);
+    
     if(!empty($daoTemp->case_contact_id)){
     // check if it is a household
     $sql = "SELECT civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
