@@ -652,7 +652,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
                 
         if('case_type_id' == $field){
           if('eq' == $filter['op']){
-            $where .= " ( " . $field . " LIKE '%" . $filter['value'] . "%' AND ";
+            $where .= " ( " . $field . " LIKE '%" . $filter['value'] . "%' ) AND ";
           }
                     
         }else if (CRM_Report_Form::OP_DATE == $filter['operatorType']) {
