@@ -864,46 +864,69 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   private function addTempHoofdhuurder($daoTemp){
+    
+    echo('check house') . '<br/>' . PHP_EOL;
+    
     // check if it is a household
     $params = array(
       'version' => 3,
       'sequential' => 1,
       'id' => $daoTemp->case_contact_id,
     );
-    $result = civicrm_api('Contact', 'getsingle', $params);
     
-    echo('check house') . '<br/>' . PHP_EOL;
+    echo('check house $params') . '<br/>' . PHP_EOL;
     echo('<pre>');
     print_r($params);
+    echo('</pre>');
+    
+    $result = civicrm_api('Contact', 'getsingle', $params);
+    
+    echo('check house $result') . '<br/>' . PHP_EOL;
+    echo('<pre>');
     print_r($result);
     echo('</pre>');
     
     // if it is a household get the contact_id of the hoofdhuurder
     if('Household' == $result['contact_type']){ // if household
+      
+      echo('Household') . '<br/>' . PHP_EOL;
+      
       $params = array(
         'version' => 3,
         'sequential' => 1,
         'relationship_type_id' => 11,
         'contact_id_b' => $daoTemp->case_contact_id,
       );
-      $result = civicrm_api('Relationship', 'getsingle', $params);
       
-      echo('Household') . '<br/>' . PHP_EOL;
+      echo('Household $params') . '<br/>' . PHP_EOL;
       echo('<pre>');
       print_r($params);
+      echo('</pre>');
+      
+      $result = civicrm_api('Relationship', 'getsingle', $params);
+      
+      echo('Household $result') . '<br/>' . PHP_EOL;
+      echo('<pre>');
       print_r($result);
       echo('</pre>');
+      
+      echo('contact_id_a') . '<br/>' . PHP_EOL;
       
       $params = array(
         'version' => 3,
         'sequential' => 1,
         'id' => $result['contact_id_a'],
       );
-      $result = civicrm_api('Contact', 'getsingle', $params);
       
-      echo('contact_id_a') . '<br/>' . PHP_EOL;
+      echo('contact_id_a $params') . '<br/>' . PHP_EOL;
       echo('<pre>');
       print_r($params);
+      echo('</pre>');
+      
+      $result = civicrm_api('Contact', 'getsingle', $params);
+      
+      echo('contact_id_a $result') . '<br/>' . PHP_EOL;
+      echo('<pre>');
       print_r($result);
       echo('</pre>');
     }
