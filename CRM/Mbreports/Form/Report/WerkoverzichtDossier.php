@@ -714,10 +714,16 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     while ($dao->fetch()) {
       $row = array();
       foreach($this->_columnHeaders as $field => $title){
-        if('case_start_date' == $field){
-         $row[$field] = date('d-m-Y', strtotime($dao->$field));
-        }else {
-          $row[$field] = $dao->$field;
+        
+        switch($field){
+          case 'case_start_date':
+          case 'ontruiming_activity_date_time':
+          case 'vonnis_activity_date_time':
+            $row[$field] = date('d-m-Y', strtotime($dao->$field));
+            break;
+          
+          default:
+            $row[$field] = $dao->$field;
         }
       }
       
