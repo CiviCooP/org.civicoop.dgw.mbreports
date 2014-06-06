@@ -1,4 +1,8 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', TRUE);
+ini_set('display_startup_errors', TRUE);
+
 /**
  * Util functions for mbreports
  * 
@@ -401,8 +405,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   function postProcess() {
     set_time_limit(0);
     
-    ini_set('error_reporting', E_ALL);
-    ini_set('display_errors', 'On');
+    
     
     $this->beginPostProcess();
     
