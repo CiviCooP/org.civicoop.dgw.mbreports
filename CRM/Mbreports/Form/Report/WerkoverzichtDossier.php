@@ -92,6 +92,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           'default'      => 'this.month',
           'operatorType' => CRM_Report_Form::OP_DATE,
           'type' => CRM_Utils_Type::T_DATE,
+          'required' => TRUE,
           'dbAlias' => 'case_start_date_stamp',
         ),
         'order_bys' => array(
@@ -406,8 +407,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   function postProcess() {
     set_time_limit(0);
     
-    
-    
     $this->beginPostProcess();
     
     $this->setformFields();  
@@ -531,8 +530,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   private function setColumnHeaders(){
-    foreach($this->formFields as $field => $boolean){
-      $this->_columnHeaders[$field] = array('title' => $this->fields[$field]['title']);
+    foreach($this->fields as $field => $values){
+      if(isset($this->formFields[$field])){
+        $this->_columnHeaders[$field] = array('title' => $values['title']);
+      }
     }
   }
   
@@ -700,18 +701,28 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     }
     
     $sql .= $orderby;
-        
-    echo('sql: ' . $sql) . '<br/>' . PHP_EOL;
+    
+    unset($this->fields);
+    unset($this->formFields);
+    unset($this->formFilter);
+    unset($this->formOrderBy);
+    unset($this->formGroupBy);
+    unset($this->mbreportsConfig);
     
     $rows = array();
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
       $row = array();
       foreach($this->_columnHeaders as $field => $title){
-        $row[$field] = $dao->$field;
+        if('case_start_date' == $field){
+         $row[$field] = date('d-m-Y', strtotime($dao->$field));
+        }else {
+          $row[$field] = $dao->$field;
+        }
       }
       
       $rows[] = $row;
+      unset($row);
     }
     
     unset($sql);
@@ -719,7 +730,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   private function createTempTable(){
-    $sql = "CREATE TABLE IF NOT EXISTS werkoverzicht_dossier (
+    $sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (
       case_id INT(11),
       case_subject VARCHAR(128),
       case_type_id VARCHAR(128),
