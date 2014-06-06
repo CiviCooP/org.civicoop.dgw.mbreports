@@ -907,17 +907,35 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $dao->fetch();
     if('Household' == $dao->contact_type){
       // get hoofdhuurder from household
-      $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
-      LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
-      LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
-      
-      LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
+      $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_address.street_address, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
+        LEFT JOIN civicrm_address ON civicrm_address.contact_id = civicrm_contact.id
+        LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
+        LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
 
-      WHERE civicrm_relationship.contact_id_b = '" . $daoTemp->case_contact_id . "'
-      AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
-      AND civicrm_relationship.is_active = '1'
-      ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
+        LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
+
+        WHERE civicrm_relationship.contact_id_b = '" . $daoTemp->case_contact_id . "'
+        AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
+        AND civicrm_relationship.is_active = '1'
+        ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
       
+      $dao = CRM_Core_DAO::executeQuery($sql);
+      $dao->fetch();
+      
+    }else {
+      // make sure that it has the raltionship hoofdhuurder
+      $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_address.street_address, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
+        LEFT JOIN civicrm_address ON civicrm_address.contact_id = civicrm_contact.id
+        LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
+        LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
+
+        LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
+
+        WHERE civicrm_relationship.contact_id_a = '" . $daoTemp->case_contact_id . "'
+        AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
+        AND civicrm_relationship.is_active = '1'
+        ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
+
       $dao = CRM_Core_DAO::executeQuery($sql);
       $dao->fetch();
     }
