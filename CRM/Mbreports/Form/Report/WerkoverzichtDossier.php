@@ -895,12 +895,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   private function addTempHoofdhuurder($daoTemp){
     // check if it is a household
-    $sql = "SELECT civicrm_contact.id, civicrm_contact.contact_type, civicrm_contact.sort_name, civicrm_address.street_address, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
-      LEFT JOIN civicrm_address ON civicrm_address.contact_id = civicrm_contact.id
-      LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
-      LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
+    $sql = "SELECT civicrm_contact.id, civicrm_contact.contact_type FROM civicrm_contact
       WHERE civicrm_contact.id = '" . $daoTemp->case_contact_id . "' 
-      ORDER BY civicrm_address.is_primary DESC, civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
+      LIMIT 1";
     
     $dao = CRM_Core_DAO::executeQuery($sql);
     
