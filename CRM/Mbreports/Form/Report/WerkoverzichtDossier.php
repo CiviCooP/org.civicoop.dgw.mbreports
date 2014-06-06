@@ -401,6 +401,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   function postProcess() {
     set_time_limit(0);
     
+    ini_set('error_reporting', E_ALL);
+    ini_set('display_errors', 'On');
+    
     $this->beginPostProcess();
     
     $this->setformFields();  
@@ -649,13 +652,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     if(!empty($this->formFilter)){
       $where = " WHERE ";
       foreach($this->formFilter as $field => $filter){
-                
-        /*if('case_type_id' == $field){
-          if('eq' == $filter['op']){
-            $where .= " ( " . $field . " = '" . CRM_Core_DAO::VALUE_SEPARATOR . $filter['value'] . CRM_Core_DAO::VALUE_SEPARATOR . "' ) AND ";
-          }   
-        }*/
-          
+        
         if (CRM_Report_Form::OP_DATE == $filter['operatorType']) {
           $clause = $this->dateClause($field, $filter['relative'], $filter['from'], $filter['to'], CRM_Utils_Type::T_DATE);
           $where .= " ( " . $clause . " ) AND ";
