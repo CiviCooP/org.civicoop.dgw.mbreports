@@ -1,6 +1,7 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', TRUE);
+error_reporting(-1);  // Have PHP complain about absolutely everything 
+$conf['error_level'] = 2;  // Show all messages on your screen, 2 = ERROR_REPORTING_DISPLAY_ALL.
+ini_set('display_errors', TRUE);  // These lines just give you content on WSOD pages.
 ini_set('display_startup_errors', TRUE);
 
 /**
