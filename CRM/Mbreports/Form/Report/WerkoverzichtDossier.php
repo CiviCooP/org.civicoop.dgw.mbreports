@@ -822,6 +822,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       foreach($ov_types as $key => $ov_type){
         $sql = "SELECT label FROM civicrm_property_type WHERE id = '" . $ov_type . "' LIMIT 1";
         $dao_labels = CRM_Core_DAO::executeQuery($sql);
+        $dao_labels->fetch();
         
         $labels[] = $dao_labels->label;
       }
