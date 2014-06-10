@@ -829,7 +829,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         }
       }
       
-      $sql = "UPDATE werkoverzicht_dossier SET typeringen = '" . addslashes(implode(',', $labels)) . "' WHERE case_id = '" . $dao->entity_id . "'";
+      $sql = "UPDATE werkoverzicht_dossier SET typeringen = '" . addslashes(implode(', ', $labels)) . "' WHERE case_id = '" . $dao->entity_id . "'";
       CRM_Core_DAO::executeQuery($sql);
     }
     
@@ -972,6 +972,12 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
 
       $dao = CRM_Core_DAO::executeQuery($sql);
       $dao->fetch();
+      
+      echo('hoofdhuurder: ') . '<br/>' . PHP_EOL;
+      
+      echo('<pre>');
+      print_r($dao);
+      echo('</pre>');
     }
     
     $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_id =  '" . $dao->id . "', hoofdhuurder = '" . $dao->sort_name . "', hoofdhuurder_street_address = '" . $dao->street_address . "',
