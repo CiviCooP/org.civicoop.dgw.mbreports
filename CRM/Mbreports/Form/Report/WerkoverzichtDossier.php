@@ -59,6 +59,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('Dossier type'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
+          'operator' => 'like',
           'options' => array('' => ts('- select -')) + $this->mbreportsConfig->caseTypes,
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => 'case_type_id',
@@ -257,6 +258,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('VGE type'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
+          'operator' => 'like',
           'options' => array('' => ts('- select -')) + $this->mbreportsConfig->VgeTypeList,
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => 'property_vge_type',
@@ -554,7 +556,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     while ($daoTemp->fetch()) {
       $sql = "INSERT INTO werkoverzicht_dossier 
         (case_id, case_subject, case_type_id, case_case_type, case_status_id, case_status, case_start_date_stamp, case_start_date, case_contact_id)
-        VALUES ('" . $daoTemp->case_id . "', '" . addslashes($daoTemp->case_subject) . "', '" . str_replace(CRM_Core_DAO::VALUE_SEPARATOR, '', $daoTemp->case_type_id) . "', '" . addslashes($daoTemp->case_case_type) . "', '" . $daoTemp->case_status_id . "', '" . addslashes($daoTemp->case_status) . "', '" . str_replace('-', '', $daoTemp->case_start_date) . "', '" . $daoTemp->case_start_date . "', '" . $daoTemp->case_contact_id . "' )";
+        VALUES ('" . $daoTemp->case_id . "', '" . addslashes($daoTemp->case_subject) . "', '" . $daoTemp->case_type_id . "', '" . addslashes($daoTemp->case_case_type) . "', '" . $daoTemp->case_status_id . "', '" . addslashes($daoTemp->case_status) . "', '" . str_replace('-', '', $daoTemp->case_start_date) . "', '" . $daoTemp->case_start_date . "', '" . $daoTemp->case_contact_id . "' )";
       
       CRM_Core_DAO::executeQuery($sql);
       
@@ -658,6 +660,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $where = " WHERE ";
       foreach($this->formFilter as $field => $filter){
         
+        if('case_type_id' == $field or 'property_vge_type' == $field){
+          $filter['value'] = CRM_Core_DAO::VALUE_SEPARATOR . $filter['value'] . CRM_Core_DAO::VALUE_SEPARATOR;
+        }
+        
         if (CRM_Report_Form::OP_DATE == $filter['operatorType']) {
           $clause = $this->dateClause($field, $filter['relative'], $filter['from'], $filter['to'], CRM_Utils_Type::T_DATE);
           $where .= " ( " . $clause . " ) AND ";
@@ -701,6 +707,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     }
     
     $sql .= $orderby;
+    
+    echo('$sql: ' . $sql);
     
     unset($this->fields);
     unset($this->formFields);
