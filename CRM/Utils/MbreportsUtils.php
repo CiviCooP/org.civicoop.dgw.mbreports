@@ -107,7 +107,7 @@ class CRM_Utils_MbreportsUtils {
     }
   }
   
-  private function getHuishoudenId($contactId, $type) {
+  static private function getHuishoudenId($contactId, $type) {
     $mbreportsConfig = CRM_Mbreports_Config::singleton();
     $query = 'SELECT contact_id_b FROM civicrm_relationship WHERE relationship_type_id = %1 AND contact_id_a = %2 ORDER BY end_date DESC';
     if ($type == 'hoofdhuurder') {
