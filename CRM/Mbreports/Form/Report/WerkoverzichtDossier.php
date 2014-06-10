@@ -264,14 +264,14 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           'operator' => 'like',
           'options' => array('' => ts('- select -')) + $this->mbreportsConfig->VgeTypeList,
           'type' => CRM_Utils_Type::T_INT,
-          'dbAlias' => 'property_vge_type',
+          'dbAlias' => 'vge_type_id',
         ),
         'order_bys' => array(
           'name' => 'vge_type_id',
           'title' => ts('VGE type'),
           'alias' => 'vge_type_id',
         ),
-      ),
+      ),     
       'hoofdhuurder' => array(
         'title' => ts('Hoofdhuurder naam'),
         'name' => 'hoofdhuurder',
