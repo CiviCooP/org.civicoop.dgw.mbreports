@@ -935,48 +935,53 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       LIMIT 1";
     
     $dao = CRM_Core_DAO::executeQuery($sql);
-    
     $dao->fetch();
-    if('Household' == $dao->contact_type){
-      // get hoofdhuurder from household
-      $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_address.street_address, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
-        LEFT JOIN civicrm_address ON civicrm_address.contact_id = civicrm_contact.id
-        LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
-        LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
+    
+    if($dao->N){
+    
+      if('Household' == $dao->contact_type){
+        // get hoofdhuurder from household
+        $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_address.street_address, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
+          LEFT JOIN civicrm_address ON civicrm_address.contact_id = civicrm_contact.id
+          LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
+          LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
 
-        LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
+          LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
 
-        WHERE civicrm_relationship.contact_id_b = '" . $daoTemp->case_contact_id . "'
-        AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
-        AND civicrm_relationship.is_active = '1'
-        ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
+          WHERE civicrm_relationship.contact_id_b = '" . $daoTemp->case_contact_id . "'
+          AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
+          AND civicrm_relationship.is_active = '1'
+          ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
+
+        $dao = CRM_Core_DAO::executeQuery($sql);
+        $dao->fetch();
+
+      }else {
+        // make sure that it has the raltionship hoofdhuurder
+        $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_address.street_address, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
+          LEFT JOIN civicrm_address ON civicrm_address.contact_id = civicrm_contact.id
+          LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
+          LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
+
+          LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
+
+          WHERE civicrm_relationship.contact_id_a = '" . $daoTemp->case_contact_id . "'
+          AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
+          AND civicrm_relationship.is_active = '1'
+          ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
+
+        $dao = CRM_Core_DAO::executeQuery($sql);
+        $dao->fetch();
+      }
       
-      $dao = CRM_Core_DAO::executeQuery($sql);
-      $dao->fetch();
-      
-    }else {
-      // make sure that it has the raltionship hoofdhuurder
-      $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_address.street_address, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
-        LEFT JOIN civicrm_address ON civicrm_address.contact_id = civicrm_contact.id
-        LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
-        LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
+      if($dao->N){
+        $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_id =  '" . $dao->id . "', hoofdhuurder = '" . $dao->sort_name . "', hoofdhuurder_street_address = '" . $dao->street_address . "',
+          hoofdhuurder_email = '" . $dao->email . "', hoofdhuurder_phone = '" . $dao->phone . "'
+          WHERE case_id = '" . $daoTemp->case_id . "'";
 
-        LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
-
-        WHERE civicrm_relationship.contact_id_a = '" . $daoTemp->case_contact_id . "'
-        AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
-        AND civicrm_relationship.is_active = '1'
-        ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
-
-      $dao = CRM_Core_DAO::executeQuery($sql);
-      $dao->fetch();
+        CRM_Core_DAO::executeQuery($sql);
+      }
     }
-    
-    $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_id =  '" . $dao->id . "', hoofdhuurder = '" . $dao->sort_name . "', hoofdhuurder_street_address = '" . $dao->street_address . "',
-      hoofdhuurder_email = '" . $dao->email . "', hoofdhuurder_phone = '" . $dao->phone . "'
-      WHERE case_id = '" . $daoTemp->case_id . "'";
-    
-    CRM_Core_DAO::executeQuery($sql);
 
     unset($sql);
     unset($dao);
@@ -988,39 +993,40 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $dao = CRM_Core_DAO::executeQuery($sql);
     $dao->fetch();
     
-    // get household from hoofhuurder id
-    $sql = "SELECT civicrm_relationship.contact_id_b FROM civicrm_relationship 
-      WHERE civicrm_relationship.contact_id_a = '" . $dao->hoofdhuurder_id . "'
-      AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
-      AND civicrm_relationship.is_active = '1' LIMIT 1 ";
-    $dao = CRM_Core_DAO::executeQuery($sql);
-    $dao->fetch();
+    if($dao->N){
+      // get household from hoofhuurder id
+      $sql = "SELECT civicrm_relationship.contact_id_b FROM civicrm_relationship 
+        WHERE civicrm_relationship.contact_id_a = '" . $dao->hoofdhuurder_id . "'
+        AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
+        AND civicrm_relationship.is_active = '1' LIMIT 1 ";
+      $dao = CRM_Core_DAO::executeQuery($sql);
+      $dao->fetch();
     
-    // get medehuurder from household
-    $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
-      LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
-      LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
-      
-      LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
-      
-      WHERE civicrm_relationship.contact_id_b = '" . $dao->contact_id_b . "' 
-      AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->medehuurderRelationshipTypeId . "'
-      AND civicrm_relationship.is_active = '1'
-      ORDER BY civicrm_email.is_primary DESC LIMIT 1";
-    
-    $dao = CRM_Core_DAO::executeQuery($sql);
-    $dao->fetch();
-    
-    echo('<pre>');
-    print_r($dao);
-    echo('</pre>');
-    
-    
-    $sql = "UPDATE werkoverzicht_dossier SET medehuurder_id =  '" . $dao->id . "', medehuurder = '" . $dao->sort_name . "', 
-      medehuurder_email = '" . $dao->email . "'
-      WHERE case_id = '" . $daoTemp->case_id . "'";
-    
-    CRM_Core_DAO::executeQuery($sql);
+      if($dao->N){
+        // get medehuurder from household
+        $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
+          LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
+          LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
+
+          LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
+
+          WHERE civicrm_relationship.contact_id_b = '" . $dao->contact_id_b . "' 
+          AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->medehuurderRelationshipTypeId . "'
+          AND civicrm_relationship.is_active = '1'
+          ORDER BY civicrm_email.is_primary DESC LIMIT 1";
+
+        $dao = CRM_Core_DAO::executeQuery($sql);
+        $dao->fetch();
+
+        if($dao->N){
+          $sql = "UPDATE werkoverzicht_dossier SET medehuurder_id =  '" . $dao->id . "', medehuurder = '" . $dao->sort_name . "', 
+            medehuurder_email = '" . $dao->email . "'
+            WHERE case_id = '" . $daoTemp->case_id . "'";
+
+          CRM_Core_DAO::executeQuery($sql);
+        }
+      }
+    }
     
     unset($sql);
     unset($dao);
