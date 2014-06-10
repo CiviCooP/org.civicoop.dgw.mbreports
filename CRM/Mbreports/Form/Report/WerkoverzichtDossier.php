@@ -61,8 +61,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'required' => TRUE,
         'filters' => array(
           'title' => ts('Dossier type'),
-          'operatorType' => CRM_Report_Form::OP_STRING,
-          //'operator' => 'like',
+          'operatorType' => CRM_Report_Form::OP_SELECT,
+          'operator' => 'like',
           'options' => array('' => ts('- select -')) + $this->mbreportsConfig->caseTypes,
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => 'case_type_id',
@@ -260,8 +260,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filter_name' => 'property_vge_type_op',
         'filters' => array(
           'title' => ts('VGE type'),
-          'operatorType' => CRM_Report_Form::OP_STRING,
-          //'operator' => 'like',
+          'operatorType' => CRM_Report_Form::OP_SELECT,
+          'operator' => 'like',
           'options' => array('' => ts('- select -')) + $this->mbreportsConfig->VgeTypeList,
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => 'property_vge_type',
@@ -544,7 +544,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   public function buildRows($sql, &$rows) {
-    set_time_limit(0);
+    //set_time_limit(0);
         
     /*
      * create temporary table to for case and additional data
@@ -666,9 +666,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         
         if('case_type_id' == $field or 'property_vge_type' == $field){
           $filter['value'] = CRM_Core_DAO::VALUE_SEPARATOR . $filter['value'] . CRM_Core_DAO::VALUE_SEPARATOR;
-        }
-        
-        if (CRM_Report_Form::OP_DATE == $filter['operatorType']) {
+          
+          $where .= " ( " . $filter['field'] . " LIKE '" . $filter['value'] . "' ) AND ";
+          
+        }else if (CRM_Report_Form::OP_DATE == $filter['operatorType']) {
           $clause = $this->dateClause($field, $filter['relative'], $filter['from'], $filter['to'], CRM_Utils_Type::T_DATE);
           $where .= " ( " . $clause . " ) AND ";
           
