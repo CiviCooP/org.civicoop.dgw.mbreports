@@ -4,6 +4,9 @@ $conf['error_level'] = 2;  // Show all messages on your screen, 2 = ERROR_REPORT
 ini_set('display_errors', TRUE);  // These lines just give you content on WSOD pages.
 ini_set('display_startup_errors', TRUE);
 
+set_time_limit(0);
+@ini_set('memory_limit', '128M');
+
 /**
  * Util functions for mbreports
  * 
@@ -407,7 +410,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   function postProcess() {
-    set_time_limit(0);
+    /*set_time_limit(0);
+    @ini_set('memory_limit', '128M');*/
     
     $this->beginPostProcess();
     
@@ -748,7 +752,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   private function createTempTable(){
-    $sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (
+    /*$sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (*/
+    $sql = "CREATE TABLE IF NOT EXISTS werkoverzicht_dossier (
       case_id INT(11),
       case_subject VARCHAR(128),
       case_type_id VARCHAR(128),
