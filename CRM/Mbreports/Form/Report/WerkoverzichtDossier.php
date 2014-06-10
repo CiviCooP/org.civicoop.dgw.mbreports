@@ -668,7 +668,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $where = " WHERE ";
       foreach($this->formFilter as $field => $filter){
         
-        if('case_type_id' == $field or 'property_vge_type_id' == $field){
+        if('case_type_id' == $field){
           $where .= " ( " . $field . " LIKE CONCAT ('%" . CRM_Core_DAO::VALUE_SEPARATOR . "'," . $filter['value'] . ",'" . CRM_Core_DAO::VALUE_SEPARATOR . "%') ) AND ";
           
         }else if (CRM_Report_Form::OP_DATE == $filter['operatorType']) {
