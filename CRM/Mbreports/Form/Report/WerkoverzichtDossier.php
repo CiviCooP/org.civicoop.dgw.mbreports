@@ -910,7 +910,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   private function addTempVge($daoTemp)
   {
-    $caseVgeData = CRM_Utils_MbreportsUtils::getCaseVgeData($daoTemp->case_id);
+    /*$caseVgeData = CRM_Utils_MbreportsUtils::getCaseVgeData($daoTemp->case_id);
     
     $sql = "SELECT civicrm_property.vge_id, civicrm_property.complex_id, civicrm_property.block, civicrm_property.city_region, civicrm_property.vge_type_id, civicrm_property_type.label AS vge_type FROM civicrm_property
       LEFT JOIN civicrm_property_type ON civicrm_property_type.id = civicrm_property.vge_type_id
@@ -927,10 +927,36 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     
     unset($caseVgeData);
     unset($sql);
-    unset($dao);
+    unset($dao);*/
+    
+    $hoofdhuurderId = CRM_Utils_MbreportsUtils::getCaseHoofdHuurderId($daoTemp->case_id);
+    
+    if(!empty($hoofdhuurderId)){
+      $caseVgeData = CRM_Utils_MbreportsUtils::getHoofdHuurderIdVgeData($hoofdhuurderId);
+      
+      $sql = "SELECT civicrm_property.vge_id, civicrm_property.complex_id, civicrm_property.block, civicrm_property.city_region, civicrm_property.vge_type_id, civicrm_property_type.label AS vge_type FROM civicrm_property
+      LEFT JOIN civicrm_property_type ON civicrm_property_type.id = civicrm_property.vge_type_id
+      WHERE civicrm_property.vge_id = '" . $caseVgeData['vge_nummer_first_6'] . "' ";
+        
+    $dao = CRM_Core_DAO::executeQuery($sql);    
+    while ($dao->fetch()) {
+      $sql = "UPDATE werkoverzicht_dossier SET property_vge_id = '" . $dao->vge_id . "', property_complex_id = '" . $dao->complex_id . "',
+        property_block = '" . $dao->block . "', property_city_region = '" . $dao->city_region . "', property_vge_type_id = '" . $dao->vge_type_id . "', 
+        property_vge_type = '" . $dao->vge_type . "'      
+        WHERE case_id = '" . $daoTemp->case_id . "'";
+      CRM_Core_DAO::executeQuery($sql);
+    }
+    
+    unset($caseVgeData);
+    unset($sql);
+    unset($dao);      
+    }
+    
+    unset($hoofdhuurderId);
   }
   
   private function addTempHoofdhuurder($daoTemp){
+    /*
     // check if it is a household
     $sql = "SELECT civicrm_contact.id, civicrm_contact.contact_type FROM civicrm_contact
       WHERE civicrm_contact.id = '" . $daoTemp->case_contact_id . "' 
@@ -979,15 +1005,33 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       print_r($dao);
       echo('</pre>');
     }
+    */
     
-    $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_id =  '" . $dao->id . "', hoofdhuurder = '" . $dao->sort_name . "', hoofdhuurder_street_address = '" . $dao->street_address . "',
-      hoofdhuurder_email = '" . $dao->email . "', hoofdhuurder_phone = '" . $dao->phone . "'
-      WHERE case_id = '" . $daoTemp->case_id . "'";
+    $hoofdhuurderId = CRM_Utils_MbreportsUtils::getCaseHoofdHuurderId($daoTemp->case_id);
     
-    CRM_Core_DAO::executeQuery($sql);
-    
-    unset($sql);
-    unset($dao);
+    if(!empty($hoofdhuurderId)){
+      $params = array(
+        'version' => 3,
+        'sequential' => 1,
+        'id' => $hoofdhuurderId,
+      );
+      $hoofdhuurder = civicrm_api('Contact', 'getsingle', $params);
+
+      if(isset($hoofdhuurder['is_error']) and !$hoofdhuurder['is_error']){
+        
+        $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_id =  '" . $hoofdhuurder['contact_id'] . "', hoofdhuurder = '" . $hoofdhuurder['sort_name'] . "', hoofdhuurder_street_address = '" . $hoofdhuurder['street_address'] . "',
+          hoofdhuurder_email = '" . $hoofdhuurder['email'] . "', hoofdhuurder_phone = '" . $hoofdhuurder['phone'] . "'
+          WHERE case_id = '" . $daoTemp->case_id . "'";
+
+        CRM_Core_DAO::executeQuery($sql);
+
+        unset($sql);
+        unset($dao);
+      }
+      
+      unset($hoofdhuurder);
+    }
+    unset($hoofdhuurderId);
   }
   
   private function addTempMedehuurder($daoTemp){
