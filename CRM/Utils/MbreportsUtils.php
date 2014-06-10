@@ -126,6 +126,7 @@ class CRM_Utils_MbreportsUtils {
       'sequential' => 1,
       'contact_id_a' => $hoofdhuurderId,
       'relationship_type_id' => $mbreportsConfig->hoofdhuurderRelationshipTypeId,
+      'is_active' => 1,
     );
     $result = civicrm_api('Relationship', 'getsingle', $params);
     
