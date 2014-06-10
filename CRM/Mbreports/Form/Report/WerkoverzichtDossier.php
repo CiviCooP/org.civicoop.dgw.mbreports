@@ -493,6 +493,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
               $filter_name = 'ontruiming_status_id';
             }
             
+            if('property_vge_type' == $field){
+              $filter_name = 'property_vge_type_id';
+            }
+            
             // add field at filter  
             if(CRM_Report_Form::OP_DATE == $values['filters']['operatorType']){ // OP_DATE
 
@@ -777,6 +781,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       property_complex_id VARCHAR(45),
       property_block VARCHAR(128),
       property_city_region VARCHAR(128),
+      property_vge_type_id INT(11),
       property_vge_type VARCHAR(128),
       hoofdhuurder_id INT(11),
       hoofdhuurder VARCHAR(128),
@@ -805,15 +810,27 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   private function addTempTyperingen(){
-    $sql = "SELECT civicrm_value_ov_data.entity_id, civicrm_property_type.label FROM civicrm_value_ov_data
-      LEFT JOIN civicrm_property_type ON civicrm_value_ov_data.ov_type LIKE CONCAT('%',civicrm_property_type.id,'%')";
+    // get all entity_id`s and ov_types`s
+    $sql = "SELECT entity_id, ov_type FROM civicrm_value_ov_data";
     $dao = CRM_Core_DAO::executeQuery($sql);
-        
+    
+    // get all labels by ov_type
     while ($dao->fetch()) {
-      $sql = "UPDATE werkoverzicht_dossier SET typeringen = '" . addslashes($dao->label) . "' WHERE case_id = '" . $dao->entity_id . "'";
+      $ov_types = explode(CRM_Core_DAO::VALUE_SEPARATOR, $dao->ov_type);
+      
+      $labels = array();
+      foreach($ov_types as $key => $ov_type){
+        $sql = "SELECT label FROM civicrm_property_type WHERE id = '" . $ov_type . "' LIMIT 1";
+        $dao_labels = CRM_Core_DAO::executeQuery($sql);
+        
+        $labels[] = $dao_labels->label;
+      }
+      
+      $sql = "UPDATE werkoverzicht_dossier SET typeringen = '" . addslashes(implode(',', $labels)) . "' WHERE case_id = '" . $dao->entity_id . "'";
       CRM_Core_DAO::executeQuery($sql);
     }
     
+    unset($dao_labels);
     unset($sql);
     unset($dao);
   }
@@ -899,7 +916,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $dao = CRM_Core_DAO::executeQuery($sql);    
     while ($dao->fetch()) {
       $sql = "UPDATE werkoverzicht_dossier SET property_vge_id = '" . $dao->vge_id . "', property_complex_id = '" . $dao->complex_id . "',
-        property_block = '" . $dao->block . "', property_city_region = '" . $dao->city_region . "', property_vge_type = '" . $dao->vge_type . "' 
+        property_block = '" . $dao->block . "', property_city_region = '" . $dao->city_region . "', property_vge_type_id = '" . $dao->vge_type_id . "', 
+        property_vge_type = '" . $dao->vge_type . "'      
         WHERE case_id = '" . $daoTemp->case_id . "'";
       CRM_Core_DAO::executeQuery($sql);
     }
