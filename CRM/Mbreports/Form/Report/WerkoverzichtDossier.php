@@ -1017,7 +1017,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       );
       $hoofdhuurder = civicrm_api('Contact', 'getsingle', $params);
 
-      if(isset($hoofdhuurder['is_error']) and !$hoofdhuurder['is_error']){
+      if(isset($hoofdhuurder['is_error']) and $hoofdhuurder['is_error']){
         
         $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_id =  '" . $hoofdhuurder['contact_id'] . "', hoofdhuurder = '" . $hoofdhuurder['sort_name'] . "', hoofdhuurder_street_address = '" . $hoofdhuurder['street_address'] . "',
           hoofdhuurder_email = '" . $hoofdhuurder['email'] . "', hoofdhuurder_phone = '" . $hoofdhuurder['phone'] . "'
