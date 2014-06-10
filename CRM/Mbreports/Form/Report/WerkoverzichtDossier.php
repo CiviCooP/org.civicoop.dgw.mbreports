@@ -243,7 +243,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('Buurt'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => $city_regions,
           'options' => array('' => ts('- select -')) + $this->mbreportsConfig->buurtList,
           'type' => CRM_Utils_Type::T_STRING,
           'dbAlias' => 'property_city_region',
