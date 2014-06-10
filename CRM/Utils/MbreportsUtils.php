@@ -54,6 +54,8 @@ class CRM_Utils_MbreportsUtils {
    * @static
    */
   static public function getCaseHoofdHuurderId($caseId) {
+    $mbreportsConfig = CRM_Mbreports_Config::singleton();
+    
     if (empty($caseId) || !is_numeric(($caseId))) {
       return array();
     }
@@ -79,7 +81,7 @@ class CRM_Utils_MbreportsUtils {
         LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
 
         WHERE civicrm_relationship.contact_id_b = '" . $clientId . "'
-        AND civicrm_relationship.relationship_type_id = '" .  $this->hoofdhuurderRelationshipTypeId . "'
+        AND civicrm_relationship.relationship_type_id = '" .  $mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
         AND civicrm_relationship.is_active = '1'
         ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
       
@@ -92,7 +94,7 @@ class CRM_Utils_MbreportsUtils {
         LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
 
         WHERE civicrm_relationship.contact_id_a = '" . $clientId . "'
-        AND civicrm_relationship.relationship_type_id = '" .  $this->hoofdhuurderRelationshipTypeId . "'
+        AND civicrm_relationship.relationship_type_id = '" .  $mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
         AND civicrm_relationship.is_active = '1'
         ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
 
@@ -114,6 +116,8 @@ class CRM_Utils_MbreportsUtils {
    * @static
    */
   static public function getHoofdHuurderIdVgeData($hoofdhuurderId) {
+    $mbreportsConfig = CRM_Mbreports_Config::singleton();
+    
     if (empty($hoofdhuurderId) || !is_numeric(($hoofdhuurderId))) {
       return array();
     }
@@ -123,7 +127,7 @@ class CRM_Utils_MbreportsUtils {
       'version' => 3,
       'sequential' => 1,
       'contact_id_a' => $hoofdhuurderId,
-      'relationship_type_id' => $this->hoofdhuurderRelationshipTypeId,
+      'relationship_type_id' => $mbreportsConfig->hoofdhuurderRelationshipTypeId,
     );
     $result = civicrm_api('Relationship', 'getsingle', $params);
     
