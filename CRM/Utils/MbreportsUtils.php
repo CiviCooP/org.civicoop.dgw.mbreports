@@ -31,9 +31,11 @@ class CRM_Utils_MbreportsUtils {
      * assume first one is the one we need, De Goede Woning do not assign more
      * customers to a case
      */
+    $clientId = 0;
     if (!empty($caseClients)) {
       $clientId = $caseClients[0];
     }
+    
     if (self::checkHuishouden($clientId) == FALSE) {
       $huishoudenId = self::getHuishouden($clientId);
     } else {
