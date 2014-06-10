@@ -82,8 +82,7 @@ class CRM_Utils_MbreportsUtils {
 
         WHERE civicrm_relationship.contact_id_b = '" . $clientId . "'
         AND civicrm_relationship.relationship_type_id = '" .  $mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
-        AND civicrm_relationship.is_active = '1'
-        ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
+        AND civicrm_relationship.is_active = '1' LIMIT 1";
       
       $dao = CRM_Core_DAO::executeQuery($sql);
       $dao->fetch();
@@ -95,8 +94,7 @@ class CRM_Utils_MbreportsUtils {
 
         WHERE civicrm_relationship.contact_id_a = '" . $clientId . "'
         AND civicrm_relationship.relationship_type_id = '" .  $mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
-        AND civicrm_relationship.is_active = '1'
-        ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
+        AND civicrm_relationship.is_active = '1' LIMIT 1";
 
       $dao = CRM_Core_DAO::executeQuery($sql);
       $dao->fetch();  
