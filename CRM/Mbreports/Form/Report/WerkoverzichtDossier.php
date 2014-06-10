@@ -1009,8 +1009,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     
     $hoofdhuurderId = CRM_Utils_MbreportsUtils::getCaseHoofdHuurderId($daoTemp->case_id);
     
-    echo('$hoofdhuurderId: ' . $hoofdhuurderId) . '<br/>' . PHP_EOL;
-    
     if(!empty($hoofdhuurderId)){
       $params = array(
         'version' => 3,
@@ -1019,12 +1017,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       );
       $hoofdhuurder = civicrm_api('Contact', 'getsingle', $params);
       
-      echo('<pre>');
-      print_r($hoofdhuurder);
-      echo('</pre>');
-      
-      
-      if(isset($hoofdhuurder['is_error']) and $hoofdhuurder['is_error']){
+      if(!isset($hoofdhuurder['is_error']) or !$hoofdhuurder['is_error']){
         
         $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_id =  '" . $hoofdhuurder['contact_id'] . "', hoofdhuurder = '" . $hoofdhuurder['sort_name'] . "', hoofdhuurder_street_address = '" . $hoofdhuurder['street_address'] . "',
           hoofdhuurder_email = '" . $hoofdhuurder['email'] . "', hoofdhuurder_phone = '" . $hoofdhuurder['phone'] . "'
