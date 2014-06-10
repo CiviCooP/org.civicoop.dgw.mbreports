@@ -61,8 +61,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'required' => TRUE,
         'filters' => array(
           'title' => ts('Dossier type'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'operator' => 'like',
+          'operatorType' => CRM_Report_Form::OP_STRING,
+          //'operator' => 'like',
           'options' => array('' => ts('- select -')) + $this->mbreportsConfig->caseTypes,
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => 'case_type_id',
@@ -260,8 +260,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filter_name' => 'property_vge_type_op',
         'filters' => array(
           'title' => ts('VGE type'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'operator' => 'like',
+          'operatorType' => CRM_Report_Form::OP_STRING,
+          //'operator' => 'like',
           'options' => array('' => ts('- select -')) + $this->mbreportsConfig->VgeTypeList,
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => 'property_vge_type',
