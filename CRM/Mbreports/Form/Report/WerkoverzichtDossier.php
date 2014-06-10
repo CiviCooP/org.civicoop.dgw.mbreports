@@ -664,9 +664,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $where = " WHERE ";
       foreach($this->formFilter as $field => $filter){
         
-        
-         ON classification_14 LIKE concat("%", value, "%")
-        
         if('case_type_id' == $field or 'property_vge_type' == $field){
           $where .= " ( " . $field . " LIKE CONCAT ('%" . CRM_Core_DAO::VALUE_SEPARATOR . "'," . $filter['value'] . ",'" . CRM_Core_DAO::VALUE_SEPARATOR . "%') ) AND ";
           
