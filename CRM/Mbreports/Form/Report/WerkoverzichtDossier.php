@@ -1,11 +1,9 @@
 <?php
 error_reporting(-1);  // Have PHP complain about absolutely everything 
-$conf['error_level'] = 2;  // Show all messages on your screen, 2 = ERROR_REPORTING_DISPLAY_ALL.
 ini_set('display_errors', TRUE);  // These lines just give you content on WSOD pages.
 ini_set('display_startup_errors', TRUE);
 
 set_time_limit(0);
-@ini_set('memory_limit', '128M');
 
 /**
  * Util functions for mbreports
@@ -936,6 +934,11 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $dao = CRM_Core_DAO::executeQuery($sql);
     $dao->fetch();
     
+    echo('<pre>');
+    print_r($dao);
+    echo('</pre>');
+    exit();
+    
     if($dao->N){
     
       if('Household' == $dao->contact_type){
@@ -955,7 +958,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         $dao = CRM_Core_DAO::executeQuery($sql);
         $dao->fetch();
 
-      }else {
+      }else if ('Individual' == $dao->contact_type){
         // make sure that it has the raltionship hoofdhuurder
         $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_address.street_address, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
           LEFT JOIN civicrm_address ON civicrm_address.contact_id = civicrm_contact.id
@@ -968,9 +971,21 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
           AND civicrm_relationship.is_active = '1'
           ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
+        
+        // just get all the contact information
+        $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_address.street_address, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
+          LEFT JOIN civicrm_address ON civicrm_address.contact_id = civicrm_contact.id
+          LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
+          LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
+          
+          WHERE civicrm_contact.id = '" . $daoTemp->case_contact_id . "'
+          ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
 
         $dao = CRM_Core_DAO::executeQuery($sql);
         $dao->fetch();
+        
+      }else {
+        return false;
       }
       
       if($dao->N){
