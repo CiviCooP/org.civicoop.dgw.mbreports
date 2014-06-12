@@ -43,6 +43,7 @@ class CRM_Mbreports_Config {
   public $wfMelderCustomGroupName = NULL;
   public $wfMelderCustomGroupId = NULL;
   public $wfMelderCustomTableName = NULL;
+  public $wfMelderList = array();
   
   public $wfUitkomstCustomGroupName = NULL;
   public $wfUitkomstCustomGroupId = NULL;
@@ -96,6 +97,7 @@ class CRM_Mbreports_Config {
     $this->setWfUitkomstCustomFieldName('wf_uitkomst');
     $this->setWoonfraude();
     $this->setWfTypeList();
+    $this->setWfMelderList();
     
     $this->setOvCustomGroupName('ov_data');
     $this->setOvTypeCustomFieldName('ov_type');
@@ -479,10 +481,22 @@ class CRM_Mbreports_Config {
     foreach ($optionValues['values'] as $optionId => $optionValue) {
       $this->ovTypeList[$optionValue['value']] = $optionValue['label'];
     }
-    $this->ovTypeList[0] = '- alle -';
     asort($this->ovTypeList);
   }
 
+  private function setWfMelderList() {
+    $params = array(
+      'name'            =>  $this->wfMelderCustomFieldName,
+      'custom_group_id' =>  $this->wfMelderCustomGroupId,
+      'return'          =>  'option_group_id');
+    $wfOptionGroup = civicrm_api3('CustomField', 'Getvalue', $params);
+    $optionValues = civicrm_api3('OptionValue', 'Get', array('option_group_id' => $wfOptionGroup));
+    foreach ($optionValues['values'] as $optionId => $optionValue) {
+      $this->wfMelderList[$optionValue['value']] = $optionValue['label'];
+    }
+    asort($this->wfMelderList);
+  }
+  
   private function setWfTypeList() {
     $params = array(
       'name'            =>  $this->wfTypeCustomFieldName,
@@ -493,7 +507,6 @@ class CRM_Mbreports_Config {
     foreach ($optionValues['values'] as $optionId => $optionValue) {
       $this->wfTypeList[$optionValue['value']] = $optionValue['label'];
     }
-    $this->wfTypeList[0] = '- alle -';
     asort($this->wfTypeList);
   }
   private function setComplexList() {

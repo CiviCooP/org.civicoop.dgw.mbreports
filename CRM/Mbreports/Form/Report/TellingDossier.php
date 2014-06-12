@@ -64,10 +64,13 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
       $this->_where .= ' AND b.contact_id_b '.$this->formatOperator($this->_formValues['case_manager_op']).'('.implode(', ', $this->_formValues['case_manager_value']).')';
     }
     if (!empty($this->_formValues['ov_type_value'])) {
-      $this->_where .= ' AND f.ov_type LIKE "%'.$this->_formValues['ov_type_value'].'%"';
+      $this->_where .= ' AND '.$this->setSeparatedWhereClause($this->_formValues['ov_type_value'], 'ov_type', $this->_formValues['ov_type_op']);
     }
     if (!empty($this->_formValues['wf_type_value'])) {
-      $this->_where .= ' AND g.wf_type LIKE "%'.$this->_formValues['wf_type_value'].'%"';
+      $this->_where .= ' AND '.$this->setSeparatedWhereClause($this->_formValues['wf_type_value'], 'wf_type', $this->_formValues['wf_type_op']);
+    }
+    if (!empty($this->_formValues['wf_melder_value'])) {
+      $this->_where .= ' AND '.$this->setMultipleWhereClause($this->_formValues['wf_melder_value'], $mbreportsConfig->wfMelderList, 'wf_melder', $this->_formValues['wf_melder_op']);      
     }
   }
   
@@ -75,6 +78,14 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     $values = array();
     foreach ($keys as $key) {
       $values[] = CRM_Utils_Array::value($key, $list);
+    }
+    return $field.' '.$this->formatOperator($operator).'("'.implode('", "', $values).'")';
+  }
+  
+  private function setSeparatedWhereClause($keys, $field, $operator) {
+    $values = array();
+    foreach ($keys as $key) {
+      $values[] = CRM_Core_DAO::VALUE_SEPARATOR.$key.CRM_Core_DAO::VALUE_SEPARATOR;
     }
     return $field.' '.$this->formatOperator($operator).'("'.implode('", "', $values).'")';
   }
@@ -159,15 +170,22 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
         'ov_type' => array(
           'title'         => 'Overlast typering',
           'type'          => CRM_Utils_Type::T_INT,
-          'operatorType'  => CRM_Report_Form::OP_SELECT,
+          'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
           'options'       => $mbreportsConfig->ovTypeList
         ),
         'wf_type' => array(
           'title'         => 'Woonfraude typering',
           'type'          => CRM_Utils_Type::T_INT,
-          'operatorType'  => CRM_Report_Form::OP_SELECT,
+          'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
           'options'       => $mbreportsConfig->wfTypeList
         ),
+        'wf_melder' => array(
+          'title'         => 'Woonfraude melder',
+          'type'          => CRM_Utils_Type::T_INT,
+          'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
+          'options'       => $mbreportsConfig->wfMelderList
+        ),
+        
         'start_date' => array(
           'title'        => 'Periode',
           'default'      => 'this.month',
