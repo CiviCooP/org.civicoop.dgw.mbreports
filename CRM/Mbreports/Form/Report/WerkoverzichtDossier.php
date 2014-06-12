@@ -933,12 +933,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     
     $dao = CRM_Core_DAO::executeQuery($sql);
     $dao->fetch();
-    
-    echo('<pre>');
-    print_r($dao);
-    echo('</pre>');
-    exit();
-    
+        
     if($dao->N){
     
       if('Household' == $dao->contact_type){
