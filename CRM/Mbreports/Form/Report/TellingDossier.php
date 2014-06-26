@@ -72,6 +72,14 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     if (!empty($this->_formValues['wf_melder_value'])) {
       $this->_where .= ' AND '.$this->setMultipleWhereClause($this->_formValues['wf_melder_value'], $mbreportsConfig->wfMelderList, 'wf_melder', $this->_formValues['wf_melder_op']);      
     }
+    if (!empty($this->_formValues['start_date_relative']) 
+      || !empty($this->_formValues['start_date_from']) 
+      || !empty($this->_formValues['start_date_to'])) {
+      $relative = $this->_formValues['start_date_relative'];
+      $from     = $this->_formValues['start_date_from'];
+      $to       = $this->_formValues['start_date_to'];
+      $this->_where .= ' AND ('.$this->dateClause('a.start_date', $relative, $from, $to, CRM_Utils_Type::T_DATE).')';
+    }
   }
   
   private function setMultipleWhereClause($keys, $list, $field, $operator) {
@@ -123,14 +131,12 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     $this->getGroupFields();
     $rows = array();
     $this->buildRows($sql, $rows);
+		$this->alterDisplay($rows);
 
     $this->doTemplateAssignment($rows);
     $this->endPostProcess($rows);
   }
 
-  function alterDisplay(&$rows) {
-  }
-  
   private function setColumns() {
     $mbreportsConfig = CRM_Mbreports_Config::singleton();
     $this->_columns = array(
@@ -221,9 +227,12 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     $dao = CRM_Core_DAO::executeQuery($query);
     $previousLevel = NULL;
     $levelCount = 0;
+    $totalCount = 0;
     while ($dao->fetch()) {
+      $totalCount = $totalCount + $dao->countCases;
       $rows[] = $this->buildSingleRow($dao->countCases, $previousLevel, $levelCount, $dao);
     }
+    $this->buildTotalRows($totalCount, $dao, $rows, $levelCount, $previousLevel);
   }
   /**
    * Function to create temporary data to hold rows that are partially filled
@@ -328,6 +337,8 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     $this->addElement('checkbox', 'buurtGroupBy', ts('Buurt'));
     $this->addElement('checkbox', 'complexGroupBy', ts('Complex'), NULL, array('checked'));
     $this->addElement('checkbox', 'caseTypeGroupBy', ts('Case Type'), NULL, array('checked'));
+    $this->addElement('checkbox', 'ovTypeGroupBy', ts('Overlast Type'));
+    $this->addElement('checkbox', 'wfTypeGroupBy', ts('Woonfraude Type'));    
     $this->addElement('checkbox', 'caseManagerGroupBy', ts('Case Manager'), NULL, array('checked'));
   }
   
@@ -353,6 +364,14 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
       $this->_groupFields[] = 'case_manager';
       $this->_columnHeaders['case_manager'] = array('title' => 'Dossiermanager');
     }
+    if ($this->_formValues['ovTypeGroupBy']== TRUE) {
+      $this->_groupFields[] = 'ov_type';
+      $this->_columnHeaders['ov_type'] = array('title' => 'Overlast typering');
+    }
+    if ($this->_formValues['wfTypeGroupBy']== TRUE) {
+      $this->_groupFields[] = 'wf_type';
+      $this->_columnHeaders['wf_type'] = array('title' => 'Woonfraude typering');
+    }
     $this->_groupFields[] = 'status';
     $this->_columnHeaders['status'] = array('title' => 'Status');
     $this->_columnHeaders['count'] = array('title' => 'Aantal');
@@ -361,12 +380,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   private function buildSingleRow($countCases, &$previousLevel, &$levelCount, $dao) {
     $row = array();
     $levelField = $this->_groupFields[0];
-    if ($dao->$levelField == $previousLevel) {
-      $row['level_break'] = false;
-      $row['total_count'] = 0;
-      $row['previous'] = '';
-      $row['col_span'] = 0;
-    } else {
+    if ($dao->levelField != $previousLevel) {
       $row['level_break'] = true;
       $row['total_count'] = $levelCount;
       $row['previous'] = $previousLevel;
@@ -374,13 +388,32 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
       $row['col_span'] = count($this->_groupFields);
       $previousLevel = $dao->$levelField;
       $levelCount = 0;
+    } else {
+      $row['level_break'] = false;
+      $row['total_count'] = 0;
+      $row['previous'] = '';
+      $row['col_span'] = 0;
     }
+    $row['last'] = false;
     foreach ($this->_groupFields as $fieldId => $fieldValue) {
       $row[$fieldValue] = $dao->$fieldValue;
     }
-    $row[count] = $countCases;
+    $row['count'] = $countCases;
     $levelCount = $levelCount + $countCases;
     return $row;
+  }
+  
+  private function buildTotalRows($totalCount, $dao, &$rows, $levelCount, $previousLevel) {
+    $row = array();
+    $row['level_break'] = true;
+    $row['last'] = true;
+    $row['total_count'] = $levelCount;
+    $row['previous'] = $previousLevel;
+    $row['col_span'] = count($this->_groupFields);
+    $rows[] = $row;
+    $totalRow['col_span'] = count($this->_groupFields);
+    $totalRow['total'] = $totalCount;
+    $rows[] = $totalRow;
   }
   
   private function removeTempTable() {
@@ -417,8 +450,35 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     return $whereString;
   }
   
-  private function removeOvTypes() {
-    $selectedOvType = $this->_formValues['ov_type_value'];
-    
+  public function alterDisplay( &$rows ) {
+    $entryFound = false;
+    $mbreportsConfig = CRM_Mbreports_Config::singleton();
+    foreach ($rows as $rowNum => $row) {
+      if (array_key_exists('ov_type', $row)) {
+        $ovParts = explode(CRM_Core_DAO::VALUE_SEPARATOR, $row['ov_type']);
+        $ovLabels = array();
+        foreach ($ovParts as $ovType) {
+          if (!empty($ovType)) {
+            $ovLabels[] = CRM_Utils_Array::value($ovType, $mbreportsConfig->ovTypeList);
+          }
+        }
+        $rows[$rowNum]['ov_type'] = implode(', ', $ovLabels);
+        $entryFound = true;
+      }
+      if (array_key_exists('wf_type', $row)) {
+        $wfParts = explode(CRM_Core_DAO::VALUE_SEPARATOR, $row['wf_type']);
+        $wfLabels = array();
+        foreach ($wfParts as $wfType) {
+          if (!empty($wfType)) {
+            $wfLabels[] = CRM_Utils_Array::value($wfType, $mbreportsConfig->wfTypeList);
+          }
+        }
+        $rows[$rowNum]['wf_type'] = implode(', ', $wfLabels);
+        $entryFound = true;
+      }
+      if ( !$entryFound ) {
+        break;
+      }
+    }
   }
 }    

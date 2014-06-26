@@ -96,30 +96,45 @@
 
         {foreach from=$rows item=row key=rowid}
           {eval var=$sectionHeaderTemplate}
-          {if $row.level_break eq 1}
-            {if $row.total_count > 0}
-              <tr  class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}">
+          {if isset($row.total)}
+            <tr class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}"><td colspan="42"><hr /></td></tr>
+            <tr class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}">
+              <td colspan="{$row.col_span}"><strong>EINDTOTAAL</strong></td>
+              <td><strong>{$row.total}</strong></td>
+            </tr>
+          {else}  
+            {if $row.last eq 1}
+              <tr class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}">
                 <td colspan="{$row.col_span}"><strong>Totaal {$row.previous}</strong></td>
                 <td><strong>{$row.total_count}</strong></td>
               </tr>
-            {/if}  
-            <tr  class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}"><td colspan="42"><hr /></td></tr>
+            {else}  
+              {if $row.level_break eq 1}
+                {if $row.total_count > 0}
+                  <tr class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}">
+                    <td colspan="{$row.col_span}"><strong>Totaal {$row.previous}</strong></td>
+                    <td><strong>{$row.total_count}</strong></td>
+                  </tr>
+                {/if}  
+                <tr class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}"><td colspan="42"><hr /></td></tr>
+              {/if}
+              <tr class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}">
+                {foreach from=$columnHeaders item=header key=field}
+                  <td class="crm-report-{$field} report-contents-left">
+                    {$row.$field}
+                  </td>
+                {/foreach}
+              </tr>
+            {/if}
           {/if}
-          <tr  class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}">
-            {foreach from=$columnHeaders item=header key=field}
-              <td class="crm-report-{$field} report-contents-left">
-                {$row.$field}
-              </td>
-            {/foreach}
-          </tr>
         {/foreach}
-        {if $row.total_count > 0}
-          <tr  class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}">
+        {if $row.total_count > 0 and $row.last ne 1}
+          <tr class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}">
             <td colspan="{$row.col_span}"><strong>Totaal {$row.current}</strong></td>
             <td><strong>{$row.total_count}</strong></td>
           </tr>
         {/if}  
-        <tr  class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}"><td colspan="42"><hr /></td></tr>
+        <tr class="{cycle values="odd-row,even-row"} {$row.class} crm-report" id="crm-report_{$rowid}"><td colspan="42"><hr /></td></tr>
 
     </table>
     {if $pager and $pager->_response and $pager->_response.numPages > 1}

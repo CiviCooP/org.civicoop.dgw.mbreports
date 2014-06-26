@@ -221,11 +221,13 @@
         <div class="crm-accordion-wrapper">
           <table class="report-layout">
             <tr class="report-contents">
-              <td class="report-contents">{$form.wijkGroupBy.label} : {$form.wijkGroupBy.html}</td>
-              <td class="report-contents">{$form.buurtGroupBy.label} : {$form.buurtGroupBy.html}</td>
-              <td class="report-contents">{$form.complexGroupBy.label} : {$form.complexGroupBy.html}</td>
-              <td class="report-contents">{$form.caseTypeGroupBy.label} : {$form.caseTypeGroupBy.html}</td>
-              <td class="report-contents">{$form.caseManagerGroupBy.label} : {$form.caseManagerGroupBy.html}</td>
+              <td class="report-contents">{$form.complexGroupBy.label} : {$form.complexGroupBy.html}
+                <br />{$form.wijkGroupBy.label} : {$form.wijkGroupBy.html}</td>
+              <td class="report-contents">{$form.caseTypeGroupBy.label} : {$form.caseTypeGroupBy.html}
+                <br />{$form.buurtGroupBy.label} : {$form.buurtGroupBy.html}</td>
+              <td class="report-contents">{$form.caseManagerGroupBy.label} : {$form.caseManagerGroupBy.html}
+                <br />{$form.ovTypeGroupBy.label} : {$form.ovTypeGroupBy.html}</td>
+              <td class="report-contents"><br />{$form.wfTypeGroupBy.label} : {$form.wfTypeGroupBy.html}</td>
             </tr>
           </table>
         </div>
