@@ -712,6 +712,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     
     $sql .= $orderby;
     
+    echo('sql: ' . $sql);
+    
     unset($this->fields);
     unset($this->formFields);
     unset($this->formFilter);
