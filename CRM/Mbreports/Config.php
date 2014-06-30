@@ -463,12 +463,12 @@ class CRM_Mbreports_Config {
      */
     $query = 'SELECT DISTINCT(contact_id_b) as manager_id, display_name FROM civicrm_relationship '
       . 'JOIN civicrm_contact cc ON contact_id_b = cc.id WHERE relationship_type_id = %1 AND case_id IS NOT NULL';
-    $params = array(1 => array($this->dossierManagerRelationshipTypeId, 'Integer'));
+    $params = array(1 => array($this->deurwaarderRelationshipTypeId, 'Integer'));
     $dao = CRM_Core_DAO::executeQuery($query, $params);
     while($dao->fetch()) {
-      $this->dossierManagerList[$dao->manager_id] = $dao->display_name;
+      $this->deurwaarderList[$dao->manager_id] = $dao->display_name;
     }
-    asort($this->dossierManagerList);
+    asort($this->deurwaarderList);
   }
   
   private function setOvTypeList() {

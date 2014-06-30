@@ -138,7 +138,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(
           'title' => ts('Deurwaarder'),
           'operatorType' => CRM_Report_Form::OP_MULTISELECT,
-          'options' => $this->mbreportsConfig->dossierManagerList,
+          'options' => $this->mbreportsConfig->deurwaarderList,
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => 'deurwaarder_id',
         ),
