@@ -707,9 +707,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     }
     
     $sql .= $orderby;
-    
-    echo('sql: ' . $sql);
-    
+        
     unset($this->fields);
     unset($this->formFields);
     unset($this->formFilter);
@@ -891,7 +889,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       WHERE civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->vonnisActTypeId . "'
       AND civicrm_activity.is_current_revision = '1' 
       AND civicrm_case_activity.case_id = '" . $daoTemp->case_id . "'
-      ORDER BY civicrm_activity.activity_date_time DESC  LIMIT 1";
+      ORDER BY civicrm_activity.activity_date_time DESC LIMIT 1";
     
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
