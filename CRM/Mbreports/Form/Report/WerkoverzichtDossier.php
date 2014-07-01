@@ -562,6 +562,23 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       CRM_Core_DAO::executeQuery($sql);
       
       /*
+      * add ontruiming to temporary table
+      * one ontruiming at the time
+      */
+      if($this->formFields['ontruiming'] or $this->formFields['ontruiming_status'] 
+      or $this->formFields['ontruiming_activity_date_time']){
+        $this->addTempOntruiming($daoTemp);
+      }
+
+      /*
+      * add vonnis to temporary table
+      * one vonnis at the time
+      */
+      if($this->formFields['vonnis'] or $this->formFields['vonnis_activity_date_time']){
+        $this->addTempVonnis($daoTemp);
+      } 
+      
+      /*
       * add vge to temporary table
       * one vge at the time
       */
@@ -617,23 +634,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $this->addTempDeurwaarder();
     }
     
-    /*
-    * add ontruiming to temporary table
-    * all ontruiming at once
-    */
-    if($this->formFields['ontruiming'] or $this->formFields['ontruiming_status'] 
-    or $this->formFields['ontruiming_activity_date_time']){
-      $this->addTempOntruiming();
-    }
-    
-    /*
-    * add vonnis to temporary table
-    * all vonnis at once
-    */
-    if($this->formFields['vonnis'] or $this->formFields['vonnis_activity_date_time']){
-      $this->addTempVonnis();
-    } 
-        
     /*
      * now select records from temp and build row from them
      */
@@ -865,14 +865,14 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     unset($dao);
   }
   
-  private function addTempOntruiming(){    
+  private function addTempOntruiming($daoTemp){    
     $sql = "SELECT (CASE WHEN 1 = status_id THEN 'J' ELSE 'N' END) AS ontruiming, civicrm_activity.status_id, civicrm_case_activity.case_id, civicrm_activity.activity_date_time, civicrm_option_value.label FROM civicrm_activity 
       LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = civicrm_activity.id
       LEFT JOIN civicrm_option_value ON civicrm_option_value.value = civicrm_activity.status_id
       WHERE civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->ontruimingActTypeId . "'
       AND civicrm_option_value.option_group_id = '" . $this->mbreportsConfig->activityStatusTypeOptionGroupId . "'
       AND civicrm_activity.is_current_revision = '1' 
-      AND civicrm_case_activity.case_id = '" . $dao->case_id . "'
+      AND civicrm_case_activity.case_id = '" . $daoTemp->case_id . "'
       ORDER BY civicrm_activity.activity_date_time DESC LIMIT 1";
         
     $dao = CRM_Core_DAO::executeQuery($sql);
@@ -885,12 +885,12 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     unset($dao);
   }
   
-  private function addTempVonnis(){
+  private function addTempVonnis($daoTemp){
     $sql = "SELECT (CASE WHEN status_id IS NULL THEN 'N' ELSE 'J' END) AS vonnis, civicrm_case_activity.case_id, civicrm_activity.activity_date_time FROM civicrm_activity 
       LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = civicrm_activity.id
       WHERE civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->vonnisActTypeId . "'
       AND civicrm_activity.is_current_revision = '1' 
-      AND civicrm_case_activity.case_id = '" . $dao->case_id . "'
+      AND civicrm_case_activity.case_id = '" . $daoTemp->case_id . "'
       ORDER BY civicrm_activity.activity_date_time DESC  LIMIT 1";
     
     $dao = CRM_Core_DAO::executeQuery($sql);
