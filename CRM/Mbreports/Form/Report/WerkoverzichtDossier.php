@@ -1,8 +1,4 @@
 <?php
-error_reporting(-1);  // Have PHP complain about absolutely everything 
-ini_set('display_errors', TRUE);  // These lines just give you content on WSOD pages.
-ini_set('display_startup_errors', TRUE);
-
 set_time_limit(0);
 
 /**
@@ -876,6 +872,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       WHERE civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->ontruimingActTypeId . "'
       AND civicrm_option_value.option_group_id = '" . $this->mbreportsConfig->activityStatusTypeOptionGroupId . "'
       AND civicrm_activity.is_current_revision = '1' 
+      AND civicrm_case_activity.case_id = '" . $dao->case_id . "'
       ORDER BY civicrm_activity.activity_date_time DESC LIMIT 1";
         
     $dao = CRM_Core_DAO::executeQuery($sql);
@@ -893,6 +890,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = civicrm_activity.id
       WHERE civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->vonnisActTypeId . "'
       AND civicrm_activity.is_current_revision = '1' 
+      AND civicrm_case_activity.case_id = '" . $dao->case_id . "'
       ORDER BY civicrm_activity.activity_date_time DESC  LIMIT 1";
     
     $dao = CRM_Core_DAO::executeQuery($sql);
