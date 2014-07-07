@@ -37,8 +37,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   function select() {
 
     $this->_select = 'SELECT a.id AS case_id, d.label AS case_type, a.start_date
-      , e.label AS status, a.end_date, b.contact_id_b AS case_manager_id, c.wf_melder
-      , f.ov_type, g.wf_type';
+      , e.label AS status, a.end_date, b.contact_id_b AS case_manager_id, c.wf_melder';
   }
 
   function from() {
@@ -49,9 +48,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
       LEFT JOIN civicrm_option_value d ON a.case_type_id = d.value AND d.option_group_id = '
       .$mbreportsConfig->caseTypeOptionGroupId
       .' LEFT JOIN civicrm_option_value e ON a.status_id = e.value AND e.option_group_id = '
-      .$mbreportsConfig->caseStatusOptionGroupId
-      .' LEFT JOIN '.$mbreportsConfig->ovCustomTableName.' f ON a.id = f.entity_id 
-      LEFT JOIN '.$mbreportsConfig->wfUitkomstCustomTableName.' g ON a.id = g.entity_id';
+      .$mbreportsConfig->caseStatusOptionGroupId;
   }
 
   function where() {
@@ -63,22 +60,16 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     if (!empty($this->_formValues['case_manager_value'])) {
       $this->_where .= ' AND b.contact_id_b '.$this->formatOperator($this->_formValues['case_manager_op']).'('.implode(', ', $this->_formValues['case_manager_value']).')';
     }
-    if (!empty($this->_formValues['ov_type_value'])) {
-      $this->_where .= ' AND '.$this->setSeparatedWhereClause($this->_formValues['ov_type_value'], 'ov_type', $this->_formValues['ov_type_op']);
-    }
-    if (!empty($this->_formValues['wf_type_value'])) {
-      $this->_where .= ' AND '.$this->setSeparatedWhereClause($this->_formValues['wf_type_value'], 'wf_type', $this->_formValues['wf_type_op']);
-    }
     if (!empty($this->_formValues['wf_melder_value'])) {
       $this->_where .= ' AND '.$this->setMultipleWhereClause($this->_formValues['wf_melder_value'], $mbreportsConfig->wfMelderList, 'wf_melder', $this->_formValues['wf_melder_op']);      
     }
-    if (!empty($this->_formValues['start_date_relative']) 
-      || !empty($this->_formValues['start_date_from']) 
-      || !empty($this->_formValues['start_date_to'])) {
-      $relative = $this->_formValues['start_date_relative'];
-      $from     = $this->_formValues['start_date_from'];
-      $to       = $this->_formValues['start_date_to'];
-      $this->_where .= ' AND ('.$this->dateClause('a.start_date', $relative, $from, $to, CRM_Utils_Type::T_DATE).')';
+    if (!empty($this->_formValues['end_date_relative']) 
+      || !empty($this->_formValues['end_date_from']) 
+      || !empty($this->_formValues['end_date_to'])) {
+      $relative = $this->_formValues['end_date_relative'];
+      $from     = $this->_formValues['end_date_from'];
+      $to       = $this->_formValues['end_date_to'];
+      $this->_where .= ' AND ('.$this->dateClause('a.end_date', $relative, $from, $to, CRM_Utils_Type::T_DATE).' OR a.end_date IS NULL)';
     }
   }
   
@@ -173,26 +164,13 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
           'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
           'options'       => $mbreportsConfig->dossierManagerList
         ),
-        'ov_type' => array(
-          'title'         => 'Overlast typering',
-          'type'          => CRM_Utils_Type::T_INT,
-          'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
-          'options'       => $mbreportsConfig->ovTypeList
-        ),
-        'wf_type' => array(
-          'title'         => 'Woonfraude typering',
-          'type'          => CRM_Utils_Type::T_INT,
-          'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
-          'options'       => $mbreportsConfig->wfTypeList
-        ),
         'wf_melder' => array(
           'title'         => 'Woonfraude melder',
           'type'          => CRM_Utils_Type::T_INT,
           'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
           'options'       => $mbreportsConfig->wfMelderList
         ),
-        
-        'start_date' => array(
+        'end_date' => array(
           'title'        => 'Periode',
           'default'      => 'this.month',
           'operatorType' => CRM_Report_Form::OP_DATE,
@@ -246,11 +224,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
       buurt VARCHAR(128),
       case_manager VARCHAR(255),
       case_type VARCHAR(255),
-      ov_type VARCHAR(255),
-      wf_type VARCHAR(255),
       wf_melder VARCHAR(255),
-      wf_uitkomst VARCHAR(255),
-      ov_uitkomst VARCHAR(255),
       status VARCHAR(25), 
       start_date VARCHAR(25), 
       end_date VARCHAR(25))';
@@ -261,7 +235,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
    */
   private function addTempTable($dao) {    
     $insert = 'INSERT INTO data_rows (case_id, case_manager, case_type, status, start_date,
-      end_date, wf_melder, ov_type, buurt, wijk, complex, wf_type, wf_uitkomst, ov_uitkomst)';
+      end_date, wf_melder, buurt, wijk, complex)';
     $elementIndex = 1;
     $insValues = array();
     $insParams = array();
@@ -275,7 +249,6 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     $this->setValueLine($dao->start_date, 'String',  $elementIndex, $insParams, $insValues);
     $this->setValueLine($dao->end_date, 'String',  $elementIndex, $insParams, $insValues);
     $this->setValueLine($dao->wf_melder, 'String',  $elementIndex, $insParams, $insValues);
-    $this->setValueLine($dao->ov_type, 'String',  $elementIndex, $insParams, $insValues);
     /*
      * retrieve data for VGE and for wf_uitkomst
      */
@@ -283,11 +256,6 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     $this->setValueLine($vgeData['block'], 'String', $elementIndex, $insParams, $insValues);
     $this->setValueLine($vgeData['city_region'], 'String', $elementIndex, $insParams, $insValues);
     $this->setValueLine($vgeData['complex_id'], 'String', $elementIndex, $insParams, $insValues);
-
-    $wfUitkomstData = $this->getWfUitkomstData($dao->case_id);
-    $this->setValueLine($wfUitkomstData['wf_type'], 'String', $elementIndex, $insParams, $insValues);
-    $this->setValueLine($wfUitkomstData['wf_uitkomst'], 'String', $elementIndex, $insParams, $insValues);
-    $this->setValueLine($wfUitkomstData['ov_uitkomst'], 'String', $elementIndex, $insParams, $insValues);
 
     $insert = $insert.' VALUES('.implode(', ', $insValues).')';
     CRM_Core_DAO::executeQuery($insert, $insParams);
@@ -337,8 +305,6 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     $this->addElement('checkbox', 'buurtGroupBy', ts('Buurt'));
     $this->addElement('checkbox', 'complexGroupBy', ts('Complex'), NULL, array('checked'));
     $this->addElement('checkbox', 'caseTypeGroupBy', ts('Case Type'), NULL, array('checked'));
-    $this->addElement('checkbox', 'ovTypeGroupBy', ts('Overlast Type'));
-    $this->addElement('checkbox', 'wfTypeGroupBy', ts('Woonfraude Type'));    
     $this->addElement('checkbox', 'caseManagerGroupBy', ts('Case Manager'), NULL, array('checked'));
   }
   
@@ -363,14 +329,6 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     if ($this->_formValues['caseManagerGroupBy']== TRUE) {
       $this->_groupFields[] = 'case_manager';
       $this->_columnHeaders['case_manager'] = array('title' => 'Dossiermanager');
-    }
-    if ($this->_formValues['ovTypeGroupBy']== TRUE) {
-      $this->_groupFields[] = 'ov_type';
-      $this->_columnHeaders['ov_type'] = array('title' => 'Overlast typering');
-    }
-    if ($this->_formValues['wfTypeGroupBy']== TRUE) {
-      $this->_groupFields[] = 'wf_type';
-      $this->_columnHeaders['wf_type'] = array('title' => 'Woonfraude typering');
     }
     $this->_groupFields[] = 'status';
     $this->_columnHeaders['status'] = array('title' => 'Status');
@@ -448,37 +406,5 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
       $whereString = '';
     }
     return $whereString;
-  }
-  
-  public function alterDisplay( &$rows ) {
-    $entryFound = false;
-    $mbreportsConfig = CRM_Mbreports_Config::singleton();
-    foreach ($rows as $rowNum => $row) {
-      if (array_key_exists('ov_type', $row)) {
-        $ovParts = explode(CRM_Core_DAO::VALUE_SEPARATOR, $row['ov_type']);
-        $ovLabels = array();
-        foreach ($ovParts as $ovType) {
-          if (!empty($ovType)) {
-            $ovLabels[] = CRM_Utils_Array::value($ovType, $mbreportsConfig->ovTypeList);
-          }
-        }
-        $rows[$rowNum]['ov_type'] = implode(', ', $ovLabels);
-        $entryFound = true;
-      }
-      if (array_key_exists('wf_type', $row)) {
-        $wfParts = explode(CRM_Core_DAO::VALUE_SEPARATOR, $row['wf_type']);
-        $wfLabels = array();
-        foreach ($wfParts as $wfType) {
-          if (!empty($wfType)) {
-            $wfLabels[] = CRM_Utils_Array::value($wfType, $mbreportsConfig->wfTypeList);
-          }
-        }
-        $rows[$rowNum]['wf_type'] = implode(', ', $wfLabels);
-        $entryFound = true;
-      }
-      if ( !$entryFound ) {
-        break;
-      }
-    }
-  }
-}    
+  }  
+}
