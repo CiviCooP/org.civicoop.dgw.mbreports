@@ -52,11 +52,13 @@ class CRM_Mbreports_Config {
   public $wfTypeCustomFieldName = NULL;
   public $wfMelderCustomFieldName = NULL;
   public $wfUitkomstCustomFieldName = NULL;
+  public $wfUitkomstActieNaVonnisCustomFieldName = NULL;
   
   public $wfTypeColumnName = NULL;
   public $wfTypeList = array();
   public $wfMelderColumnName = NULL;
   public $wfUitkomstColumnName = NULL;
+  public $wfUitkomstList = array();
   public $woonfraudeCaseTypeId = NULL;
   
   public $changeCaseStatusActTypeId = NULL;
@@ -71,6 +73,14 @@ class CRM_Mbreports_Config {
   public $ovTypeList = array();
   public $overlastCaseTypeId = NULL;
   public $ovTypeOptionGroupId = NULL;
+  
+  /*
+   * custom group for activity type Vonnis gegevens
+   */
+  public $vongegeCustomGroupName = NULL;
+  public $vongegeCustomGroupId = NULL;
+  public $vongegeCustomTableName = NULL;
+  public $vongegeDeurCustomFieldName = NULL;
   
   /*
    * array with case types that are available for M&B reporting
@@ -95,9 +105,11 @@ class CRM_Mbreports_Config {
     $this->setWfMelderCustomFieldName('wf_melder');
     $this->setWfTypeCustomFieldName('wf_type');
     $this->setWfUitkomstCustomFieldName('wf_uitkomst');
+    $this->setWfUitkomstActieNaVonnisCustomFieldName('ActienaVonnis_uitkomst');
     $this->setWoonfraude();
     $this->setWfTypeList();
     $this->setWfMelderList();
+    $this->setWfUitkomstList();
     
     $this->setOvCustomGroupName('ov_data');
     $this->setOvTypeCustomFieldName('ov_type');
@@ -105,6 +117,10 @@ class CRM_Mbreports_Config {
     $this->setOvTypeList();
     $this->setActTypeId('Change Case Status');
     $this->setValidCaseTypes();
+    
+    $this->setVongegeCustomGroupName('Vonnis_gegevens');
+    $this->setVongegeDeurCustomFieldName('Deurwaardernummer');
+    $this->setVonnisGegevens();
     
     $this->setActivityStatusTypeOptionGroupId();
     $this->setActivityStatus();
@@ -205,6 +221,10 @@ class CRM_Mbreports_Config {
     $this->wfUitkomstCustomFieldName = $wfUitkomstCustomFieldName;
   }
   
+  public function setWfUitkomstActieNaVonnisCustomFieldName($wfUitkomstActieNaVonnisCustomFieldName) {
+    $this->wfUitkomstActieNaVonnisCustomFieldName = $wfUitkomstActieNaVonnisCustomFieldName;
+  }
+  
   public function setWfUitkomstColumnName($wfUitkomstColumnName) {
     $this->wfUitkomstColumnName = $wfUitkomstColumnName;
   }
@@ -227,6 +247,22 @@ class CRM_Mbreports_Config {
   
   public function setOvTypeColumnName($ovTypeColumnName) {
     $this->ovTypeColumnName = $ovTypeColumnName;
+  }
+  
+  public function setVongegeCustomGroupName($vongegeCustomGroupName) {
+    $this->vongegeCustomGroupName = $vongegeCustomGroupName;
+  }
+  
+  public function setVongegeCustomGroupId($vongegeCustomGroupId) {
+    $this->vongegeCustomGroupId = $vongegeCustomGroupId;
+  }
+  
+  public function setVongegeCustomTableName($vongegeCustomTableName) {
+    $this->vongegeCustomTableName = $vongegeCustomTableName;
+  }
+  
+  public function setVongegeDeurCustomFieldName($vongegeDeurCustomFieldName) {
+    $this->vongegeDeurCustomFieldName = $vongegeDeurCustomFieldName;
   }
   
   private function setWoonfraude() {
@@ -285,6 +321,17 @@ class CRM_Mbreports_Config {
       throw new Exception('Could not find custom field with name '.$this->wfUitkomstCustomFieldName
         .' in custom group '.$this->wfUitkomstCustomGroupId.', error from API CustomField Getvalue :'.$ex->getMessage());
     }    
+    
+    $customFieldParams['custom_group_id'] = $this->wfUitkomstCustomGroupId;
+    $customFieldParams['return'] = 'column_name';
+    $customFieldParams['name'] = $this->wfUitkomstActieNaVonnisCustomFieldName;
+    try {
+      $this->setWfUitkomstActieNaVonnisCustomFieldName(civicrm_api3('CustomField', 'Getvalue', $customFieldParams));
+    } catch (CiviCRM_API3_Exception $ex) {
+      $this->setWfUitkomstActieNaVonnisCustomFieldName('');
+      throw new Exception('Could not find custom field with name '.$this->wfUitkomstActieNaVonnisCustomFieldName
+        .' in custom group '.$this->wfUitkomstCustomGroupId.', error from API CustomField Getvalue :'.$ex->getMessage());
+    }    
   }
   
   private function setOverlast() {
@@ -312,6 +359,34 @@ class CRM_Mbreports_Config {
       $this->setOvTypeColumnName('');
       throw new Exception('Could not find custom field with name '.$this->ovTypeCustomFieldName
         .' in custom group '.$this->ovCustomGroupName.', error from API CustomField Getvalue :'.$ex->getMessage());
+    }
+  }
+  
+  private function setVonnisGegevens() {
+    try {
+      $customGroup = civicrm_api3('CustomGroup', 'Getsingle', array('name' => $this->vongegeCustomGroupName));
+    } catch (CiviCRM_API3_Exception $ex) {
+      $this->setVongegeCustomGroupId(0);
+      $this->setVongegeCustomTableName('');
+      $this->setVongegeDeurCustomFieldName('');
+      throw new Exception('Could not find a group with name '.$this->vongegeCustomGroupName
+        .',  error from API CustomGroup Getvalue : '.$ex->getMessage());
+    }
+    $this->setVongegeCustomGroupId($customGroup['id']);
+    $this->setVongegeCustomTableName($customGroup['table_name']);
+    $this->vongegeCustomFields();
+  }
+  
+  private function vongegeCustomFields() {
+    $customFieldParams['custom_group_id'] = $this->setVongegeCustomGroupId;
+    $customFieldParams['return'] = 'column_name';
+    $customFieldParams['name'] = $this->vongegeDeurCustomFieldName;
+    try {
+      $this->setVongegeDeurCustomFieldName(civicrm_api3('CustomField', 'Getvalue', $customFieldParams));
+    } catch (CiviCRM_API3_Exception $ex) {
+      $this->setVongegeDeurCustomFieldName('');
+      throw new Exception('Could not find custom field with name '.$this->vongegeDeurCustomFieldName
+        .' in custom group '.$this->vongegeCustomGroupName.', error from API CustomField Getvalue :'.$ex->getMessage());
     }
   }
   
@@ -509,6 +584,20 @@ class CRM_Mbreports_Config {
     }
     asort($this->wfTypeList);
   }
+  
+  private function setWfUitkomstList() {
+    $params = array(
+      'name'            =>  $this->wfUitkomstCustomFieldName,
+      'custom_group_id' =>  $this->wfUitkomstCustomGroupId,
+      'return'          =>  'option_group_id');
+    $wfOptionGroup = civicrm_api3('CustomField', 'Getvalue', $params);
+    $optionValues = civicrm_api3('OptionValue', 'Get', array('option_group_id' => $wfOptionGroup));
+    foreach ($optionValues['values'] as $optionId => $optionValue) {
+      $this->wfUitkomstList[$optionValue['value']] = $optionValue['label'];
+    }
+    asort($this->wfUitkomstList);
+  }
+  
   private function setComplexList() {
     $dao = CRM_Core_DAO::executeQuery('SELECT DISTINCT(complex_id) FROM civicrm_property');
     while ($dao->fetch()) {
