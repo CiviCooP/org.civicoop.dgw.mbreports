@@ -43,7 +43,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   function from() {
     $mbreportsConfig = CRM_Mbreports_Config::singleton();
     $this->_from = 'FROM civicrm_case a 
-      JOIN civicrm_relationship b ON a.id = b.case_id AND b.relationship_type_id = '
+      LEFT JOIN civicrm_relationship b ON a.id = b.case_id AND b.relationship_type_id = '
       .$mbreportsConfig->dossierManagerRelationshipTypeId.' 
       LEFT JOIN civicrm_value_wf_data c ON a.id = c.entity_id
       LEFT JOIN civicrm_option_value d ON a.case_type_id = d.value AND d.option_group_id = '
@@ -122,8 +122,6 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     
     $this->getGroupFields();
     $rows = array();
-    CRM_Core_Error::debug('sql', $sql);
-    exit();
     $this->buildRows($sql, $rows);
 		$this->alterDisplay($rows);
 
