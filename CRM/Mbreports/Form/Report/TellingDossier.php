@@ -122,6 +122,8 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     
     $this->getGroupFields();
     $rows = array();
+    CRM_Core_Error::debug('sql', $sql);
+    exit();
     $this->buildRows($sql, $rows);
 		$this->alterDisplay($rows);
 
