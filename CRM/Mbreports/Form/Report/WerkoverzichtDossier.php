@@ -162,7 +162,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'order_bys' => array(),
       ),
       // J / N (Ja of Nee) ontruimt, ontruim id is 41
-      'ontruiming' => array(
+      /*'ontruiming' => array(
         'title' => ts('Ontruiming'),
         'name' => 'ontruiming',
         'filter_name' => 'ontruiming_op',
@@ -194,7 +194,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filter_name' => 'ontruiming_activity_date_time_op',
         'filters' => array(),
         'order_bys' => array(),
-      ),
+      ),*/
       // vonnis 
       'vonnis_deurwaarder_nr' => array(
         'title' => ts('Vonnis deurwaarder nr.'),
@@ -241,16 +241,16 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           'alias' => 'complex_id',
         ),
       ),
-      'property_block' => array(
+      'property_city_region' => array(
         'title' => ts('Wijk'),
         'name' => 'block',
-        'filter_name' => 'property_block_op',
+        'filter_name' => 'property_city_region_op',
         'filters' => array(
           'title' => ts('Wijk'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
           'options' => array('' => ts('- select -')) + $this->mbreportsConfig->wijkList,
           'type' => CRM_Utils_Type::T_STRING,
-          'dbAlias' => 'property_block',
+          'dbAlias' => 'property_city_region',
         ),
         'order_bys' => array(
           'name' => 'block',
@@ -258,16 +258,16 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           'alias' => 'block',
         ),
       ),
-      'property_city_region' => array(
+      'property_block' => array(
         'title' => ts('Buurt'),
         'name' => 'city_region',
-        'filter_name' => 'property_city_region_op',
+        'filter_name' => 'property_block_op',
         'filters' => array(
           'title' => ts('Buurt'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
           'options' => array('' => ts('- select -')) + $this->mbreportsConfig->buurtList,
           'type' => CRM_Utils_Type::T_STRING,
-          'dbAlias' => 'property_city_region',
+          'dbAlias' => 'property_block',
         ),
         'order_bys' => array(
           'name' => 'city_region',
@@ -490,7 +490,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         }
       }
     }
-    
+        
     /*
      * add field at filter
      * add field if it exists in filter
@@ -526,9 +526,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
               $filter_name = 'deurwaarder_id';
             }
             
-            if('ontruiming_status' == $field){
+            /*if('ontruiming_status' == $field){
               $filter_name = 'ontruiming_status_id';
-            }
+            }*/
             
             if('property_vge_type' == $field){
               $filter_name = 'property_vge_type_id';
@@ -536,8 +536,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             
             // add field at filter  
             if(CRM_Report_Form::OP_DATE == $values['filters']['operatorType']){ // OP_DATE
-
-              if(!empty($this->_submitValues[$field . '_relative'])) { // if not empty add to filter
+                
+              // check if it`s relative or it has a start and end date
+              if(!empty($this->_submitValues[$field . '_relative']) or (!empty($this->_submitValues[$field . '_from']) and !empty($this->_submitValues[$field . '_to']))) { // if not empty add to filter
                 $this->formFilter[$filter_name] = array(
                   'operatorType' => $values['filters']['operatorType'],
                   'relative' => $this->_submitValues[$field . '_relative'],
@@ -792,10 +793,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       * add ontruiming to temporary table
       * one ontruiming at the time
       */
-      if($this->formFields['ontruiming'] or $this->formFields['ontruiming_status'] 
+      /*if($this->formFields['ontruiming'] or $this->formFields['ontruiming_status'] 
       or $this->formFields['ontruiming_activity_date_time']){
         $this->addTempOntruiming($daoTemp);
-      }
+      }*/
 
       /*
       * add vonnis to temporary table
@@ -934,7 +935,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     }
     
     $sql .= $orderby;
-        
+            
     unset($this->fields);
     unset($this->formFields);
     unset($this->formFilter);
@@ -958,13 +959,13 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             }
             break;
             
-          case 'ontruiming_activity_date_time':  
+          /*case 'ontruiming_activity_date_time':  
             if(empty($dao->$field)){
               $row[$field] = $dao->$field;
             }else {
               $row[$field] = date('d-m-Y H:i', strtotime($dao->$field));
             }
-            break;
+            break;*/
             
           default:
             $row[$field] = $dao->$field;
@@ -981,7 +982,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     
   private function createTempTable(){
     /*$sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (*/  
-    $sql = "CREATE TABLE IF NOT EXISTS werkoverzicht_dossier (
+    /*$sql = "CREATE TABLE IF NOT EXISTS werkoverzicht_dossier (
       case_id INT(11),
       case_subject VARCHAR(128),
       case_type_id VARCHAR(128),
@@ -1003,6 +1004,45 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       ontruiming_status_id INT(10),
       ontruiming_status VARCHAR(255),
       ontruiming_activity_date_time DATETIME, 
+      vonnis_deurwaarder_nr VARCHAR(25), 
+      vonnis_activity_date_time DATETIME,
+      property_vge_id INT(11),
+      street_address VARCHAR(96),
+      property_complex_id VARCHAR(45),
+      property_block VARCHAR(128),
+      property_city_region VARCHAR(128),
+      property_vge_type_id INT(11),
+      property_vge_type VARCHAR(128),
+      hoofdhuurder_id INT(11),
+      hoofdhuurder VARCHAR(128),
+      hoofdhuurder_birth_date DATE,
+      hoofdhuurder_street_address VARCHAR(96),
+      hoofdhuurder_email VARCHAR(64),
+      hoofdhuurder_phone VARCHAR(32),
+      medehuurder_id INT(11),
+      medehuurder VARCHAR(128),
+      medehuurder_birth_date DATE,
+      medehuurder_email VARCHAR(64),
+      medehuurder_phone VARCHAR(32))";*/
+    
+    $sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (
+      case_id INT(11),
+      case_subject VARCHAR(128),
+      case_type_id VARCHAR(128),
+      case_case_type VARCHAR(128),
+      case_sub_type VARCHAR(128),
+      case_uitkomst VARCHAR(128),
+      case_melder VARCHAR(128),
+      case_status_id INT(10),
+      case_status VARCHAR(225),
+      case_start_date_stamp VARCHAR(255),
+      case_start_date DATE,
+      case_contact_id INT(11),
+      typeringen VARCHAR(128),
+      dossiermanager_id INT(11),
+      dossiermanager VARCHAR(128),
+      deurwaarder_id VARCHAR(11),
+      deurwaarder VARCHAR(128),
       vonnis_deurwaarder_nr VARCHAR(25), 
       vonnis_activity_date_time DATETIME,
       property_vge_id INT(11),
@@ -1103,7 +1143,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     unset($dao);
   }
   
-  private function addTempOntruiming($daoTemp){    
+  /*private function addTempOntruiming($daoTemp){    
     $sql = "SELECT (CASE WHEN 1 = status_id THEN 'J' ELSE 'N' END) AS ontruiming, civicrm_activity.status_id, civicrm_case_activity.case_id, civicrm_activity.activity_date_time, civicrm_option_value.label FROM civicrm_activity 
       LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = civicrm_activity.id
       LEFT JOIN civicrm_option_value ON civicrm_option_value.value = civicrm_activity.status_id
@@ -1121,7 +1161,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     
     unset($sql);
     unset($dao);
-  }
+  }*/
   
   private function addTempVonnis($daoTemp){
     $sql = "SELECT " . $this->mbreportsConfig->vongegeCustomTableName . "." . $this->mbreportsConfig->vongegeDeurCustomFieldName . " AS vonnis_deurwaarder_nr, civicrm_case_activity.case_id, civicrm_activity.activity_date_time FROM civicrm_activity 
@@ -1168,14 +1208,15 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       CRM_Core_DAO::executeQuery($sql);
       
     }else {
-      // get street address from contact
+      // het is niet meer nodig om het contact adres op te halen als er geen vge adres is
+      /*// get street address from contact
       $sql = "SELECT street_address FROM civicrm_address WHERE contact_id = '" . $hoofdhuurder->id . "' AND is_primary = '1' LIMIT 1";
       $dao = CRM_Core_DAO::executeQuery($sql);
       $dao->fetch();
       
       // update street_address
       $sql = "UPDATE werkoverzicht_dossier SET street_address = '" . $dao->street_address . "' WHERE case_id = '" . $daoTemp->case_id . "'";
-      CRM_Core_DAO::executeQuery($sql);
+      CRM_Core_DAO::executeQuery($sql);*/
     }
     
     unset($caseVgeData);
