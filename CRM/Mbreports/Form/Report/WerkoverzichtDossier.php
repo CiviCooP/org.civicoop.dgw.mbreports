@@ -1025,7 +1025,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       medehuurder_email VARCHAR(64),
       medehuurder_phone VARCHAR(32))";*/
     
-    $sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (
+    /*$sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (*/
+      $sql = "CREATE TABLE IF NOT EXISTS werkoverzicht_dossier (
       case_id INT(11),
       case_subject VARCHAR(128),
       case_type_id VARCHAR(128),
