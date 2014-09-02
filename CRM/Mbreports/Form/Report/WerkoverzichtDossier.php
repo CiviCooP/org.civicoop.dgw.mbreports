@@ -611,10 +611,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $ov_types = $this->mbreportsConfig->ovTypeList;
     $wf_types = $this->mbreportsConfig->wfTypeList;
     $wf_uitkomst = $this->mbreportsConfig->wfUitkomstList;
-        
-    /*echo('<pre>');
-    print_r($this->mbreportsConfig);
-    echo('</pre>');*/
     
     /*
      * add records to temporary table
@@ -632,7 +628,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
 
       $dao = CRM_Core_DAO::executeQuery($sql);
       $dao->fetch();
-
+            
       if($dao->N){
 
         if('Household' == $dao->contact_type){
@@ -669,14 +665,14 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           
           $dao = CRM_Core_DAO::executeQuery($sql);
           $dao->fetch();
-
+          
           if($dao->N){
             if('Household' == $dao->contact_type){
               $household = $dao;
             }
           }
         }
-      }     
+      }      
       
       $case_sub_types = array();
       $case_uitkomst = array();
@@ -696,7 +692,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           $dao = CRM_Core_DAO::executeQuery($sql);
           
           // get all labels by ov_type
-          while ($dao->fetch()) {
+          while ($dao->fetch()) {            
             $ov_typess = explode(CRM_Core_DAO::VALUE_SEPARATOR, $dao->ov_type);
             
             foreach($ov_typess as $key => $ov_type){
@@ -718,9 +714,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           $sql = "SELECT wf_type, wf_uitkomst FROM " . $this->mbreportsConfig->wfUitkomstCustomTableName . "
             LEFT JOIN civicrm_activity_target ON civicrm_activity_target.activity_id = " . $this->mbreportsConfig->wfUitkomstCustomTableName . ".entity_id 
             LEFT JOIN civicrm_activity ON civicrm_activity.id = " . $this->mbreportsConfig->wfUitkomstCustomTableName . ".entity_id
-            WHERE civicrm_activity_target.target_contact_id = '" . $hoofdhuurder->id . "' AND civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->changecasestatusActTypeId . "'";
+            WHERE civicrm_activity_target.target_contact_id = '" . $hoofdhuurder->id . "' AND civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->changecasestatusActTypeId . "'
+            ORDER BY civicrm_activity.activity_date_time ASC LIMIT 1";
           $dao = CRM_Core_DAO::executeQuery($sql);         
-          
+                    
           // get all labels by wf_type
           while ($dao->fetch()) {            
             /*
@@ -761,13 +758,14 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           $sql = "SELECT " . $this->mbreportsConfig->wfUitkomstActieNaVonnisCustomFieldName . " FROM " . $this->mbreportsConfig->wfUitkomstCustomTableName . "
             LEFT JOIN civicrm_activity_target ON civicrm_activity_target.activity_id = " . $this->mbreportsConfig->wfUitkomstCustomTableName . ".entity_id 
             LEFT JOIN civicrm_activity ON civicrm_activity.id = " . $this->mbreportsConfig->wfUitkomstCustomTableName . ".entity_id
-            WHERE civicrm_activity_target.target_contact_id = '" . $hoofdhuurder->id . "' AND civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->changecasestatusActTypeId . "'";
+            WHERE civicrm_activity_target.target_contact_id = '" . $hoofdhuurder->id . "' AND civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->changecasestatusActTypeId . "'
+            ORDER BY civicrm_activity.activity_date_time ASC LIMIT 1";
           $dao = CRM_Core_DAO::executeQuery($sql);         
-          
+                     
           // get all labels by wf_type
-          while ($dao->fetch()) {  
+          while ($dao->fetch()) {
             // actie na vonis uitkomst            
-          if(!empty($dao->{$this->mbreportsConfig->wfUitkomstActieNaVonnisCustomFieldName})){
+            if(!empty($dao->{$this->mbreportsConfig->wfUitkomstActieNaVonnisCustomFieldName})){
               $case_uitkomst[] = $dao->{$this->mbreportsConfig->wfUitkomstActieNaVonnisCustomFieldName};
             }
           }
@@ -788,16 +786,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           '" . str_replace('-', '', $daoTemp->case_start_date) . "', '" . $daoTemp->case_start_date . "', '" . $daoTemp->case_contact_id . "' )";
       
       CRM_Core_DAO::executeQuery($sql);
-         
-      /*
-      * add ontruiming to temporary table
-      * one ontruiming at the time
-      */
-      /*if($this->formFields['ontruiming'] or $this->formFields['ontruiming_status'] 
-      or $this->formFields['ontruiming_activity_date_time']){
-        $this->addTempOntruiming($daoTemp);
-      }*/
-
+      
       /*
       * add vonnis to temporary table
       * one vonnis at the time
@@ -837,14 +826,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     
     unset($sql);
     unset($daoTemp);
-    
-    /*
-    * add typeringen to temporary table
-    * all typeringen at once
-    */
-    /*if($this->formFields['typeringen']){
-      $this->addTempTyperingen();
-    }*/
     
     /*
     * add dossiermanager to temporary table
@@ -982,51 +963,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     
   private function createTempTable(){
     /*$sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (*/  
-    /*$sql = "CREATE TABLE IF NOT EXISTS werkoverzicht_dossier (
-      case_id INT(11),
-      case_subject VARCHAR(128),
-      case_type_id VARCHAR(128),
-      case_case_type VARCHAR(128),
-      case_sub_type VARCHAR(128),
-      case_uitkomst VARCHAR(128),
-      case_melder VARCHAR(128),
-      case_status_id INT(10),
-      case_status VARCHAR(225),
-      case_start_date_stamp VARCHAR(255),
-      case_start_date DATE,
-      case_contact_id INT(11),
-      typeringen VARCHAR(128),
-      dossiermanager_id INT(11),
-      dossiermanager VARCHAR(128),
-      deurwaarder_id VARCHAR(11),
-      deurwaarder VARCHAR(128),
-      ontruiming VARCHAR(2),
-      ontruiming_status_id INT(10),
-      ontruiming_status VARCHAR(255),
-      ontruiming_activity_date_time DATETIME, 
-      vonnis_deurwaarder_nr VARCHAR(25), 
-      vonnis_activity_date_time DATETIME,
-      property_vge_id INT(11),
-      street_address VARCHAR(96),
-      property_complex_id VARCHAR(45),
-      property_block VARCHAR(128),
-      property_city_region VARCHAR(128),
-      property_vge_type_id INT(11),
-      property_vge_type VARCHAR(128),
-      hoofdhuurder_id INT(11),
-      hoofdhuurder VARCHAR(128),
-      hoofdhuurder_birth_date DATE,
-      hoofdhuurder_street_address VARCHAR(96),
-      hoofdhuurder_email VARCHAR(64),
-      hoofdhuurder_phone VARCHAR(32),
-      medehuurder_id INT(11),
-      medehuurder VARCHAR(128),
-      medehuurder_birth_date DATE,
-      medehuurder_email VARCHAR(64),
-      medehuurder_phone VARCHAR(32))";*/
+    /*$sql = "CREATE TABLE IF NOT EXISTS werkoverzicht_dossier (*/
     
-    /*$sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (*/
-      $sql = "CREATE TABLE IF NOT EXISTS werkoverzicht_dossier (
+    $sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (
       case_id INT(11),
       case_subject VARCHAR(128),
       case_type_id VARCHAR(128),
@@ -1081,43 +1020,22 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     
   }
   
-  /*private function addTempTyperingen(){
-    // get all entity_id`s and ov_types`s
-    $sql = "SELECT entity_id, ov_type FROM civicrm_value_ov_data";
-    $dao = CRM_Core_DAO::executeQuery($sql);
-    
-    // get all labels by ov_type
-    while ($dao->fetch()) {
-      $ov_types = explode(CRM_Core_DAO::VALUE_SEPARATOR, $dao->ov_type);
-      
-      $labels = array();
-      foreach($ov_types as $key => $ov_type){
-        $sql = "SELECT label FROM civicrm_property_type WHERE id = '" . $ov_type . "' LIMIT 1";
-        $dao_labels = CRM_Core_DAO::executeQuery($sql);
-        $dao_labels->fetch();
-        
-        if(!empty($dao_labels->label)){
-          $labels[] = $dao_labels->label;
-        }
-      }
-      
-      $sql = "UPDATE werkoverzicht_dossier SET typeringen = '" . addslashes(implode(', ', $labels)) . "' WHERE case_id = '" . $dao->entity_id . "'";
-      CRM_Core_DAO::executeQuery($sql);
-    }
-    
-    unset($dao_labels);
-    unset($sql);
-    unset($dao);
-  }*/
-  
   private function addTempDossiermanager(){
     $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_relationship.case_id FROM civicrm_contact
       LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_b = civicrm_contact.id
       AND civicrm_relationship.is_active = '1'
       WHERE civicrm_relationship.relationship_type_id = '" . $this->mbreportsConfig->dossierManagerRelationshipTypeId . "'";
     
+    echo($sql) . '<br/>' . PHP_EOL;
+    echo('$this->mbreportsConfig->dossierManagerRelationshipTypeId: ' . $this->mbreportsConfig->dossierManagerRelationshipTypeId) . '<br/>' . PHP_EOL;
+    
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
+      if(1453 == $dao->case_id){
+        echo('<pre>');
+        print_r($dao);
+        echo('</pre>');
+      }
       $sql = "UPDATE werkoverzicht_dossier SET dossiermanager = '" . addslashes($dao->sort_name) . "', dossiermanager_id = '" . $dao->id . "' 
         WHERE case_id = '" . $dao->case_id . "'";
       CRM_Core_DAO::executeQuery($sql);
@@ -1143,27 +1061,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     unset($sql);
     unset($dao);
   }
-  
-  /*private function addTempOntruiming($daoTemp){    
-    $sql = "SELECT (CASE WHEN 1 = status_id THEN 'J' ELSE 'N' END) AS ontruiming, civicrm_activity.status_id, civicrm_case_activity.case_id, civicrm_activity.activity_date_time, civicrm_option_value.label FROM civicrm_activity 
-      LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = civicrm_activity.id
-      LEFT JOIN civicrm_option_value ON civicrm_option_value.value = civicrm_activity.status_id
-      WHERE civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->ontruimingActTypeId . "'
-      AND civicrm_option_value.option_group_id = '" . $this->mbreportsConfig->activityStatusTypeOptionGroupId . "'
-      AND civicrm_activity.is_current_revision = '1' 
-      AND civicrm_case_activity.case_id = '" . $daoTemp->case_id . "'
-      ORDER BY civicrm_activity.activity_date_time DESC LIMIT 1";
-        
-    $dao = CRM_Core_DAO::executeQuery($sql);
-    while ($dao->fetch()) {
-      $sql = "UPDATE werkoverzicht_dossier SET ontruiming = '" . $dao->ontruiming . "', ontruiming_status_id = '" . $dao->status_id . "', ontruiming_status= '" . addslashes($dao->label) . "', ontruiming_activity_date_time = '" . $dao->activity_date_time . "' WHERE case_id = '" . $dao->case_id . "'";
-      CRM_Core_DAO::executeQuery($sql);
-    }
     
-    unset($sql);
-    unset($dao);
-  }*/
-  
   private function addTempVonnis($daoTemp){
     $sql = "SELECT " . $this->mbreportsConfig->vongegeCustomTableName . "." . $this->mbreportsConfig->vongegeDeurCustomFieldName . " AS vonnis_deurwaarder_nr, civicrm_case_activity.case_id, civicrm_activity.activity_date_time FROM civicrm_activity 
       LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = civicrm_activity.id
@@ -1229,22 +1127,77 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     if(empty($hoofdhuurder)){
       return false;
     }
-    
-    // just get all the contact information
-    $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_contact.birth_date, civicrm_address.street_address, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
-      LEFT JOIN civicrm_address ON civicrm_address.contact_id = civicrm_contact.id
-      LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
-      LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
-
-      WHERE civicrm_contact.id = '" . $hoofdhuurder->id . "'
-      ORDER BY civicrm_phone.is_primary DESC, civicrm_email.is_primary DESC LIMIT 1";
+        
+    // get id, name and birth date hoofdhuurder
+    $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_contact.birth_date FROM civicrm_contact
+      WHERE civicrm_contact.id = '" . $hoofdhuurder->id . "' LIMIT 1";
 
     $dao = CRM_Core_DAO::executeQuery($sql);
     $dao->fetch();
+    
+    if($dao->N){
+      $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_id =  '" . $dao->id . "', hoofdhuurder = '" . $dao->sort_name . "', hoofdhuurder_birth_date = '" . $dao->birth_date . "'
+        WHERE case_id = '" . $daoTemp->case_id . "'";
+
+      CRM_Core_DAO::executeQuery($sql);
+    }
+
+    unset($sql);
+    unset($dao);
+    
+    // get address hoofdhuurder
+    $sql = "SELECT civicrm_address.street_address FROM civicrm_contact
+      LEFT JOIN civicrm_address ON civicrm_address.contact_id = civicrm_contact.id
+      WHERE civicrm_contact.id = '" . $hoofdhuurder->id . "'
+      ORDER BY civicrm_address.is_primary DESC LIMIT 1";
+
+    $dao = CRM_Core_DAO::executeQuery($sql);
+    $dao->fetch();
+    
+    if($dao->N){
+      $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_street_address = '" . $dao->street_address . "' 
+        WHERE case_id = '" . $daoTemp->case_id . "'";
+
+      CRM_Core_DAO::executeQuery($sql);
+    }
+
+    unset($sql);
+    unset($dao);
+    
+    // get email hoofdhuurder
+    $sql = "SELECT civicrm_email.email FROM civicrm_contact
+      LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id 
+
+      WHERE civicrm_contact.id = '" . $hoofdhuurder->id . "' 
+      ORDER BY civicrm_email.is_primary DESC LIMIT 1";
+
+    $dao = CRM_Core_DAO::executeQuery($sql);
+    $dao->fetch();
+    
+    // get address
 
     if($dao->N){
-      $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_id =  '" . $dao->id . "', hoofdhuurder = '" . $dao->sort_name . "', hoofdhuurder_birth_date = '" . $dao->birth_date . "', 
-        hoofdhuurder_street_address = '" . $dao->street_address . "', hoofdhuurder_email = '" . $dao->email . "', hoofdhuurder_phone = '" . $dao->phone . "'
+      $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_email = '" . $dao->email . "' 
+        WHERE case_id = '" . $daoTemp->case_id . "'";
+
+      CRM_Core_DAO::executeQuery($sql);
+    }
+
+    unset($sql);
+    unset($dao);
+    
+    // get phone hoofdhuurder
+    $sql = "SELECT civicrm_phone.phone FROM civicrm_contact
+      LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
+
+      WHERE civicrm_contact.id = '" . $hoofdhuurder->id . "'
+      ORDER BY civicrm_phone.is_primary DESC LIMIT 1";
+
+    $dao = CRM_Core_DAO::executeQuery($sql);
+    $dao->fetch();
+    
+    if($dao->N){
+      $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_phone = '" . $dao->phone . "'
         WHERE case_id = '" . $daoTemp->case_id . "'";
 
       CRM_Core_DAO::executeQuery($sql);
@@ -1258,11 +1211,32 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     if(empty($household)){
       return false;
     }
-      
-    // get medehuurder from household
-    $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_contact.birth_date, civicrm_email.email, civicrm_phone.phone FROM civicrm_contact
+    
+    // get id, name and birth date from medehuurder by household
+    $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_contact.birth_date FROM civicrm_contact
+      LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
+
+      WHERE civicrm_relationship.contact_id_b = '" . $household->id . "' 
+      AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->medehuurderRelationshipTypeId . "'
+      AND civicrm_relationship.is_active = '1' LIMIT 1";
+
+    $dao = CRM_Core_DAO::executeQuery($sql);
+    $dao->fetch();
+    
+    if($dao->N){
+      $sql = "UPDATE werkoverzicht_dossier SET medehuurder_id =  '" . $dao->id . "', medehuurder = '" . $dao->sort_name . "', 
+        medehuurder_birth_date = '" . $dao->birth_date . "' 
+        WHERE case_id = '" . $daoTemp->case_id . "'";
+
+      CRM_Core_DAO::executeQuery($sql);
+    }
+        
+    unset($sql);
+    unset($dao);
+    
+    // get email from medehuurder by household
+    $sql = "SELECT civicrm_email.email FROM civicrm_contact
       LEFT JOIN civicrm_email ON civicrm_email.contact_id = civicrm_contact.id
-      LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
 
       LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
 
@@ -1273,16 +1247,38 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
 
     $dao = CRM_Core_DAO::executeQuery($sql);
     $dao->fetch();
-
+    
     if($dao->N){
-      $sql = "UPDATE werkoverzicht_dossier SET medehuurder_id =  '" . $dao->id . "', medehuurder = '" . $dao->sort_name . "', 
-        medehuurder_birth_date = '" . $dao->birth_date . "', medehuurder_email = '" . $dao->email . "'
+      $sql = "UPDATE werkoverzicht_dossier SET medehuurder_email = '" . $dao->email . "' 
         WHERE case_id = '" . $daoTemp->case_id . "'";
 
       CRM_Core_DAO::executeQuery($sql);
     }
+        
+    unset($sql);
+    unset($dao);
     
+    // get phone from medehuurder by household
+    $sql = "SELECT civicrm_phone.phone FROM civicrm_contact
+      LEFT JOIN civicrm_phone ON civicrm_phone.contact_id = civicrm_contact.id
+
+      LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_a = civicrm_contact.id
+
+      WHERE civicrm_relationship.contact_id_b = '" . $household->id . "' 
+      AND civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->medehuurderRelationshipTypeId . "'
+      AND civicrm_relationship.is_active = '1'
+      ORDER BY civicrm_phone.is_primary DESC LIMIT 1";
+
+    $dao = CRM_Core_DAO::executeQuery($sql);
+    $dao->fetch();
     
+    if($dao->N){
+      $sql = "UPDATE werkoverzicht_dossier SET medehuurder_phone = '" . $dao->phone . "'
+        WHERE case_id = '" . $daoTemp->case_id . "'";
+
+      CRM_Core_DAO::executeQuery($sql);
+    }
+        
     unset($sql);
     unset($dao);
   }
