@@ -1023,8 +1023,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   private function addTempDossiermanager(){
     $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_relationship.case_id FROM civicrm_contact
       LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_b = civicrm_contact.id
-      AND civicrm_relationship.is_active = '1'
-      WHERE civicrm_relationship.relationship_type_id = '" . $this->mbreportsConfig->dossierManagerRelationshipTypeId . "'";
+      WHERE civicrm_relationship.relationship_type_id = '" . $this->mbreportsConfig->dossierManagerRelationshipTypeId . "'
+      AND civicrm_relationship.is_active = '1' ";
     
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
@@ -1040,8 +1040,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   private function addTempDeurwaarder(){
     $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_relationship.case_id FROM civicrm_contact
       LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_b = civicrm_contact.id
-      AND civicrm_relationship.is_active = '1'
-      WHERE civicrm_relationship.relationship_type_id = '" . $this->mbreportsConfig->deurwaarderRelationshipTypeId . "'";
+      WHERE civicrm_relationship.relationship_type_id = '" . $this->mbreportsConfig->deurwaarderRelationshipTypeId . "'
+      AND civicrm_relationship.is_active = '1'";
     
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
