@@ -1026,16 +1026,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       AND civicrm_relationship.is_active = '1'
       WHERE civicrm_relationship.relationship_type_id = '" . $this->mbreportsConfig->dossierManagerRelationshipTypeId . "'";
     
-    echo($sql) . '<br/>' . PHP_EOL;
-    echo('$this->mbreportsConfig->dossierManagerRelationshipTypeId: ' . $this->mbreportsConfig->dossierManagerRelationshipTypeId) . '<br/>' . PHP_EOL;
-    
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
-      if(1453 == $dao->case_id){
-        echo('<pre>');
-        print_r($dao);
-        echo('</pre>');
-      }
       $sql = "UPDATE werkoverzicht_dossier SET dossiermanager = '" . addslashes($dao->sort_name) . "', dossiermanager_id = '" . $dao->id . "' 
         WHERE case_id = '" . $dao->case_id . "'";
       CRM_Core_DAO::executeQuery($sql);
@@ -1070,15 +1062,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       AND civicrm_activity.is_current_revision = '1' 
       AND civicrm_case_activity.case_id = '" . $daoTemp->case_id . "'
       ORDER BY civicrm_activity.activity_date_time DESC LIMIT 1";
-    
-    //echo('sql: ' . $sql) . '<br/>' . PHP_EOL;
-    
+        
     $dao = CRM_Core_DAO::executeQuery($sql);
-    while ($dao->fetch()) {
-      /*echo('<pre>');
-      print_r($dao);
-      echo('</pre>');*/
-      
+    while ($dao->fetch()) {      
       $sql = "UPDATE werkoverzicht_dossier SET vonnis_deurwaarder_nr = '" . $dao->vonnis_deurwaarder_nr . "', vonnis_activity_date_time = '" . $dao->activity_date_time . "' WHERE case_id = '" . $dao->case_id . "'";
       CRM_Core_DAO::executeQuery($sql);
     }
