@@ -120,17 +120,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           'alias' => 'start_date',
         ),
       ),
-      /*'typeringen' => array(
-        'title' => ts('Typeringen'),
-        'name' => 'typeringen',
-        'filter_name' => 'typeringen_op',
-        'filters' => array(),
-        'order_bys' => array(
-          'name' => 'typeringen',
-          'title' => ts('Typeringen'),
-          'alias' => 'typeringen',
-        ),
-      ),*/
       'dossiermanager' =>  array(
         'title' => ts('Dossiermanager'),
         'name' => 'dossiermanager',
@@ -161,40 +150,6 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         ),
         'order_bys' => array(),
       ),
-      // J / N (Ja of Nee) ontruimt, ontruim id is 41
-      /*'ontruiming' => array(
-        'title' => ts('Ontruiming'),
-        'name' => 'ontruiming',
-        'filter_name' => 'ontruiming_op',
-        'filters' => array(
-          'title' => ts('Ontruiming'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array('' => ts('- select -'), 'J' => ts('Ja'), 'N' => ts('Nee')),
-          'type' => CRM_Utils_Type::T_STRING,
-          'dbAlias' => 'ontruiming',
-        ),
-        'order_bys' => array(),
-      ),
-      'ontruiming_status' => array(
-        'title' => ts('Ontruiming status'),
-        'name' => 'ontruiming_status',
-        'filter_name' => 'ontruiming_status_op',
-        'filters' => array(
-          'title' => ts('Ontruiming status '),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->activityStatus,
-          'type' => CRM_Utils_Type::T_INT,
-          'dbAlias' => 'ontruiming_status_id',
-        ),
-        'order_bys' => array(),
-      ),
-      'ontruiming_activity_date_time' => array(
-        'title' => ts('Ontruiming datum'),
-        'name' => 'ontruiming_activity_date_time',
-        'filter_name' => 'ontruiming_activity_date_time_op',
-        'filters' => array(),
-        'order_bys' => array(),
-      ),*/
       // vonnis 
       'vonnis_deurwaarder_nr' => array(
         'title' => ts('Vonnis deurwaarder nr.'),
@@ -440,6 +395,23 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   function where() {
     $this->_where = "WHERE civicrm_case.is_deleted = '0' ";
+            
+    // check if it`s relative or it has a start and end date
+    if(!empty($this->_submitValues['case_start_date_relative']) or (!empty($this->_submitValues['case_start_date_from']) and !empty($this->_submitValues['case_start_date_to']))) { // if not empty add to filter
+      $filter = array(
+        'operatorType' => CRM_Report_Form::OP_DATE,
+        'relative' => $this->_submitValues['case_start_date_relative'],
+        'from' => $this->_submitValues['case_start_date_from'],
+        'from_display' => $this->_submitValues['case_start_date_from_display'],
+        'to' => $this->_submitValues['case_start_date_to'],
+        'to_display' => $this->_submitValues['case_start_date_to_display'],
+        'field' => 'civicrm_case.start_date',
+      );
+
+      $clause = $this->dateClause($filter['field'], $filter['relative'], $filter['from'], $filter['to'], CRM_Utils_Type::T_DATE);      
+      $this->_where .= " AND ( " . $clause . " ) ";
+
+    }
   }
   
   function orderBy() {
@@ -525,11 +497,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             if('deurwaarder' == $field){
               $filter_name = 'deurwaarder_id';
             }
-            
-            /*if('ontruiming_status' == $field){
-              $filter_name = 'ontruiming_status_id';
-            }*/
-            
+                        
             if('property_vge_type' == $field){
               $filter_name = 'property_vge_type_id';
             }
@@ -595,7 +563,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $this->truncateTempTable();
     
     $daoTemp = CRM_Core_DAO::executeQuery($sql);
-        
+      
     /*
      * get case type ids
      */
@@ -712,14 +680,15 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
          */
         if($woonfraude_id == $case_type_id){
           $sql = "SELECT wf_type, wf_uitkomst FROM " . $this->mbreportsConfig->wfUitkomstCustomTableName . "
-            LEFT JOIN civicrm_activity_target ON civicrm_activity_target.activity_id = " . $this->mbreportsConfig->wfUitkomstCustomTableName . ".entity_id 
+            LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = " . $this->mbreportsConfig->wfUitkomstCustomTableName . ".entity_id
             LEFT JOIN civicrm_activity ON civicrm_activity.id = " . $this->mbreportsConfig->wfUitkomstCustomTableName . ".entity_id
-            WHERE civicrm_activity_target.target_contact_id = '" . $hoofdhuurder->id . "' AND civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->changecasestatusActTypeId . "'
-            ORDER BY civicrm_activity.activity_date_time ASC LIMIT 1";
-          $dao = CRM_Core_DAO::executeQuery($sql);         
-                    
+            WHERE civicrm_case_activity.case_id =  '" . $daoTemp->case_id . "'
+            ORDER BY civicrm_activity.activity_date_time DESC LIMIT 1";
+          
+          $dao = CRM_Core_DAO::executeQuery($sql);        
+          
           // get all labels by wf_type
-          while ($dao->fetch()) {            
+          while ($dao->fetch()) {
             /*
              * get woonfraude type, uitkomst
              */
@@ -756,10 +725,11 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
          */
         if($actienavonnis_id == $case_type_id){
           $sql = "SELECT " . $this->mbreportsConfig->wfUitkomstActieNaVonnisCustomFieldName . " FROM " . $this->mbreportsConfig->wfUitkomstCustomTableName . "
-            LEFT JOIN civicrm_activity_target ON civicrm_activity_target.activity_id = " . $this->mbreportsConfig->wfUitkomstCustomTableName . ".entity_id 
+            LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = " . $this->mbreportsConfig->wfUitkomstCustomTableName . ".entity_id
             LEFT JOIN civicrm_activity ON civicrm_activity.id = " . $this->mbreportsConfig->wfUitkomstCustomTableName . ".entity_id
-            WHERE civicrm_activity_target.target_contact_id = '" . $hoofdhuurder->id . "' AND civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->changecasestatusActTypeId . "'
-            ORDER BY civicrm_activity.activity_date_time ASC LIMIT 1";
+            WHERE civicrm_case_activity.case_id =  '" . $daoTemp->case_id . "'
+            ORDER BY civicrm_activity.activity_date_time DESC LIMIT 1";
+          
           $dao = CRM_Core_DAO::executeQuery($sql);         
                      
           // get all labels by wf_type
