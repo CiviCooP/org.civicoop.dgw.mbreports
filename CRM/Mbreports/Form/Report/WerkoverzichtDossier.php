@@ -684,7 +684,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             LEFT JOIN civicrm_activity ON civicrm_activity.id = " . $this->mbreportsConfig->wfUitkomstCustomTableName . ".entity_id
             WHERE civicrm_case_activity.case_id =  '" . $daoTemp->case_id . "'
             ORDER BY civicrm_activity.activity_date_time DESC LIMIT 1";
-          
+                    
           $dao = CRM_Core_DAO::executeQuery($sql);        
           
           // get all labels by wf_type
@@ -903,6 +903,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         switch($field){
           case 'case_start_date':
           case 'vonnis_activity_date_time':
+          case 'hoofdhuurder_birth_date':
+          case 'medehuurder_birth_date':
             if(empty($dao->$field)){
               $row[$field] = $dao->$field;
             }else {
