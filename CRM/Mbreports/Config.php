@@ -118,7 +118,7 @@ class CRM_Mbreports_Config {
     $this->setActTypeId('Change Case Status');
     $this->setValidCaseTypes();
     
-    $this->setVongegeCustomGroupName('Vonnis_gegevens');
+    $this->setVongegeCustomGroupName('vonnis_gegevens');
     $this->setVongegeDeurCustomFieldName('Deurwaardernummer');
     $this->setVonnisGegevens();
     
