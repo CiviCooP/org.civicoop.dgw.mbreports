@@ -363,6 +363,7 @@ class CRM_Mbreports_Config {
   }
   
   private function setVonnisGegevens() {
+    CRM_Core_Error::debug('name', $this->vongegeCustomGroupName);
     try {
       $customGroup = civicrm_api3('CustomGroup', 'Getsingle', array('name' => $this->vongegeCustomGroupName));
     } catch (CiviCRM_API3_Exception $ex) {
