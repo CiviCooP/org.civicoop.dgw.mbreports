@@ -119,7 +119,7 @@ class CRM_Mbreports_Config {
     $this->setValidCaseTypes();
     
     $this->setVongegeCustomGroupName('vonnis_gegevens');
-    $this->setVongegeDeurCustomFieldName('Deurwaardernummer');
+    $this->setVongegeDeurCustomFieldName('deurwaarder_nummer');
     $this->setVonnisGegevens();
     
     $this->setActivityStatusTypeOptionGroupId();
@@ -363,7 +363,6 @@ class CRM_Mbreports_Config {
   }
   
   private function setVonnisGegevens() {
-    CRM_Core_Error::debug('name', $this->vongegeCustomGroupName);
     try {
       $customGroup = civicrm_api3('CustomGroup', 'Getsingle', array('name' => $this->vongegeCustomGroupName));
     } catch (CiviCRM_API3_Exception $ex) {
