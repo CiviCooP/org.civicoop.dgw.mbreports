@@ -105,7 +105,7 @@ class CRM_Mbreports_Config {
     $this->setWfMelderCustomFieldName('wf_melder');
     $this->setWfTypeCustomFieldName('wf_type');
     $this->setWfUitkomstCustomFieldName('wf_uitkomst');
-    $this->setWfUitkomstActieNaVonnisCustomFieldName('ActienaVonnis_uitkomst');
+    $this->setWfUitkomstActieNaVonnisCustomFieldName('anv_uitkomst');
     $this->setWoonfraude();
     $this->setWfTypeList();
     $this->setWfMelderList();
