@@ -1094,7 +1094,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $dao->fetch();
     
     if($dao->N){
-      $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_id =  '" . $dao->id . "', hoofdhuurder = '" . $dao->sort_name . "', hoofdhuurder_birth_date = '" . $dao->birth_date . "'
+      $sortName = CRM_Core_DAO::escapeString($dao->sort_name);
+      $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_id =  '" . $dao->id . "', hoofdhuurder = '" . $sortName . "', hoofdhuurder_birth_date = '" . $dao->birth_date . "'
         WHERE case_id = '" . $daoTemp->case_id . "'";
 
       CRM_Core_DAO::executeQuery($sql);
@@ -1113,7 +1114,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $dao->fetch();
     
     if($dao->N){
-      $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_street_address = '" . $dao->street_address . "' 
+      $streetAddress = CRM_Core_DAO::escapeString($dao->street_address);
+      $sql = "UPDATE werkoverzicht_dossier SET hoofdhuurder_street_address = '" . $streetAddress . "' 
         WHERE case_id = '" . $daoTemp->case_id . "'";
 
       CRM_Core_DAO::executeQuery($sql);
@@ -1182,7 +1184,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $dao->fetch();
     
     if($dao->N){
-      $sql = "UPDATE werkoverzicht_dossier SET medehuurder_id =  '" . $dao->id . "', medehuurder = '" . $dao->sort_name . "', 
+      $sortName = CRM_Core_DAO::escapeString($dao->sort_name);
+      $sql = "UPDATE werkoverzicht_dossier SET medehuurder_id =  '" . $dao->id . "', medehuurder = '" . $sortName . "', 
         medehuurder_birth_date = '" . $dao->birth_date . "' 
         WHERE case_id = '" . $daoTemp->case_id . "'";
 
