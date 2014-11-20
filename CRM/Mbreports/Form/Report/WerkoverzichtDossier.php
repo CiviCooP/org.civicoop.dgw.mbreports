@@ -52,7 +52,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'title' => ts('Dossier type'),
         'name' => 'case_type',
         'filter_name' => 'case_case_type_op',
-        'required' => TRUE,
+        //'required' => TRUE,
         'filters' => array(
           'title' => ts('Dossier type'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
@@ -88,7 +88,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'title' => ts('Dossier status'),
         'name' => 'status_id',
         'filter_name' => 'case_status_op',
-        'required' => TRUE,
+        //'required' => TRUE,
         'filters' => array(
           'title' => ts('Dossier status'),
           'operatorType' => CRM_Report_Form::OP_SELECT,
@@ -259,7 +259,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       'hoofdhuurder_birth_date' => array(
         'title' => ts('Hoofdhuurder geboortedatum'),
         'name' => 'hoofdhuurder_birth_date',
-        'required' => FALSE,
+        //'required' => FALSE,
         'filter_name' => 'hoofdhuurder_birth_date_op',
         'filters' => array(),
         'order_bys' => array(),
@@ -267,7 +267,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       'hoofdhuurder_street_address' => array(
         'title' => ts('Hoofdhuurder adres'),
         'name' => 'hoofdhuurder_street_address',
-        'required' => TRUE,
+        //'required' => TRUE,
         'filter_name' => 'hoofdhuurder_street_address_op',
         'filters' => array(),
         'order_bys' => array(),
@@ -296,7 +296,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       'medehuurder_birth_date' => array(
         'title' => ts('Medehuurder geboortedatum'),
         'name' => 'medehuurder_birth_date',
-        'required' => FALSE,
+        //'required' => FALSE,
         'filter_name' => 'medehuurder_birth_date_op',
         'filters' => array(),
         'order_bys' => array(),
@@ -817,7 +817,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
      * now select records from temp and build row from them
      */
     $sql = "SELECT ";
-    
+        
     /*
      * add fields
      */
@@ -886,7 +886,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     }
     
     $sql .= $orderby;
-            
+        
     unset($this->fields);
     unset($this->formFields);
     unset($this->formFilter);
