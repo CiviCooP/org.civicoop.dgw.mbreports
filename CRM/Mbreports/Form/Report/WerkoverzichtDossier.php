@@ -397,14 +397,14 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $this->_where = "WHERE civicrm_case.is_deleted = '0' ";
             
     // check if it`s relative or it has a start and end date
-    if(!empty($this->_submitValues['case_start_date_relative']) or (!empty($this->_submitValues['case_start_date_from']) and !empty($this->_submitValues['case_start_date_to']))) { // if not empty add to filter
+    if(!empty($this->_formValues['case_start_date_relative']) or (!empty($this->_formValues['case_start_date_from']) and !empty($this->_formValues['case_start_date_to']))) { // if not empty add to filter
       $filter = array(
         'operatorType' => CRM_Report_Form::OP_DATE,
-        'relative' => $this->_submitValues['case_start_date_relative'],
-        'from' => $this->_submitValues['case_start_date_from'],
-        'from_display' => $this->_submitValues['case_start_date_from_display'],
-        'to' => $this->_submitValues['case_start_date_to'],
-        'to_display' => $this->_submitValues['case_start_date_to_display'],
+        'relative' => $this->_formValues['case_start_date_relative'],
+        'from' => $this->_formValues['case_start_date_from'],
+        'from_display' => $this->_formValues['case_start_date_from_display'],
+        'to' => $this->_formValues['case_start_date_to'],
+        'to_display' => $this->_formValues['case_start_date_to_display'],
         'field' => 'civicrm_case.start_date',
       );
 
@@ -442,14 +442,14 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   private function setformFields(){
-    $this->formFields = $this->_submitValues['fields'];
+    $this->formFields = $this->_formValues['fields'];
     
     /*
      * add field at orderby
      * add field at groupby
      * add field if it exists in order by
      */
-    foreach($this->_submitValues['order_bys'] as $key => $order_bys){
+    foreach($this->_formValues['order_bys'] as $key => $order_bys){
       if('-' != $order_bys['column']){ // if orderby is not empty
         $this->formOrderBy[$order_bys['column']] = $order_bys; // add field at orderby
 
@@ -467,7 +467,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
      * add field at filter
      * add field if it exists in filter
      */
-    foreach($this->_submitValues as $filter => $value){
+    foreach($this->_formValues as $filter => $value){
       if('qfKey' != $filter and '_qf_default' != $filter and 'fields' != $filter and 'order_bys' != $filter and '_qf_WerkoverzichtDossier_submit' != $filter){
         
         foreach($this->fields as $field => $values){
@@ -506,14 +506,14 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             if(CRM_Report_Form::OP_DATE == $values['filters']['operatorType']){ // OP_DATE
                 
               // check if it`s relative or it has a start and end date
-              if(!empty($this->_submitValues[$field . '_relative']) or (!empty($this->_submitValues[$field . '_from']) and !empty($this->_submitValues[$field . '_to']))) { // if not empty add to filter
+              if(!empty($this->_formValues[$field . '_relative']) or (!empty($this->_formValues[$field . '_from']) and !empty($this->_formValues[$field . '_to']))) { // if not empty add to filter
                 $this->formFilter[$filter_name] = array(
                   'operatorType' => $values['filters']['operatorType'],
-                  'relative' => $this->_submitValues[$field . '_relative'],
-                  'from' => $this->_submitValues[$field . '_from'],
-                  'from_display' => $this->_submitValues[$field . '_from_display'],
-                  'to' => $this->_submitValues[$field . '_to'],
-                  'to_display' => $this->_submitValues[$field . '_to_display'],
+                  'relative' => $this->_formValues[$field . '_relative'],
+                  'from' => $this->_formValues[$field . '_from'],
+                  'from_display' => $this->_formValues[$field . '_from_display'],
+                  'to' => $this->_formValues[$field . '_to'],
+                  'to_display' => $this->_formValues[$field . '_to_display'],
                   'field' => $values['filters'],
                 );
 
@@ -524,11 +524,11 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
 
             }else {
 
-              if(!empty($this->_submitValues[$field . '_value'])){ // if not empty add to filter
+              if(!empty($this->_formValues[$field . '_value'])){ // if not empty add to filter
                 $this->formFilter[$filter_name] = array(
                   'operatorType' => $values['filters']['operatorType'],
-                  'op' => $this->_submitValues[$field . '_op'],
-                  'value' => $this->_submitValues[$field . '_value'],
+                  'op' => $this->_formValues[$field . '_op'],
+                  'value' => $this->_formValues[$field . '_value'],
                   'field' => $values['filters'],
                   'min' => '',
                   'max' => '',
