@@ -151,7 +151,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'order_bys' => array(),
       ),
       // J / N (Ja of Nee) ontruimt, ontruim id is 41
-      'ontruiming' => array(
+      /*'ontruiming' => array(
         'title' => ts('Ontruiming'),
         'name' => 'ontruiming',
         'filter_name' => 'ontruiming_op',
@@ -163,7 +163,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           'dbAlias' => 'ontruiming',
         ),
         'order_bys' => array(),
-      ),
+      ),*/
       'ontruiming_status' => array(
         'title' => ts('Ontruiming status'),
         'name' => 'ontruiming_status',
@@ -1092,7 +1092,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     unset($sql);
     unset($dao);
   }
-    
+  
   private function addTempOntruiming($daoTemp){    
     $sql = "SELECT (CASE WHEN 1 = status_id THEN 'J' ELSE 'N' END) AS ontruiming, civicrm_activity.status_id, civicrm_case_activity.case_id, civicrm_activity.activity_date_time, civicrm_option_value.label FROM civicrm_activity 
       LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = civicrm_activity.id
