@@ -378,7 +378,7 @@ class CRM_Mbreports_Config {
   }
   
   private function vongegeCustomFields() {
-    $customFieldParams['custom_group_id'] = $this->setVongegeCustomGroupId;
+    $customFieldParams['custom_group_id'] = $this->vongegeCustomGroupId;
     $customFieldParams['return'] = 'column_name';
     $customFieldParams['name'] = $this->vongegeDeurCustomFieldName;
     try {

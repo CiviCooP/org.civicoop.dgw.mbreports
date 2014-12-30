@@ -150,6 +150,40 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         ),
         'order_bys' => array(),
       ),
+      // J / N (Ja of Nee) ontruimt, ontruim id is 41
+      'ontruiming' => array(
+        'title' => ts('Ontruiming'),
+        'name' => 'ontruiming',
+        'filter_name' => 'ontruiming_op',
+        'filters' => array(
+          'title' => ts('Ontruiming'),
+          'operatorType' => CRM_Report_Form::OP_SELECT,
+          'options' => array('' => ts('- select -'), 'J' => ts('Ja'), 'N' => ts('Nee')),
+          'type' => CRM_Utils_Type::T_STRING,
+          'dbAlias' => 'ontruiming',
+        ),
+        'order_bys' => array(),
+      ),
+      'ontruiming_status' => array(
+        'title' => ts('Ontruiming status'),
+        'name' => 'ontruiming_status',
+        'filter_name' => 'ontruiming_status_op',
+        'filters' => array(
+          'title' => ts('Ontruiming status '),
+          'operatorType' => CRM_Report_Form::OP_SELECT,
+          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->activityStatus,
+          'type' => CRM_Utils_Type::T_INT,
+          'dbAlias' => 'ontruiming_status_id',
+        ),
+        'order_bys' => array(),
+      ),
+      'ontruiming_activity_date_time' => array(
+        'title' => ts('Ontruiming datum'),
+        'name' => 'ontruiming_activity_date_time',
+        'filter_name' => 'ontruiming_activity_date_time_op',
+        'filters' => array(),
+        'order_bys' => array(),
+      ),
       // vonnis 
       'vonnis_deurwaarder_nr' => array(
         'title' => ts('Vonnis deurwaarder nr.'),
@@ -395,18 +429,26 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   function where() {
     $this->_where = "WHERE civicrm_case.is_deleted = '0' ";
-            
+        
     // check if it`s relative or it has a start and end date
     if(!empty($this->_formValues['case_start_date_relative']) or (!empty($this->_formValues['case_start_date_from']) and !empty($this->_formValues['case_start_date_to']))) { // if not empty add to filter
       $filter = array(
         'operatorType' => CRM_Report_Form::OP_DATE,
         'relative' => $this->_formValues['case_start_date_relative'],
         'from' => $this->_formValues['case_start_date_from'],
-        'from_display' => $this->_formValues['case_start_date_from_display'],
+        //'from_display' => $this->_formValues['case_start_date_from_display'],
         'to' => $this->_formValues['case_start_date_to'],
-        'to_display' => $this->_formValues['case_start_date_to_display'],
+        //'to_display' => $this->_formValues['case_start_date_to_display'],
         'field' => 'civicrm_case.start_date',
       );
+      
+      if(isset($this->_formValues['case_start_date_from_display'])){
+        $filter['from_display'] = $this->_formValues['case_start_date_from_display'];
+      }
+      
+      if(isset($this->_formValues['case_start_date_to_display'])){
+        $filter['to_display'] = $this->_formValues['case_start_date_to_display'];
+      }
 
       $clause = $this->dateClause($filter['field'], $filter['relative'], $filter['from'], $filter['to'], CRM_Utils_Type::T_DATE);      
       $this->_where .= " AND ( " . $clause . " ) ";
@@ -443,7 +485,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   private function setformFields(){
     $this->formFields = $this->_formValues['fields'];
-    
+            
     /*
      * add field at orderby
      * add field at groupby
@@ -497,7 +539,11 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             if('deurwaarder' == $field){
               $filter_name = 'deurwaarder_id';
             }
-                        
+            
+            if('ontruiming_status' == $field){
+              $filter_name = 'ontruiming_status_id';
+            }
+            
             if('property_vge_type' == $field){
               $filter_name = 'property_vge_type_id';
             }
@@ -511,12 +557,20 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
                   'operatorType' => $values['filters']['operatorType'],
                   'relative' => $this->_formValues[$field . '_relative'],
                   'from' => $this->_formValues[$field . '_from'],
-                  'from_display' => $this->_formValues[$field . '_from_display'],
+                  //'from_display' => $this->_formValues[$field . '_from_display'],
                   'to' => $this->_formValues[$field . '_to'],
-                  'to_display' => $this->_formValues[$field . '_to_display'],
+                  //'to_display' => $this->_formValues[$field . '_to_display'],
                   'field' => $values['filters'],
                 );
+                
+                if(isset($this->_formValues[$field . '_from_display'])){
+                  $this->formFilter[$filter_name]['from_display'] = $this->_formValues[$field . '_from_display'];
+                }
 
+                if(isset($this->_formValues[$field . '_to_display'])){
+                  $this->formFilter[$filter_name]['to_display'] = $this->_formValues[$field . '_to_display'];
+                }
+                
                 if(!isset($this->formFields[$field])){ // add field if it exists in filter
                   $this->formFields[$field] = true; 
                 }
@@ -758,10 +812,19 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       CRM_Core_DAO::executeQuery($sql);
       
       /*
+      * add ontruiming to temporary table
+      * one ontruiming at the time
+      */
+      if((isset($this->formFields['ontruiming']) and $this->formFields['ontruiming']) or (isset($this->formFields['ontruiming_status']) and $this->formFields['ontruiming_status'])
+      or (isset($this->formFields['ontruiming_activity_date_time']) and $this->formFields['ontruiming_activity_date_time'])){
+        $this->addTempOntruiming($daoTemp);
+      }
+      
+      /*
       * add vonnis to temporary table
       * one vonnis at the time
       */
-      if($this->formFields['vonnis'] or $this->formFields['vonnis_activity_date_time']){
+      if((isset($this->formFields['vonnis']) and $this->formFields['vonnis']) or (isset($this->formFields['vonnis_activity_date_time']) and $this->formFields['vonnis_activity_date_time'])){
         $this->addTempVonnis($daoTemp);
       } 
       
@@ -769,9 +832,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       * add vge to temporary table
       * one vge at the time
       */
-      if($this->formFields['property_vge_id'] or $this->formFields['property_complex_id']
-      or $this->formFields['property_block'] or $this->formFields['property_city_region']
-      or $this->formFields['property_vge_type']){
+      if((isset($this->formFields['property_vge_id']) and $this->formFields['property_vge_id']) or (isset($this->formFields['property_complex_id']) and $this->formFields['property_complex_id'])
+      or (isset($this->formFields['property_block']) and $this->formFields['property_block']) or (isset($this->formFields['property_city_region']) and $this->formFields['property_city_region'])
+      or (isset($this->formFields['property_vge_type']) and $this->formFields['property_vge_type'])){
         $this->addTempVge($daoTemp, $hoofdhuurder);
       }
       
@@ -779,8 +842,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       * add hoofdhuurder to temporary table
       * one hoofdhuurder at the time
       */
-      if($this->formFields['hoofdhuurder'] or $this->formFields['hoofdhuurder_street_address'] 
-      or $this->formFields['hoofdhuurder_email'] or $this->formFields['hoofdhuurder_phone']){
+      if((isset($this->formFields['hoofdhuurder']) and $this->formFields['hoofdhuurder']) or (isset($this->formFields['hoofdhuurder_street_address']) and $this->formFields['hoofdhuurder_street_address'])
+      or (isset($this->formFields['hoofdhuurder_email']) and $this->formFields['hoofdhuurder_email']) or (isset($this->formFields['hoofdhuurder_phone']) and $this->formFields['hoofdhuurder_phone'])){
         $this->addTempHoofdhuurder($daoTemp, $hoofdhuurder);
       }
       
@@ -788,8 +851,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       * add medehuurder to temporary table
       * one medehuurder at the time
       */
-      if($this->formFields['medehuurder'] or $this->formFields['medehuurder_email'] 
-      or $this->formFields['medehuurder_phone']){
+      if((isset($this->formFields['medehuurder']) and $this->formFields['medehuurder']) or (isset($this->formFields['medehuurder_email']) and $this->formFields['medehuurder_email'])
+      or isset($this->formFields['medehuurder_phone']) and $this->formFields['medehuurder_phone']){
         $this->addTempMedehuurder($daoTemp, $household);
       }
     }
@@ -801,7 +864,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     * add dossiermanager to temporary table
     * all dossiermanagers at once
     */
-    if($this->formFields['dossiermanager']){
+    if(isset($this->formFields['dossiermanager']) and $this->formFields['dossiermanager']){
       $this->addTempDossiermanager();
     }
     
@@ -809,7 +872,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     * add deurwaarders to temporary table
     * all deurwaarders at once
     */
-    if($this->formFields['deurwaarder']){
+    if(isset($this->formFields['deurwaarder']) and $this->formFields['deurwaarder']){
       $this->addTempDeurwaarder();
     }
     
@@ -912,13 +975,13 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             }
             break;
             
-          /*case 'ontruiming_activity_date_time':  
+          case 'ontruiming_activity_date_time':  
             if(empty($dao->$field)){
               $row[$field] = $dao->$field;
             }else {
               $row[$field] = date('d-m-Y H:i', strtotime($dao->$field));
             }
-            break;*/
+            break;
             
           default:
             $row[$field] = $dao->$field;
@@ -955,6 +1018,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       dossiermanager VARCHAR(128),
       deurwaarder_id VARCHAR(11),
       deurwaarder VARCHAR(128),
+      ontruiming VARCHAR(2),
+      ontruiming_status_id INT(10),
+      ontruiming_status VARCHAR(255),
+      ontruiming_activity_date_time DATETIME,
       vonnis_deurwaarder_nr VARCHAR(25), 
       vonnis_activity_date_time DATETIME,
       property_vge_id INT(11),
@@ -1026,6 +1093,26 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     unset($dao);
   }
     
+  private function addTempOntruiming($daoTemp){    
+    $sql = "SELECT (CASE WHEN 1 = status_id THEN 'J' ELSE 'N' END) AS ontruiming, civicrm_activity.status_id, civicrm_case_activity.case_id, civicrm_activity.activity_date_time, civicrm_option_value.label FROM civicrm_activity 
+      LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = civicrm_activity.id
+      LEFT JOIN civicrm_option_value ON civicrm_option_value.value = civicrm_activity.status_id
+      WHERE civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->ontruimingActTypeId . "'
+      AND civicrm_option_value.option_group_id = '" . $this->mbreportsConfig->activityStatusTypeOptionGroupId . "'
+      AND civicrm_activity.is_current_revision = '1' 
+      AND civicrm_case_activity.case_id = '" . $daoTemp->case_id . "'
+      ORDER BY civicrm_activity.activity_date_time DESC LIMIT 1";
+        
+    $dao = CRM_Core_DAO::executeQuery($sql);
+    while ($dao->fetch()) {
+      $sql = "UPDATE werkoverzicht_dossier SET ontruiming = '" . $dao->ontruiming . "', ontruiming_status_id = '" . $dao->status_id . "', ontruiming_status= '" . addslashes($dao->label) . "', ontruiming_activity_date_time = '" . $dao->activity_date_time . "' WHERE case_id = '" . $dao->case_id . "'";
+      CRM_Core_DAO::executeQuery($sql);
+    }
+    
+    unset($sql);
+    unset($dao);
+  }
+  
   private function addTempVonnis($daoTemp){
     $sql = "SELECT " . $this->mbreportsConfig->vongegeCustomTableName . "." . $this->mbreportsConfig->vongegeDeurCustomFieldName . " AS vonnis_deurwaarder_nr, civicrm_case_activity.case_id, civicrm_activity.activity_date_time FROM civicrm_activity 
       LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = civicrm_activity.id
