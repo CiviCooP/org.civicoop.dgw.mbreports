@@ -55,9 +55,11 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         //'required' => TRUE,
         'filters' => array(
           'title' => ts('Dossier type'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
+          //'operatorType' => CRM_Report_Form::OP_SELECT,
+          'operatorType' => CRM_Report_Form::OP_MULTISELECT,
           'operator' => 'like',
-          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->caseTypes,
+          //'options' => array('' => ts('- select -')) + $this->mbreportsConfig->caseTypes,
+          'options' => $this->mbreportsConfig->caseTypes,
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => 'case_type_id',
         ),
@@ -91,8 +93,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         //'required' => TRUE,
         'filters' => array(
           'title' => ts('Dossier status'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->caseStatus,
+          'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+          //'options' => array('' => ts('- select -')) + $this->mbreportsConfig->caseStatus,
+          'options' => $this->mbreportsConfig->caseStatus,
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => 'case_status_id',
         ),
@@ -170,8 +173,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filter_name' => 'ontruiming_status_op',
         'filters' => array(
           'title' => ts('Ontruiming status '),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->activityStatus,
+          'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+          //'options' => array('' => ts('- select -')) + $this->mbreportsConfig->activityStatus,
+          'options' => $this->mbreportsConfig->activityStatus,
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => 'ontruiming_status_id',
         ),
@@ -219,8 +223,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filter_name' => 'property_complex_id_op',
         'filters' => array(
           'title' => ts('Complex'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->complexList,
+          'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+          //'options' => array('' => ts('- select -')) + $this->mbreportsConfig->complexList,
+          'options' => $this->mbreportsConfig->complexList,
           'type' => CRM_Utils_Type::T_STRING,
           'dbAlias' => 'property_complex_id',
         ),
@@ -236,8 +241,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filter_name' => 'property_city_region_op',
         'filters' => array(
           'title' => ts('Wijk'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->wijkList,
+          'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+          //'options' => array('' => ts('- select -')) + $this->mbreportsConfig->wijkList,
+          'options' => $this->mbreportsConfig->wijkList,
           'type' => CRM_Utils_Type::T_STRING,
           'dbAlias' => 'property_city_region',
         ),
@@ -253,8 +259,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filter_name' => 'property_block_op',
         'filters' => array(
           'title' => ts('Buurt'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
-          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->buurtList,
+          'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+          //'options' => array('' => ts('- select -')) + $this->mbreportsConfig->buurtList,
+          'options' => $this->mbreportsConfig->buurtList,
           'type' => CRM_Utils_Type::T_STRING,
           'dbAlias' => 'property_block',
         ),
@@ -270,9 +277,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filter_name' => 'property_vge_type_op',
         'filters' => array(
           'title' => ts('VGE type'),
-          'operatorType' => CRM_Report_Form::OP_SELECT,
+          'operatorType' => CRM_Report_Form::OP_MULTISELECT,
           'operator' => 'like',
-          'options' => array('' => ts('- select -')) + $this->mbreportsConfig->VgeTypeList,
+          //'options' => array('' => ts('- select -')) + $this->mbreportsConfig->VgeTypeList,
+          'options' => $this->mbreportsConfig->VgeTypeList,
           'type' => CRM_Utils_Type::T_INT,
           'dbAlias' => 'property_vge_type_id',
         ),
@@ -903,8 +911,31 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $where = " WHERE ";
       foreach($this->formFilter as $field => $filter){
         
-        if('case_type_id' == $field){
-          $where .= " ( " . $field . " LIKE CONCAT ('%" . CRM_Core_DAO::VALUE_SEPARATOR . "'," . $filter['value'] . ",'" . CRM_Core_DAO::VALUE_SEPARATOR . "%') ) AND ";
+        if('case_type_id' == $field){          
+          //$where .= " ( " . $field . " LIKE CONCAT ('%" . CRM_Core_DAO::VALUE_SEPARATOR . "'," . $filter['value'] . ",'" . CRM_Core_DAO::VALUE_SEPARATOR . "%') ) AND ";
+          
+          $where .= " ( ";
+          
+          $clause = array();
+          foreach($filter['value'] as $key => $value){
+            switch($filter['op']){
+              case 'notin':
+                $clause[] = " ( " . $field . " NOT LIKE CONCAT ('%" . CRM_Core_DAO::VALUE_SEPARATOR . "'," . $value . ",'" . CRM_Core_DAO::VALUE_SEPARATOR . "%') ) ";
+                break;
+              default:
+                $clause[] = " ( " . $field . " LIKE CONCAT ('%" . CRM_Core_DAO::VALUE_SEPARATOR . "'," . $value . ",'" . CRM_Core_DAO::VALUE_SEPARATOR . "%') ) ";
+            }
+          }
+          
+          switch($filter['op']){
+            case 'notin':
+              $where .= implode(" AND ", $clause);
+              break;
+            default:
+              $where .= implode(" OR ", $clause);
+          }
+          
+          $where .= " ) AND ";
           
         }else if (CRM_Report_Form::OP_DATE == $filter['operatorType']) {
           $clause = $this->dateClause($field, $filter['relative'], $filter['from'], $filter['to'], CRM_Utils_Type::T_DATE);
