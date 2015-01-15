@@ -1,5 +1,6 @@
 <?php
-/**
+set_time_limit(0);
+
 /**
  * Report totaaltellingen dossiers
  * 
@@ -10,9 +11,6 @@
  * Copyright (C) 2014 Coöperatieve CiviCooP U.A. <http://www.civicoop.org>
  * Licensed to De Goede Woning <http://www.degoedewoning.nl> and CiviCRM under AGPL-3.0
  */
-
-set_time_limit(0);
-
 class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
 
   protected $_addressField = FALSE;
@@ -35,7 +33,6 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   }
 
   function select() {
-
     $this->_select = 'SELECT a.id AS case_id, d.label AS case_type, a.start_date
       , e.label AS status, a.end_date, b.contact_id_b AS case_manager_id, c.wf_melder';
   }
@@ -119,12 +116,11 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     $this->from();
     $this->where();
     $sql = $this->_select.' '.$this->_from.' '.$this->_where;
-    CRM_Core_Error::debug('sql', $sql);
     
     $this->getGroupFields();
     $rows = array();
     $this->buildRows($sql, $rows);
-		$this->alterDisplay($rows);
+    $this->alterDisplay($rows);
 
     $this->doTemplateAssignment($rows);
     $this->endPostProcess($rows);
@@ -312,23 +308,23 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   
   private function getGroupFields() {
     
-    if ($this->_formValues['wijkGroupBy'] == TRUE) {
+    if (isset($this->_formValues['wijkGroupBy']) and $this->_formValues['wijkGroupBy'] == TRUE) {
       $this->_groupFields[] = 'wijk';
       $this->_columnHeaders['wijk'] = array('title' => 'Wijk');
     }
-    if ($this->_formValues['buurtGroupBy'] == TRUE) {
+    if (isset($this->_formValues['buurtGroupBy']) and $this->_formValues['buurtGroupBy'] == TRUE) {
       $this->_groupFields[] = 'buurt';
       $this->_columnHeaders['buurt'] = array('title' => 'buurt');
     }
-    if ($this->_formValues['complexGroupBy'] == TRUE) {
+    if (isset($this->_formValues['complexGroupBy']) and $this->_formValues['complexGroupBy'] == TRUE) {
       $this->_groupFields[] = 'complex';
       $this->_columnHeaders['complex'] = array('title' => 'Complex');
     }
-    if ($this->_formValues['caseTypeGroupBy'] == TRUE) {
+    if (isset($this->_formValues['caseTypeGroupBy']) and $this->_formValues['caseTypeGroupBy'] == TRUE) {
       $this->_groupFields[] = 'case_type';
       $this->_columnHeaders['case_type'] = array('title' => 'Dossiertype');
     }
-    if ($this->_formValues['caseManagerGroupBy']== TRUE) {
+    if (isset($this->_formValues['caseManagerGroupBy']) and $this->_formValues['caseManagerGroupBy'] == TRUE) {
       $this->_groupFields[] = 'case_manager';
       $this->_columnHeaders['case_manager'] = array('title' => 'Dossiermanager');
     }
@@ -340,7 +336,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   private function buildSingleRow($countCases, &$previousLevel, &$levelCount, $dao) {
     $row = array();
     $levelField = $this->_groupFields[0];
-    if ($dao->levelField != $previousLevel) {
+    if (!isset($dao->levelField) or $dao->levelField != $previousLevel) {
       $row['level_break'] = true;
       $row['total_count'] = $levelCount;
       $row['previous'] = $previousLevel;
@@ -390,15 +386,15 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   private function setRemoveWhereClauses() {
     $mbreportsConfig = CRM_Mbreports_Config::singleton();
     $whereClauses = array();
-    if (!empty($this->_formValues['complex_value'])) {
+    if (isset($this->_formValues['complex_value']) and !empty($this->_formValues['complex_value'])) {
       $operator = $this->reverseOperator($this->_formValues['complex_op']);
       $whereClauses[] = $this->setMultipleWhereClause($this->_formValues['complex_value'], $mbreportsConfig->complexList, 'complex', $operator);
     }
-    if (!empty($this->_formValues['wijk_value'])) {
+    if (isset($this->_formValues['wijk_value']) and !empty($this->_formValues['wijk_value'])) {
       $operator = $this->reverseOperator($this->_formValues['wijk_op']);
       $whereClauses[] = $this->setMultipleWhereClause($this->_formValues['wijk_value'], $mbreportsConfig->wijkList, 'wijk', $operator);
     }
-    if (!empty($this->_formValues['buurt_value'])) {
+    if (isset($this->_formValues['buurt_value']) and !empty($this->_formValues['buurt_value'])) {
       $operator = $this->reverseOperator($this->_formValues['buurt_op']);
       $whereClauses[] = $this->setMultipleWhereClause($this->_formValues['buurt_value'], $mbreportsConfig->buurtList, 'buurt', $operator);
     }

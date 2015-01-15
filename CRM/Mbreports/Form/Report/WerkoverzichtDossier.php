@@ -8,7 +8,7 @@ set_time_limit(0);
  * @author Jan-Derek Vos (CiviCooP) <helpdesk@civicoop.org>
  * @date 12 May 2014
  * 
- * Copyright (C) 2014 Coöperatieve CiviCooP U.A. <http://www.civicoop.org>
+ * Copyright (C) 2014 CoÃ¶peratieve CiviCooP U.A. <http://www.civicoop.org>
  * Licensed to De Goede Woning <http://www.degoedewoning.nl> and CiviCRM under AGPL-3.0
  */
 
@@ -503,7 +503,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       if('-' != $order_bys['column']){ // if orderby is not empty
         $this->formOrderBy[$order_bys['column']] = $order_bys; // add field at orderby
 
-        if($order_bys['section']){
+        if(isset($order_bys['section']) and $order_bys['section']){
           $this->formGroupBy[$order_bys['column']] = true;
         }
         
@@ -912,30 +912,32 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       foreach($this->formFilter as $field => $filter){
         
         if('case_type_id' == $field){          
-          //$where .= " ( " . $field . " LIKE CONCAT ('%" . CRM_Core_DAO::VALUE_SEPARATOR . "'," . $filter['value'] . ",'" . CRM_Core_DAO::VALUE_SEPARATOR . "%') ) AND ";
-          
-          $where .= " ( ";
-          
-          $clause = array();
-          foreach($filter['value'] as $key => $value){
+          if(!is_array($filter['value'])){
+            $where .= " ( " . $field . " LIKE CONCAT ('%" . CRM_Core_DAO::VALUE_SEPARATOR . "'," . $filter['value'] . ",'" . CRM_Core_DAO::VALUE_SEPARATOR . "%') ) AND ";
+          }else {
+            $where .= " ( ";
+
+            $clause = array();
+            foreach($filter['value'] as $key => $value){
+              switch($filter['op']){
+                case 'notin':
+                  $clause[] = " ( " . $field . " NOT LIKE CONCAT ('%" . CRM_Core_DAO::VALUE_SEPARATOR . "'," . $value . ",'" . CRM_Core_DAO::VALUE_SEPARATOR . "%') ) ";
+                  break;
+                default:
+                  $clause[] = " ( " . $field . " LIKE CONCAT ('%" . CRM_Core_DAO::VALUE_SEPARATOR . "'," . $value . ",'" . CRM_Core_DAO::VALUE_SEPARATOR . "%') ) ";
+              }
+            }
+
             switch($filter['op']){
               case 'notin':
-                $clause[] = " ( " . $field . " NOT LIKE CONCAT ('%" . CRM_Core_DAO::VALUE_SEPARATOR . "'," . $value . ",'" . CRM_Core_DAO::VALUE_SEPARATOR . "%') ) ";
+                $where .= implode(" AND ", $clause);
                 break;
               default:
-                $clause[] = " ( " . $field . " LIKE CONCAT ('%" . CRM_Core_DAO::VALUE_SEPARATOR . "'," . $value . ",'" . CRM_Core_DAO::VALUE_SEPARATOR . "%') ) ";
+                $where .= implode(" OR ", $clause);
             }
+
+            $where .= " ) AND ";
           }
-          
-          switch($filter['op']){
-            case 'notin':
-              $where .= implode(" AND ", $clause);
-              break;
-            default:
-              $where .= implode(" OR ", $clause);
-          }
-          
-          $where .= " ) AND ";
           
         }else if (CRM_Report_Form::OP_DATE == $filter['operatorType']) {
           $clause = $this->dateClause($field, $filter['relative'], $filter['from'], $filter['to'], CRM_Utils_Type::T_DATE);
