@@ -20,7 +20,9 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   protected $_summary = NULL;
   protected $_formValues = array();
   protected $_groupFields = array();
-
+  
+  protected $_noFields = TRUE;
+  
   function __construct() {
     $this->setColumns();
     $this->setGroupBys();
