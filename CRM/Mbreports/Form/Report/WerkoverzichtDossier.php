@@ -1093,11 +1093,15 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   }
   
   private function addTempDossiermanager(){
+    /*
+     * BOS150145 - show in active dossiermanagers, because if the case is closed the relationship with the dossiermanager becomes 
+     * in active. Therfore i order by is_active ASC, so that the dossiermanager how is active overwrite as last
+     */
     $sql = "SELECT civicrm_contact.id, civicrm_contact.sort_name, civicrm_relationship.case_id FROM civicrm_contact
       LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_b = civicrm_contact.id
       WHERE civicrm_relationship.relationship_type_id = '" . $this->mbreportsConfig->dossierManagerRelationshipTypeId . "'
-      AND civicrm_relationship.is_active = '1' ";
-    
+      ORDER BY civicrm_relationship.is_active ASC";
+        
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
       $sql = "UPDATE werkoverzicht_dossier SET dossiermanager = '" . addslashes($dao->sort_name) . "', dossiermanager_id = '" . $dao->id . "' 
