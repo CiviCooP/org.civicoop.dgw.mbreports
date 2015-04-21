@@ -820,31 +820,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             
       /*
        * insert case
-       */
-      /*echo('<pre>');
-      print_r($daoTemp);
-      echo('</pre>');*/
-      //exit();
-      
-      // check if not empty 
-      /*$case_start_date_stamp = NULL;
-      if(!empty($daoTemp->case_start_date)){
-        $case_start_date_stamp = str_replace('-', '', $daoTemp->case_start_date);
-      }
-      
-      $case_end_date_stamp = NULL;
-      $case_end_date = NULL;
-      if(!empty($daoTemp->case_end_date)){
-        $case_end_date_stamp = str_replace('-', '', $daoTemp->case_end_date);
-        $case_end_date = $daoTemp->case_end_date;
-      }
-      var_dump($case_end_date);
-      //echo('$case_end_date_stamp: ' . $case_end_date_stamp) . '<br/>' . PHP_EOL;
-      
-      if($case_end_date == NULL){
-        echo('$case_end_date == NULL') . '<br/>' . PHP_EOL;
-      }*/
-      
+       */      
       $sql = "INSERT INTO werkoverzicht_dossier 
         (case_id, case_subject, case_type_id, case_case_type, case_sub_type, case_uitkomst, case_melder, case_status_id, case_status, case_start_date_stamp, case_start_date, case_end_date_stamp, case_end_date, case_contact_id)
         VALUES ('" . $daoTemp->case_id . "', '" . addslashes($daoTemp->case_subject) . "', '" . $daoTemp->case_type_id . "', 
@@ -1074,8 +1050,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     /*$sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (*/  
     /*$sql = "CREATE TABLE IF NOT EXISTS werkoverzicht_dossier (*/
     
-    /*$sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (*/
-    $sql = "CREATE TABLE IF NOT EXISTS werkoverzicht_dossier (
+    $sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (
       case_id INT(11),
       case_subject VARCHAR(128),
       case_type_id VARCHAR(128),
