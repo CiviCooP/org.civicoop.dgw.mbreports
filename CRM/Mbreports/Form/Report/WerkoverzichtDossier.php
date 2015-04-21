@@ -123,6 +123,13 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           'alias' => 'start_date',
         ),
       ),
+      'case_end_date' => array(
+        'title' => ts('Dossier einddatum'),
+        'name' => 'end_date',
+        'filter_name' => 'case_end_date_relative',
+        'filters' => array(),
+        'order_bys' => array(),
+      ),
       'dossiermanager' =>  array(
         'title' => ts('Dossiermanager'),
         'name' => 'dossiermanager',
@@ -426,7 +433,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     $this->_select = "SELECT civicrm_case.id AS case_id, civicrm_case.case_type_id AS case_type_id, civicrm_case.status_id AS case_status_id, civicrm_case.subject AS case_subject, 
     (SELECT label FROM civicrm_option_value WHERE option_group_id = '" . $this->mbreportsConfig->caseTypeOptionGroupId . "' AND value = civicrm_case.case_type_id) AS case_case_type, 
     (SELECT label FROM civicrm_option_value WHERE option_group_id = '" . $this->mbreportsConfig->caseStatusOptionGroupId . "' AND value = civicrm_case.status_id) AS case_status, 
-    civicrm_case.start_date AS case_start_date, civicrm_case_contact.contact_id AS case_contact_id ";
+    civicrm_case.start_date AS case_start_date, civicrm_case.end_date AS case_end_date, civicrm_case_contact.contact_id AS case_contact_id ";
   }
   
   function from() {
@@ -534,6 +541,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             
             if('case_start_date' == $field){
               $filter_name = 'case_start_date_stamp';
+            }
+            
+            if('case_end_date' == $field){
+              $filter_name = 'case_end_date_stamp';
             }
             
             if('case_status' == $field){
@@ -810,12 +821,37 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       /*
        * insert case
        */
+      /*echo('<pre>');
+      print_r($daoTemp);
+      echo('</pre>');*/
+      //exit();
+      
+      // check if not empty 
+      /*$case_start_date_stamp = NULL;
+      if(!empty($daoTemp->case_start_date)){
+        $case_start_date_stamp = str_replace('-', '', $daoTemp->case_start_date);
+      }
+      
+      $case_end_date_stamp = NULL;
+      $case_end_date = NULL;
+      if(!empty($daoTemp->case_end_date)){
+        $case_end_date_stamp = str_replace('-', '', $daoTemp->case_end_date);
+        $case_end_date = $daoTemp->case_end_date;
+      }
+      var_dump($case_end_date);
+      //echo('$case_end_date_stamp: ' . $case_end_date_stamp) . '<br/>' . PHP_EOL;
+      
+      if($case_end_date == NULL){
+        echo('$case_end_date == NULL') . '<br/>' . PHP_EOL;
+      }*/
+      
       $sql = "INSERT INTO werkoverzicht_dossier 
-        (case_id, case_subject, case_type_id, case_case_type, case_sub_type, case_uitkomst, case_melder, case_status_id, case_status, case_start_date_stamp, case_start_date, case_contact_id)
+        (case_id, case_subject, case_type_id, case_case_type, case_sub_type, case_uitkomst, case_melder, case_status_id, case_status, case_start_date_stamp, case_start_date, case_end_date_stamp, case_end_date, case_contact_id)
         VALUES ('" . $daoTemp->case_id . "', '" . addslashes($daoTemp->case_subject) . "', '" . $daoTemp->case_type_id . "', 
           '" . addslashes($daoTemp->case_case_type) . "', '" . addslashes(implode(',', $case_sub_types)) . "', '" . addslashes(implode(',', $case_uitkomst)) . "',
           '" . addslashes(implode(',', $case_melder)) . "', '" . $daoTemp->case_status_id . "', '" . addslashes($daoTemp->case_status) . "', 
-          '" . str_replace('-', '', $daoTemp->case_start_date) . "', '" . $daoTemp->case_start_date . "', '" . $daoTemp->case_contact_id . "' )";
+          '" . str_replace('-', '', $daoTemp->case_start_date) . "', '" . $daoTemp->case_start_date . "',
+          '" . str_replace('-', '', $daoTemp->case_end_date) . "', '" . $daoTemp->case_end_date . "', '" . $daoTemp->case_contact_id . "' )";
       
       CRM_Core_DAO::executeQuery($sql);
       
@@ -998,13 +1034,18 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         
         switch($field){
           case 'case_start_date':
+          case 'case_end_date':
           case 'vonnis_activity_date_time':
           case 'hoofdhuurder_birth_date':
           case 'medehuurder_birth_date':
             if(empty($dao->$field)){
               $row[$field] = $dao->$field;
             }else {
-              $row[$field] = date('d-m-Y', strtotime($dao->$field));
+              if('0000-00-00' == $dao->$field){ // mysql column DATE does not except easyly NULL values, therefore i change the displayed value here
+                $row[$field] = '';
+              }else {
+                $row[$field] = date('d-m-Y', strtotime($dao->$field));
+              }
             }
             break;
             
@@ -1033,7 +1074,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
     /*$sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (*/  
     /*$sql = "CREATE TABLE IF NOT EXISTS werkoverzicht_dossier (*/
     
-    $sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (
+    /*$sql = "CREATE TEMPORARY TABLE IF NOT EXISTS werkoverzicht_dossier (*/
+    $sql = "CREATE TABLE IF NOT EXISTS werkoverzicht_dossier (
       case_id INT(11),
       case_subject VARCHAR(128),
       case_type_id VARCHAR(128),
@@ -1045,6 +1087,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       case_status VARCHAR(225),
       case_start_date_stamp VARCHAR(255),
       case_start_date DATE,
+      case_end_date_stamp VARCHAR(255),
+      case_end_date DATE,
       case_contact_id INT(11),
       typeringen VARCHAR(128),
       dossiermanager_id INT(11),
