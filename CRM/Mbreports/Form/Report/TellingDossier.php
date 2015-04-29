@@ -25,7 +25,6 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
   
   function __construct() {
     $this->setColumns();
-    $this->setGroupBys();
     parent::__construct();
   }
 
@@ -118,7 +117,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     $this->from();
     $this->where();
     $sql = $this->_select.' '.$this->_from.' '.$this->_where;
-    
+        
     $this->getGroupFields();
     $rows = array();
     $this->buildRows($sql, $rows);
@@ -128,7 +127,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
     $this->endPostProcess($rows);
   }
 
-  private function setColumns() {
+  private function setColumns() {    
     $mbreportsConfig = CRM_Mbreports_Config::singleton();
     $this->_columns = array(
       'civicrm_case' => array(
@@ -138,7 +137,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
           'title'         => ts('Case Type'),
           'type'          => CRM_Utils_Type::T_INT,
           'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
-          'options'       => $mbreportsConfig->caseTypes
+          'options'       => $mbreportsConfig->caseTypes,
         ),
         'complex' => array(
           'title'         => 'Complex',
@@ -150,19 +149,19 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
           'title'         => 'Wijk',
           'type'          => CRM_Utils_Type::T_INT,
           'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
-          'options'       => $mbreportsConfig->wijkList
+          'options'       => $mbreportsConfig->wijkList,
         ),
         'buurt' => array(
           'title'         => 'Buurt',
           'type'          => CRM_Utils_Type::T_INT,
           'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
-          'options'       => $mbreportsConfig->buurtList
+          'options'       => $mbreportsConfig->buurtList,
         ),
         'case_manager' => array(
           'title'         => 'Dossiermanager',
           'type'          => CRM_Utils_Type::T_INT,
           'operatorType'  => CRM_Report_Form::OP_MULTISELECT,
-          'options'       => $mbreportsConfig->dossierManagerList
+          'options'       => $mbreportsConfig->dossierManagerList,
         ),
         'wf_melder' => array(
           'title'         => 'Woonfraude melder',
@@ -174,7 +173,37 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
           'title'        => 'Periode',
           'default'      => 'this.month',
           'operatorType' => CRM_Report_Form::OP_DATE,
-    ))));        
+    )),
+      'group_bys' => array(
+        'complex' => array(
+          'name' => 'complex',
+          'title' => ts('Complex'),
+          'alias' => 'complex',
+          'default' => true,
+        ),
+        'wijk' => array(
+          'name' => 'wijk',
+          'title' => ts('Wijk'),
+          'alias' => 'wijk',
+        ),
+        'buurt' => array(
+          'name' => 'buurt',
+          'title' => ts('Buurt'),
+          'alias' => 'buurt',
+        ),
+        'case_type' => array(
+          'name' => 'case_type',
+          'title' => ts('Case Type'),
+          'alias' => 'case_type',
+          'default' => true,
+        ),
+        'case_manager' => array(
+          'name' => 'case_manager',
+          'title' => ts('Case Manager'),
+          'alias' => 'case_manager',
+        ),
+      ),
+    ));        
   }
   
   public function buildRows($sql, &$rows) {
@@ -299,34 +328,25 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
       $insValues[] = 'NULL';
     }
   }
-  
-  private function setGroupBys() {        
-    $this->addElement('checkbox', 'wijkGroupBy', ts('Wijk'));
-    $this->addElement('checkbox', 'buurtGroupBy', ts('Buurt'));
-    $this->addElement('checkbox', 'complexGroupBy', ts('Complex'), NULL, array('checked'));
-    $this->addElement('checkbox', 'caseTypeGroupBy', ts('Case Type'), NULL, array('checked'));
-    $this->addElement('checkbox', 'caseManagerGroupBy', ts('Case Manager'), NULL, array('checked'));
-  }
-  
-  private function getGroupFields() {
     
-    if (isset($this->_formValues['wijkGroupBy']) and $this->_formValues['wijkGroupBy'] == TRUE) {
+  private function getGroupFields() {        
+    if (isset($this->_formValues['group_bys']['wijk']) and $this->_formValues['group_bys']['wijk'] == TRUE) {
       $this->_groupFields[] = 'wijk';
       $this->_columnHeaders['wijk'] = array('title' => 'Wijk');
     }
-    if (isset($this->_formValues['buurtGroupBy']) and $this->_formValues['buurtGroupBy'] == TRUE) {
+    if (isset($this->_formValues['group_bys']['buurt']) and $this->_formValues['group_bys']['buurt'] == TRUE) {
       $this->_groupFields[] = 'buurt';
       $this->_columnHeaders['buurt'] = array('title' => 'buurt');
     }
-    if (isset($this->_formValues['complexGroupBy']) and $this->_formValues['complexGroupBy'] == TRUE) {
+    if (isset($this->_formValues['group_bys']['complex']) and $this->_formValues['group_bys']['complex'] == TRUE) {
       $this->_groupFields[] = 'complex';
       $this->_columnHeaders['complex'] = array('title' => 'Complex');
     }
-    if (isset($this->_formValues['caseTypeGroupBy']) and $this->_formValues['caseTypeGroupBy'] == TRUE) {
+    if (isset($this->_formValues['group_bys']['case_type']) and $this->_formValues['group_bys']['case_type'] == TRUE) {
       $this->_groupFields[] = 'case_type';
       $this->_columnHeaders['case_type'] = array('title' => 'Dossiertype');
     }
-    if (isset($this->_formValues['caseManagerGroupBy']) and $this->_formValues['caseManagerGroupBy'] == TRUE) {
+    if (isset($this->_formValues['group_bys']['case_manager']) and $this->_formValues['group_bys']['case_manager'] == TRUE) {
       $this->_groupFields[] = 'case_manager';
       $this->_columnHeaders['case_manager'] = array('title' => 'Dossiermanager');
     }

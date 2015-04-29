@@ -215,22 +215,7 @@
             {if $closed eq 0 }</table>{/if}
         </div>
     {/if}
-    
-    <div id="set-groupbys" class="civireport-criteria" >
-      <h3>Groepering</h3>
-        <div class="crm-accordion-wrapper">
-          <table class="report-layout">
-            <tr class="report-contents">
-              <td class="report-contents">{$form.complexGroupBy.label} : {$form.complexGroupBy.html}</td>
-              <td class="report-contents">{$form.wijkGroupBy.label} : {$form.wijkGroupBy.html}</td>
-              <td class="report-contents">{$form.buurtGroupBy.label} : {$form.buurtGroupBy.html}</td>             
-              <td class="report-contents">{$form.caseTypeGroupBy.label} : {$form.caseTypeGroupBy.html}
-              <td class="report-contents">{$form.caseManagerGroupBy.label} : {$form.caseManagerGroupBy.html}
-            </tr>
-          </table>
-        </div>
-    </div>
-            
+                
     {literal}
     <script type="text/javascript">
     {/literal}
