@@ -112,7 +112,7 @@ class CRM_Mbreports_Form_Report_TellingDossier extends CRM_Report_Form {
 
   function postProcess() {
     $this->beginPostProcess();
-    $this->_formValues = $this->exportValues();
+    //$this->_formValues = $this->exportValues(); // BOS1504467 insite - rapporten aanpassing - This emptys the _formValues and it does not remember the settings of the group by
     $this->select();
     $this->from();
     $this->where();
