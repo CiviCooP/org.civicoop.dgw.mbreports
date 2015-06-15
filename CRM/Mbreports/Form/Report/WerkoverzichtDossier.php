@@ -25,7 +25,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   function __construct() {
     $this->mbreportsConfig = CRM_Mbreports_Config::singleton();
-    
+        
     $this->fields = array
     (
       'case_id' => array(
@@ -650,8 +650,10 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
      * get list ov_types, wf_types, wf_uitkomst, wf_melder and anv_uitkomst
      */
     $ov_types = $this->mbreportsConfig->ovTypeList;
+    $ov_uitkomst = $this->mbreportsConfig->ovUitkomstList;
     $wf_types = $this->mbreportsConfig->wfTypeList;
     $wf_uitkomst = $this->mbreportsConfig->wfUitkomstList;
+    
     
     /*
      * add records to temporary table
@@ -725,11 +727,11 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       foreach($case_type_ids as $case_type_id){
         
         /*
-         * set overlast
+         * set overlast, uitkomst
          */
         if($overlast_id == $case_type_id){          
           // get all entity_id`s and ov_types`s
-          $sql = "SELECT entity_id, ov_type FROM " . $this->mbreportsConfig->ovCustomTableName . " WHERE entity_id = '" . $daoTemp->case_id . "'";
+          $sql = "SELECT entity_id, ov_type FROM " . $this->mbreportsConfig->ovCustomTableName . " WHERE entity_id = '" . $daoTemp->case_id . "'";           
           $dao = CRM_Core_DAO::executeQuery($sql);
           
           // get all labels by ov_type
@@ -745,9 +747,31 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
 
           unset($sql);
           unset($dao);
-
+          
+          // get overlast uitkomst
+          $sql = "SELECT overlast_uitkomst_137 FROM " . $this->mbreportsConfig->ovUitkomstCustomTableName . "
+            LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = " . $this->mbreportsConfig->ovUitkomstCustomTableName . ".entity_id
+            LEFT JOIN civicrm_activity ON civicrm_activity.id = " . $this->mbreportsConfig->ovUitkomstCustomTableName . ".entity_id
+            WHERE civicrm_case_activity.case_id =  '" . $daoTemp->case_id . "'
+            ORDER BY civicrm_activity.activity_date_time DESC LIMIT 1";
+                    
+          $dao = CRM_Core_DAO::executeQuery($sql);        
+          
+          // get all labels by wf_type
+          while ($dao->fetch()) {
+            /*
+             * get overlast uitkomst
+             */
+            // overlast uitkomst            
+            if(!empty($dao->overlast_uitkomst_137) and !empty($ov_uitkomst[$dao->overlast_uitkomst_137])){
+              $case_uitkomst[] = $ov_uitkomst[$dao->overlast_uitkomst_137];
+            }
+          }
+          
+          unset($sql);
+          unset($dao);
         }
-      
+        
         /*
          * set woonfraude type, uitkomst, melder
          */
@@ -791,6 +815,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
               $case_melder[] = $dao->wf_melder;
             }
           }
+          
+          unset($sql);
+          unset($dao);
         }
         
         /*
