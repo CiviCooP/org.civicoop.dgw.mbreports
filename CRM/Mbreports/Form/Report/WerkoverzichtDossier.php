@@ -8,7 +8,7 @@ set_time_limit(0);
  * @author Jan-Derek Vos (CiviCooP) <helpdesk@civicoop.org>
  * @date 12 May 2014
  * 
- * Copyright (C) 2014 CoÃ¶peratieve CiviCooP U.A. <http://www.civicoop.org>
+ * Copyright (C) 2014 CoÃƒÂ¶peratieve CiviCooP U.A. <http://www.civicoop.org>
  * Licensed to De Goede Woning <http://www.degoedewoning.nl> and CiviCRM under AGPL-3.0
  */
 
@@ -763,7 +763,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
              * get overlast uitkomst
              */
             // overlast uitkomst            
-            if(!empty($dao->overlast_uitkomst_137) and !empty($ov_uitkomst[$dao->overlast_uitkomst_137])){
+            if(!empty($dao->overlast_uitkomst_137)){
               $case_uitkomst[] = $ov_uitkomst[$dao->overlast_uitkomst_137];
             }
           }
