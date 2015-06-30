@@ -752,7 +752,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           $sql = "SELECT overlast_uitkomst_137 FROM " . $this->mbreportsConfig->ovUitkomstCustomTableName . "
             LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = " . $this->mbreportsConfig->ovUitkomstCustomTableName . ".entity_id
             LEFT JOIN civicrm_activity ON civicrm_activity.id = " . $this->mbreportsConfig->ovUitkomstCustomTableName . ".entity_id
-            WHERE civicrm_case_activity.case_id =  '" . $daoTemp->case_id . "'
+            WHERE civicrm_activity.is_current_revision = '1' AND civicrm_activity.activity_type_id = '" . $this->mbreportsConfig->changecasestatusActTypeId . "' AND civicrm_case_activity.case_id =  '" . $daoTemp->case_id . "'
             ORDER BY civicrm_activity.activity_date_time DESC LIMIT 1";
                     
           $dao = CRM_Core_DAO::executeQuery($sql);        
@@ -779,7 +779,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           $sql = "SELECT wf_type, wf_uitkomst FROM " . $this->mbreportsConfig->wfUitkomstCustomTableName . "
             LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = " . $this->mbreportsConfig->wfUitkomstCustomTableName . ".entity_id
             LEFT JOIN civicrm_activity ON civicrm_activity.id = " . $this->mbreportsConfig->wfUitkomstCustomTableName . ".entity_id
-            WHERE civicrm_case_activity.case_id =  '" . $daoTemp->case_id . "'
+            WHERE civicrm_activity.is_current_revision = '1' AND civicrm_case_activity.case_id =  '" . $daoTemp->case_id . "'
             ORDER BY civicrm_activity.activity_date_time DESC LIMIT 1";
                     
           $dao = CRM_Core_DAO::executeQuery($sql);        
@@ -827,7 +827,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
           $sql = "SELECT " . $this->mbreportsConfig->wfUitkomstActieNaVonnisCustomFieldName . " FROM " . $this->mbreportsConfig->wfUitkomstCustomTableName . "
             LEFT JOIN civicrm_case_activity ON civicrm_case_activity.activity_id = " . $this->mbreportsConfig->wfUitkomstCustomTableName . ".entity_id
             LEFT JOIN civicrm_activity ON civicrm_activity.id = " . $this->mbreportsConfig->wfUitkomstCustomTableName . ".entity_id
-            WHERE civicrm_case_activity.case_id =  '" . $daoTemp->case_id . "'
+            WHERE civicrm_activity.is_current_revision = '1' AND civicrm_case_activity.case_id =  '" . $daoTemp->case_id . "'
             ORDER BY civicrm_activity.activity_date_time DESC LIMIT 1";
           
           $dao = CRM_Core_DAO::executeQuery($sql);         
