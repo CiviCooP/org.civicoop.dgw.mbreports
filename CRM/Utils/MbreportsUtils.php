@@ -22,11 +22,12 @@ class CRM_Utils_MbreportsUtils {
    * @access public
    * @static
    */
-  static public function getCaseVgeData($caseId) {
+  static public function getCaseVgeData($caseId, $onlyActive = FALSE, $onlyOne = FALSE) {
     if (empty($caseId) || !is_numeric(($caseId))) {
       return array();
     }
-    $caseClients = CRM_Case_BAO_Case::getCaseClients($caseId);
+    $caseClients = CRM_Case_BAO_Case::getCaseClients($caseId);   
+        
     /*
      * assume first one is the one we need, De Goede Woning do not assign more
      * customers to a case
@@ -37,10 +38,11 @@ class CRM_Utils_MbreportsUtils {
     }
     
     if (self::checkHuishouden($clientId) == FALSE) {
-      $huishoudenId = self::getHuishouden($clientId);
+      $huishoudenId = self::getHuishouden($clientId, $onlyActive, $onlyOne);
     } else {
       $huishoudenId = $clientId;
     }
+    
     $vgeData = self::getHuishoudenVgeData($huishoudenId);
     return $vgeData;
   }
@@ -73,10 +75,10 @@ class CRM_Utils_MbreportsUtils {
    * @access public
    * @static
    */
-  public static function getHuishouden($contactId) {
+  public static function getHuishouden($contactId, $onlyActive = FALSE, $onlyOne = FALSE) {
     $huishoudenId = NULL;
-    if (CRM_Utils_DgwUtils::checkContactHoofdhuurder($contactId) == TRUE) {
-      $huishoudenId = self::getHuishoudenId($contactId, 'hoofdhuurder');
+    if (CRM_Utils_DgwUtils::checkContactHoofdhuurder($contactId, $onlyActive, $onlyOne) == TRUE) {
+      $huishoudenId = self::getHuishoudenId($contactId, 'hoofdhuurder', $onlyActive);
       return $huishoudenId;
     }
     if (CRM_Utils_DgwUtils::checkContactMedehuurder($contactId) == TRUE) {
@@ -109,9 +111,19 @@ class CRM_Utils_MbreportsUtils {
     }
   }
   
-  static private function getHuishoudenId($contactId, $type) {
+  static private function getHuishoudenId($contactId, $type, $onlyActive = FALSE) {
     $mbreportsConfig = CRM_Mbreports_Config::singleton();
-    $query = 'SELECT contact_id_b FROM civicrm_relationship WHERE relationship_type_id = %1 AND contact_id_a = %2 ORDER BY end_date DESC';
+    /**
+     * BOSW1508088 insite - geen vge in weekoverzicht dossierrapporten
+     * Fix get correct houshold, i added order by start_date, and is_active
+     * so it gets the correct household
+     */
+    if($onlyActive == TRUE){
+      $query = 'SELECT contact_id_b FROM civicrm_relationship WHERE relationship_type_id = %1 AND contact_id_a = %2 AND is_active = \'1\' ORDER BY end_date, start_date DESC';
+    }else {
+      $query = 'SELECT contact_id_b FROM civicrm_relationship WHERE relationship_type_id = %1 AND contact_id_a = %2 ORDER BY end_date, start_date DESC';
+    }
+      
     if ($type == 'hoofdhuurder') {
     $params = array(
       1 => array($mbreportsConfig->hoofdhuurderRelationshipTypeId, 'Integer'),

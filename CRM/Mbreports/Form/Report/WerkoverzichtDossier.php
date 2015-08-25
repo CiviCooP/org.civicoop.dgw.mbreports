@@ -629,6 +629,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   public function buildRows($sql, &$rows) {
     //set_time_limit(0);
         
+    /*$caseVgeData = CRM_Utils_MbreportsUtils::getCaseVgeData('2058', TRUE, TRUE);
+    CRM_Utils_System::civiExit();*/
+    
     /*
      * create temporary table to for case and additional data
      */
@@ -1217,9 +1220,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   private function addTempVge($daoTemp, $hoofdhuurder)
   {
-    $caseVgeData = CRM_Utils_MbreportsUtils::getCaseVgeData($daoTemp->case_id);
+    $caseVgeData = CRM_Utils_MbreportsUtils::getCaseVgeData($daoTemp->case_id, TRUE, TRUE);
     
-    $sql = "SELECT civicrm_property.vge_id, civicrm_property.vge_street_name, civicrm_property.vge_street_number, civicrm_property.complex_id, civicrm_property.block, civicrm_property.city_region, civicrm_property.vge_type_id, civicrm_property_type.label AS vge_type FROM civicrm_property
+    $sql = "SELECT civicrm_property.vge_id, civicrm_property.vge_street_name, civicrm_property.vge_street_number, civicrm_property.vge_street_unit, civicrm_property.complex_id, civicrm_property.block, civicrm_property.city_region, civicrm_property.vge_type_id, civicrm_property_type.label AS vge_type FROM civicrm_property
       LEFT JOIN civicrm_property_type ON civicrm_property_type.id = civicrm_property.vge_type_id
       WHERE civicrm_property.vge_id = '" . $caseVgeData['vge_nummer_first_6'] . "' ";
      
@@ -1228,7 +1231,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         
     if($dao->N){
       // update street_address from vge and vge data
-      $sql = "UPDATE werkoverzicht_dossier SET property_vge_id = '" . $dao->vge_id . "', street_address = '" . $dao->vge_street_name . " " . $dao->vge_street_number . "', property_complex_id = '" . $dao->complex_id . "',
+      $sql = "UPDATE werkoverzicht_dossier SET property_vge_id = '" . $dao->vge_id . "', street_address = '" . $dao->vge_street_name . " " . $dao->vge_street_number . " " . $dao->vge_street_unit . "', property_complex_id = '" . $dao->complex_id . "',
         property_block = '" . $dao->block . "', property_city_region = '" . $dao->city_region . "', property_vge_type_id = '" . $dao->vge_type_id . "', 
         property_vge_type = '" . $dao->vge_type . "'      
         WHERE case_id = '" . $daoTemp->case_id . "'";
