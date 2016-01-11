@@ -37,6 +37,13 @@ class CRM_Mbreports_Config {
   public $buurtList = array();
   public $wijkList = array();
   public $VgeTypeList = array();
+  
+  // huurovereekomst household
+  public $hovHouseholdGroupName = NULL;
+  public $hovHouseholdGroupId = NULL;
+  public $hovHouseholdTableName = NULL;
+  public $hovHouseholdCustomFields = array();
+  
   /*
    * custom group for case type Woonfraude
    */
@@ -119,6 +126,10 @@ class CRM_Mbreports_Config {
     $this->setWfMelderList();
     $this->setWfUitkomstList();
     
+    // huurovereenkomst household
+    $this->setHovHouseholdCustomGroupName('Huurovereenkomst (huishouden)');
+    $this->setHovHousehold();
+    
     $this->setOvCustomGroupName('ov_data');
     $this->setOvTypeCustomFieldName('ov_type');
     $this->setOvUitkomstCustomGroupName('wf_uitkomst');
@@ -186,6 +197,19 @@ class CRM_Mbreports_Config {
       $result = implode($parts);
     }
     return $result;
+  }
+  
+  // Huurovereenkomst household
+  public function setHovHouseholdCustomGroupName($hovHouseholdCustomGroupName) {
+    $this->hovHouseholdCustomGroupName = $hovHouseholdCustomGroupName;
+  }
+  
+  public function setHovHouseholdCustomGroupId($hovHouseholdCustomGroupId) {
+    $this->hovHouseholdCustomGroupId = $hovHouseholdCustomGroupId;
+  }
+  
+  public function setHovHouseholdCustomTableName($hovHouseholdCustomTableName) {
+    $this->hovHouseholdCustomTableName = $hovHouseholdCustomTableName;
   }
   
   // Woonfraude
@@ -300,6 +324,34 @@ class CRM_Mbreports_Config {
     $this->vongegeDeurCustomFieldName = $vongegeDeurCustomFieldName;
   }
   
+  // Huurovereenkomst Household
+  private function setHovHousehold(){
+    try {
+      $customGroup = civicrm_api3('CustomGroup', 'Getsingle', array('name' => $this->hovHouseholdCustomGroupName));
+    } catch (CiviCRM_API3_Exception $ex) {
+      $this->setHovHouseholdCustomGroupId(0);
+      $this->setHovHouseholdCustomTableName('');
+      throw new Exception('Could not find a group with name '.$this->hovHouseholdCustomGroupName
+        .',  error from API CustomGroup Getvalue : '.$ex->getMessage());
+    }
+    $this->setHovHouseholdCustomGroupId($customGroup['id']);
+    $this->setHovHouseholdCustomTableName($customGroup['table_name']);
+    $this->setHovHouseholdCustomFields();
+  }
+  
+  private function setHovHouseholdCustomFields(){    
+    try {
+      $customFields = civicrm_api3('CustomField', 'Get', array('custom_group_id' => $this->hovHouseholdCustomGroupId));
+    } catch (CiviCRM_API3_Exception $ex) {
+      throw new Exception('Could not find custom fields with group id '.$this->hovHouseholdCustomGroupId
+        .' in custom group '.$this->hovHouseholdCustomGroupName.', error from API CustomField Getvalue :'.$ex->getMessage());
+    }
+    
+    foreach ($customFields['values'] as $custom_field){
+      $this->hovHouseholdCustomFields[$custom_field['name']] = $custom_field;
+    }
+  }
+    
   private function setWoonfraude() {
     try {
       $customGroupMelder = civicrm_api3('CustomGroup', 'Getsingle', array('name' => $this->wfMelderCustomGroupName));

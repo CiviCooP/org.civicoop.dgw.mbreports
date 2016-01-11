@@ -676,8 +676,9 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       $dao->fetch();
             
       if($dao->N){
-
-        if('Household' == $dao->contact_type){
+        if('Organization' == $dao->contact_type){
+          
+        }else if('Household' == $dao->contact_type){
           $household = $dao;
           
           // get hoofdhuurder from household
@@ -718,7 +719,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
             }
           }
         }
-      }      
+      }     
       
       $case_sub_types = array();
       $case_uitkomst = array();
@@ -1220,7 +1221,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   
   private function addTempVge($daoTemp, $hoofdhuurder)
   {
-    $caseVgeData = CRM_Utils_MbreportsUtils::getCaseVgeData($daoTemp->case_id, TRUE, TRUE);
+    /*$caseVgeData = CRM_Utils_MbreportsUtils::getCaseVgeData($daoTemp->case_id, TRUE, TRUE);
     
     $sql = "SELECT civicrm_property.vge_id, civicrm_property.vge_street_name, civicrm_property.vge_street_number, civicrm_property.vge_street_unit, civicrm_property.complex_id, civicrm_property.block, civicrm_property.city_region, civicrm_property.vge_type_id, civicrm_property_type.label AS vge_type FROM civicrm_property
       LEFT JOIN civicrm_property_type ON civicrm_property_type.id = civicrm_property.vge_type_id
@@ -1237,7 +1238,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         WHERE case_id = '" . $daoTemp->case_id . "'";
       CRM_Core_DAO::executeQuery($sql);
       
-    }else {
+    }else {*/
       // het is niet meer nodig om het contact adres op te halen als er geen vge adres is
       /*// get street address from contact
       $sql = "SELECT street_address FROM civicrm_address WHERE contact_id = '" . $hoofdhuurder->id . "' AND is_primary = '1' LIMIT 1";
@@ -1247,9 +1248,89 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       // update street_address
       $sql = "UPDATE werkoverzicht_dossier SET street_address = '" . $dao->street_address . "' WHERE case_id = '" . $daoTemp->case_id . "'";
       CRM_Core_DAO::executeQuery($sql);*/
-    }
+    /*}
     
     unset($caseVgeData);
+    unset($sql);
+    unset($dao);*/
+    
+    // Get all the hov that are connected to households, check if the case dates is between the hov dates
+    $sql = "SELECT civicrm_contact.id, civicrm_contact.contact_type FROM civicrm_contact
+        WHERE civicrm_contact.id = '" . $daoTemp->case_contact_id . "' 
+        LIMIT 1";
+
+    $dao = CRM_Core_DAO::executeQuery($sql);
+    $dao->fetch();
+
+    if($dao->N){
+      if('Organization' == $dao->contact_type){
+
+      }else if('Household' == $dao->contact_type){
+        // get all the hov
+        $sql = "SELECT * FROM " . $this->mbreportsConfig->hovHouseholdCustomTableName . "
+          WHERE entity_id = '" . $daoTemp->case_contact_id . "'
+          ORDER BY " . $this->mbreportsConfig->hovHouseholdCustomFields['Begindatum_HOV']['column_name'] . " ASC
+          ";        
+
+      }else if ('Individual' == $dao->contact_type){
+        // get all the hov from the household
+        $sql = "SELECT civicrm_contact.id, civicrm_contact.contact_type, 
+          " . $this->mbreportsConfig->hovHouseholdCustomTableName . "." . $this->mbreportsConfig->hovHouseholdCustomFields['VGE_nummer_First']['column_name'] . ", 
+          " . $this->mbreportsConfig->hovHouseholdCustomTableName . "." . $this->mbreportsConfig->hovHouseholdCustomFields['VGE_adres_First']['column_name'] . ", 
+          " . $this->mbreportsConfig->hovHouseholdCustomTableName . "." . $this->mbreportsConfig->hovHouseholdCustomFields['Begindatum_HOV']['column_name'] . ", 
+          " . $this->mbreportsConfig->hovHouseholdCustomTableName . "." . $this->mbreportsConfig->hovHouseholdCustomFields['Einddatum_HOV']['column_name'] . "
+          
+          FROM civicrm_contact
+
+          LEFT JOIN civicrm_relationship ON civicrm_relationship.contact_id_b = civicrm_contact.id
+          LEFT JOIN " . $this->mbreportsConfig->hovHouseholdCustomTableName . " ON " . $this->mbreportsConfig->hovHouseholdCustomTableName . ".entity_id = civicrm_relationship.contact_id_b
+
+          WHERE civicrm_relationship.contact_id_a = '" . $daoTemp->case_contact_id . "'
+          AND (civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->hoofdhuurderRelationshipTypeId . "'
+            OR civicrm_relationship.relationship_type_id = '" .  $this->mbreportsConfig->medehuurderRelationshipTypeId . "')
+          ORDER BY " . $this->mbreportsConfig->hovHouseholdCustomTableName . "." . $this->mbreportsConfig->hovHouseholdCustomFields['Begindatum_HOV']['column_name'] . " ASC  
+          ";
+      }
+            
+      if('Household' == $dao->contact_type or 'Individual' == $dao->contact_type){
+        // loop trough all the hov
+        $daoHov = CRM_Core_DAO::executeQuery($sql);
+        while($daoHov->fetch()){
+          
+          // check if case start date higher than the hov begin date
+          if($daoHov->{$this->mbreportsConfig->hovHouseholdCustomFields['Begindatum_HOV']['column_name']} <= date('Y-m-d H:i:s', strtotime($daoTemp->case_start_date))){
+            // if the hov end date exists and it is higher than the case start date
+            // the case can be closed later than the hov is ended so we only use the case start date
+            if(empty($daoHov->{$this->mbreportsConfig->hovHouseholdCustomFields['Einddatum_HOV']['column_name']}) or $daoHov->{$this->mbreportsConfig->hovHouseholdCustomFields['Einddatum_HOV']['column_name']} >= date('Y-m-d H:i:s', strtotime($daoTemp->case_start_date))){
+              // get vge data              
+              $sql = "SELECT civicrm_property.vge_id, civicrm_property.vge_street_name, civicrm_property.vge_street_number, civicrm_property.vge_street_unit, civicrm_property.complex_id, civicrm_property.block, civicrm_property.city_region, civicrm_property.vge_type_id, civicrm_property_type.label AS vge_type FROM civicrm_property
+                LEFT JOIN civicrm_property_type ON civicrm_property_type.id = civicrm_property.vge_type_id
+                WHERE civicrm_property.vge_id = '" . $daoHov->{$this->mbreportsConfig->hovHouseholdCustomFields['VGE_nummer_First']['column_name']} . "'
+                ";
+              
+              $dao = CRM_Core_DAO::executeQuery($sql);
+              $dao->fetch();
+
+              if($dao->N){
+                // update street_address, enz from vge data
+                $sql = "UPDATE werkoverzicht_dossier SET property_vge_id = '" . $dao->vge_id . "', street_address = '" . $dao->vge_street_name . " " . $dao->vge_street_number . " " . $dao->vge_street_unit . "', property_complex_id = '" . $dao->complex_id . "',
+                  property_block = '" . $dao->block . "', property_city_region = '" . $dao->city_region . "', property_vge_type_id = '" . $dao->vge_type_id . "', 
+                  property_vge_type = '" . $dao->vge_type . "'      
+                  WHERE case_id = '" . $daoTemp->case_id . "'";
+                CRM_Core_DAO::executeQuery($sql);
+                
+              }else {
+                // use the VGE_nummer_First and VGE_adres_First as vge_id and street_address
+                $sql = "UPDATE werkoverzicht_dossier SET property_vge_id = '" . $daoHov->{$this->mbreportsConfig->hovHouseholdCustomFields['VGE_nummer_First']['column_name']} . "', street_address = '" . $daoHov->{$this->mbreportsConfig->hovHouseholdCustomFields['VGE_adres_First']['column_name']} . "'  
+                  WHERE case_id = '" . $daoTemp->case_id . "'";
+                CRM_Core_DAO::executeQuery($sql);
+              }
+            }
+          }
+        }
+      }
+    } 
+    
     unset($sql);
     unset($dao);
   }
