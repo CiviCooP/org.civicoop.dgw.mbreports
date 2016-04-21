@@ -388,7 +388,7 @@ class CRM_Mbreports_Config {
   }
   
   public function getPerNummerFirst($contact_id){
-    if(!is_int($contact_id)){
+    if(empty($contact_id)){
       return false;
     }
     
@@ -416,7 +416,7 @@ class CRM_Mbreports_Config {
 
       $dao->fetch();
 
-      return (array) $dao;
+      return $dao;
     } catch (CiviCRM_API3_Exception $ex) {
       throw new Exception('Could not find per with contact id '.$contact_id
         .' in getPerNummerFirst, error from CRM_Core_DAO executeQuery error :'.$ex->getMessage() . ', $query: ' . $query . ' $params: ' . $params);

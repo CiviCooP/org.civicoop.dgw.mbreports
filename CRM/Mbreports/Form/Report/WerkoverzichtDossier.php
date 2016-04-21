@@ -908,7 +908,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       * add hoofdhuurder to temporary table
       * one hoofdhuurder at the time
       */
-      if((isset($this->formFields['pers']) and $this->formFields['hoofdhuurder']) or (isset($this->formFields['hoofdhuurder_street_address']) and $this->formFields['hoofdhuurder_street_address'])
+      if((isset($this->formFields['hoofdhuurder']) and $this->formFields['hoofdhuurder']) or (isset($this->formFields['hoofdhuurder_street_address']) and $this->formFields['hoofdhuurder_street_address'])
       or (isset($this->formFields['hoofdhuurder_email']) and $this->formFields['hoofdhuurder_email']) or (isset($this->formFields['hoofdhuurder_phone']) and $this->formFields['hoofdhuurder_phone'])){
         $this->addTempHoofdhuurder($daoTemp, $hoofdhuurder);
       }
@@ -1440,9 +1440,8 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
   private function addPersoonsnummerFirst($daoTemp, $hoofdhuurder){
     $pers = $this->mbreportsConfig->getPerNummerFirst($hoofdhuurder->id);
     
-    if($pers['N']){
-      $sortName = CRM_Core_DAO::escapeString($dao->sort_name);
-      $sql = "UPDATE werkoverzicht_dossier SET persoonsnummer_first =  '" . $pers['Persoonsnummer_First'] . "' 
+    if($pers->N){
+      $sql = "UPDATE werkoverzicht_dossier SET persoonsnummer_first =  '" . $pers->Persoonsnummer_First . "' 
         WHERE case_id = '" . $daoTemp->case_id . "'";
 
       CRM_Core_DAO::executeQuery($sql);
