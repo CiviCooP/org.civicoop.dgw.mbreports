@@ -44,6 +44,12 @@ class CRM_Mbreports_Config {
   public $hovHouseholdTableName = NULL;
   public $hovHouseholdCustomFields = array();
   
+  // aanvullende persoonsgegevens
+  private $perGegevensCustomGroupName = 'Aanvullende_persoonsgegevens';
+  public $perGegevensCustomGroupId = 0;
+  public $perGegevensCustomTableName = '';
+  public $perGegevensCustomFields = [];
+  
   /*
    * custom group for case type Woonfraude
    */
@@ -129,6 +135,9 @@ class CRM_Mbreports_Config {
     // huurovereenkomst household
     $this->setHovHouseholdCustomGroupName('Huurovereenkomst (huishouden)');
     $this->setHovHousehold();
+    
+    // aanvulldende persoonsgegevens
+    $this->setPerGegevensCustomGroup();
     
     $this->setOvCustomGroupName('ov_data');
     $this->setOvTypeCustomFieldName('ov_type');
@@ -349,6 +358,64 @@ class CRM_Mbreports_Config {
     
     foreach ($customFields['values'] as $custom_field){
       $this->hovHouseholdCustomFields[$custom_field['name']] = $custom_field;
+    }
+  }
+  
+  // Aanvullende persoonsgegevens
+  private function setPerGegevensCustomGroup(){
+    try {
+      $customGroup = civicrm_api3('CustomGroup', 'Getsingle', array('name' => $this->perGegevensCustomGroupName));
+    } catch (CiviCRM_API3_Exception $ex) {
+      throw new Exception('Could not find a group with name '.$this->perGegevensCustomGroupName
+        .',  error from API CustomGroup Getvalue : '.$ex->getMessage());
+    }
+    $this->perGegevensCustomGroupId = $customGroup['id'];
+    $this->perGegevensCustomTableName = $customGroup['table_name'];
+    $this->setPerGegevensCustomFields();
+  }
+  
+  private function setPerGegevensCustomFields(){    
+    try {
+      $customFields = civicrm_api3('CustomField', 'Get', array('custom_group_id' => $this->perGegevensCustomGroupId));
+    } catch (CiviCRM_API3_Exception $ex) {
+      throw new Exception('Could not find custom fields with group id '.$this->perGegevensCustomGroupId
+        .' in custom group '.$this->perGegevensCustomGroupName.', error from API CustomField Getvalue :'.$ex->getMessage());
+    }
+    
+    foreach ($customFields['values'] as $custom_field){
+      $this->perGegevensCustomFields[$custom_field['name']] = $custom_field;
+    }
+  }
+  
+  public function getPerNummerFirst($contact_id){
+    try { 
+      $query = "SELECT per.entity_id,
+        per." . $this->perGegevensCustomFields['Persoonsnummer_First']['column_name'] . " as `Persoonsnummer_First`,
+        per." . $this->perGegevensCustomFields['BSN']['column_name'] . " as `BSN`,
+        per." . $this->perGegevensCustomFields['Burgerlijke_staat']['column_name'] . " as `Burgerlijke_staat`,
+        per." . $this->perGegevensCustomFields['Totaal_debiteur']['column_name'] . " as `Totaal_debiteur`
+        FROM " . $this->perGegevensCustomTableName . " as per
+        WHERE per.entity_id = '%1'
+      ";
+      $params = array( 
+          1 => array($contact_id, 'Integer'),
+      );
+
+      if(!$dao = CRM_Core_DAO::executeQuery($query, $params)){
+        $return['is_error'] = true;
+        $return['error_message'] = sprintf('Failed execute query (%s) !', $query);
+        if($debug){
+          echo $return['error_message'] . '<br/>' . PHP_EOL;
+        }
+        return $return;
+      }
+
+      $dao->fetch();
+
+      return (array) $dao;
+    } catch (CiviCRM_API3_Exception $ex) {
+      throw new Exception('Could not find per with contact id '.$contact_id
+        .' in getPerNummerFirst, error from CRM_Core_DAO executeQuery error :'.$ex->getMessage() . ', $query: ' . $query . ' $params: ' . $params);
     }
   }
     

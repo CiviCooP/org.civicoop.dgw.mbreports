@@ -335,6 +335,13 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
         'filters' => array(),
         'order_bys' => array(),
       ),
+      'persoonsnummer_first' => array(
+        'title' => ts('Persoonsnummer First'),
+        'name' => 'persoonsnummer_first',
+        'filter_name' => 'persoonsnummer_first_op',
+        'filters' => array(),
+        'order_bys' => array(),
+      ),
       'medehuurder' => array(
         'title' => ts('Medehuurder naam'),
         'name' => 'medehuurder',
@@ -893,7 +900,15 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       * add hoofdhuurder to temporary table
       * one hoofdhuurder at the time
       */
-      if((isset($this->formFields['hoofdhuurder']) and $this->formFields['hoofdhuurder']) or (isset($this->formFields['hoofdhuurder_street_address']) and $this->formFields['hoofdhuurder_street_address'])
+      if((isset($this->formFields['persoonsnummer_first']) and $this->formFields['persoonsnummer_first'])){
+        $this->addPersoonsnummerFirst($daoTemp, $hoofdhuurder);
+      }
+      
+      /*
+      * add hoofdhuurder to temporary table
+      * one hoofdhuurder at the time
+      */
+      if((isset($this->formFields['pers']) and $this->formFields['hoofdhuurder']) or (isset($this->formFields['hoofdhuurder_street_address']) and $this->formFields['hoofdhuurder_street_address'])
       or (isset($this->formFields['hoofdhuurder_email']) and $this->formFields['hoofdhuurder_email']) or (isset($this->formFields['hoofdhuurder_phone']) and $this->formFields['hoofdhuurder_phone'])){
         $this->addTempHoofdhuurder($daoTemp, $hoofdhuurder);
       }
@@ -1120,6 +1135,7 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
       hoofdhuurder_street_address VARCHAR(96),
       hoofdhuurder_email VARCHAR(64),
       hoofdhuurder_phone VARCHAR(32),
+      persoonsnummer_first VARCHAR(25),
       medehuurder_id INT(11),
       medehuurder VARCHAR(128),
       medehuurder_birth_date DATE,
@@ -1419,6 +1435,18 @@ class CRM_Mbreports_Form_Report_WerkoverzichtDossier extends CRM_Report_Form {
 
     unset($sql);
     unset($dao);
+  }
+  
+  private function addPersoonsnummerFirst($daoTemp, $hoofdhuurder){
+    $pers = $this->mbreportsConfig->getPerNummerFirst($hoofdhuurder->id);
+    
+    if($pers['N']){
+      $sortName = CRM_Core_DAO::escapeString($dao->sort_name);
+      $sql = "UPDATE werkoverzicht_dossier SET persoonsnummer_first =  '" . $pers['Persoonsnummer_First'] . "' 
+        WHERE case_id = '" . $daoTemp->case_id . "'";
+
+      CRM_Core_DAO::executeQuery($sql);
+    }
   }
   
   private function addTempMedehuurder($daoTemp, $household){
