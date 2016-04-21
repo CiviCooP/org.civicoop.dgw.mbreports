@@ -388,6 +388,10 @@ class CRM_Mbreports_Config {
   }
   
   public function getPerNummerFirst($contact_id){
+    if(!is_int($contact_id)){
+      return false;
+    }
+    
     try { 
       $query = "SELECT per.entity_id,
         per." . $this->perGegevensCustomFields['Persoonsnummer_First']['column_name'] . " as `Persoonsnummer_First`,
