@@ -620,7 +620,7 @@ class CRM_Mbreports_Config {
   }
   
   private function setValidCaseTypes() {
-    $this->validCaseTypes = array('ActienaVonnis', 'Buitenkanstraject', 'Overlast', 
+    $this->validCaseTypes = array('ActienaVonnis', 'Buitenkanstraject', 'Huurbemiddeling', 'Overlast', 
       'Volgcontact', 'Woonfraude', 'Laatstekans', 'Regeling');
     asort($this->validCaseTypes);
   }
